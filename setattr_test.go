@@ -4,18 +4,6 @@ import (
 	"testing"
 )
 
-//func TestArrayArray(t *testing.T) {
-//	var a [][2]int
-//	a = append(a, [2]int{1})
-//	a = append(a, [2]int{2})
-//	a[0][1] = 3
-//	log.Print(a)
-//	log.Print(a[0][1])
-//	for i, v := range a {
-//		log.Print(i, v)
-//	}
-//}
-
 func TestIsSameAttr(t *testing.T) {
 	msg := `got isSameAttr "%s" vs "%s" is %v, wont %v`
 	attrName := ".attrName"
