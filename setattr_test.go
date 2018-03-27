@@ -427,3 +427,39 @@ func TestMakeSetAttr_double3(t *testing.T) {
 		t.Errorf(msg, "len(Attr)", len(*d3), 1)
 	}
 }
+
+func TestMakeSetAttr_doubleArray(t *testing.T) {
+	c := &CmdBuilder{}
+	c.Append(`setAttr ".attrName" -type "doubleArray" 2 1.1 2.2;`)
+	sa, err := MakeSetAttr(c.Parse(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	msg := `got SetAttr %s %s, wont %s`
+	if sa.AttrType != TypeDoubleArray {
+		t.Errorf(msg, "AttrType", sa.AttrType, TypeDoubleArray)
+	}
+	da, ok := sa.Attr.(*AttrDoubleArray)
+	if !ok || (*da)[0] != 1.1 || (*da)[1] != 2.2 {
+		t.Errorf(msg, "Attr", sa.Attr, []float64{1, 2.2, 3.3})
+	}
+	if len(*da) != 2 {
+		t.Errorf(msg, "len(Attr)", len(*da), 2)
+	}
+	c.Clear()
+	c.Append(`setAttr ".attrName" -type "doubleArray" 0;`)
+	sa, err = MakeSetAttr(c.Parse(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if sa.AttrType != TypeDoubleArray {
+		t.Errorf(msg, "AttrType", sa.AttrType, TypeDoubleArray)
+	}
+	da, ok = sa.Attr.(*AttrDoubleArray)
+	if !ok {
+		t.Errorf(msg, "Attr", sa.Attr, []float64{})
+	}
+	if len(*da) != 0 {
+		t.Errorf(msg, "len(Attr)", len(*da), 0)
+	}
+}
