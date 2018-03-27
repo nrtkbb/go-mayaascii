@@ -463,3 +463,36 @@ func TestMakeSetAttr_doubleArray(t *testing.T) {
 		t.Errorf(msg, "len(Attr)", len(*da), 0)
 	}
 }
+
+func TestMakeSetAttr_matrix(t *testing.T) {
+	c := &CmdBuilder{}
+	c.Append(`setAttr ".ix" -type "matrix" 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16;`)
+	sa, err := MakeSetAttr(c.Parse(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	msg := `got SetAttr %s %s, wont %s`
+	if sa.AttrType != TypeMatrix {
+		t.Errorf(msg, "AttrType", sa.AttrType, TypeMatrix)
+	}
+	mt, ok := sa.Attr.(*AttrMatrix)
+	wontMt := [16]float64{
+		1, 2, 3, 4,
+		5, 6, 7, 8,
+		9, 10, 11, 12,
+		13, 14, 15, 16,
+	}
+	allOk := true
+	for i, v := range *mt {
+		if v != wontMt[i] {
+			allOk = false
+			break
+		}
+	}
+	if !ok || !allOk {
+		t.Errorf(msg, "Attr", sa.Attr, wontMt)
+	}
+	if len(*mt) != 16 {
+		t.Errorf(msg, "len(Attr)", len(*mt), 16)
+	}
+}

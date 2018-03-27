@@ -861,7 +861,7 @@ func MakeMatrix(token *[]string, start int) (Attr, AttrType, int, error) {
 	if first == "\"xform\"" {
 		return MakeMatrixXform(token, start)
 	}
-	mat4x4, err := ParseFloats((*token)[start+2: start+18]...)
+	mat4x4, err := ParseFloats((*token)[start+1: start+17]...)
 	if err != nil {
 		return nil, TypeInvalid, 0, err
 	}
