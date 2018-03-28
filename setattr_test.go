@@ -496,3 +496,34 @@ func TestMakeSetAttr_matrix(t *testing.T) {
 		t.Errorf(msg, "len(Attr)", len(*mt), 16)
 	}
 }
+
+func TestMakeSetAttr_matrix_xform(t *testing.T) {
+	c := &CmdBuilder{}
+	c.Append(`setAttr ".ix" -type "matrix" "xform" 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 1 0 0 0 1 1 1 1 yes;`)
+	sa, err := MakeSetAttr(c.Parse(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	msg := `got SetAttr %s %s, wont %s`
+	if sa.AttrType != TypeMatrixXform {
+		t.Errorf(msg, "AttrType", sa.AttrType, TypeMatrixXform)
+	}
+	mtx, ok := sa.Attr.(*AttrMatrixXform)
+	if !ok ||
+		mtx.Scale.X != 1 || mtx.Scale.Y != 1 || mtx.Scale.Z != 1 ||
+		mtx.Rotate.X != 0 || mtx.Rotate.Y != 0 || mtx.Rotate.Z != 0 ||
+		mtx.RotateOrder != RotateOrderXYZ ||
+		mtx.Translate.X != 0 || mtx.Translate.Y != 0 || mtx.Translate.Z != 0 ||
+		mtx.Shear.XY != 0 || mtx.Shear.XZ != 0 || mtx.Shear.YZ != 0 ||
+		mtx.ScalePivot.X != 0 || mtx.ScalePivot.Y != 0 || mtx.ScalePivot.Z != 0 ||
+		mtx.ScaleTranslate.X != 0 || mtx.ScaleTranslate.Y != 0 || mtx.ScaleTranslate.Z != 0 ||
+		mtx.RotatePivot.X != 0 || mtx.RotatePivot.Y != 0 || mtx.RotatePivot.Z != 0 ||
+		mtx.RotateTranslation.X != 0 || mtx.RotateTranslation.Y != 0 || mtx.RotateTranslation.Z != 0 ||
+		mtx.RotateOrient.W != 0 || mtx.RotateOrient.X != 0 || mtx.RotateOrient.Y != 0 || mtx.RotateOrient.Z != 1 ||
+		mtx.JointOrient.W != 0 || mtx.JointOrient.X != 0 || mtx.JointOrient.Y != 0 || mtx.JointOrient.Z != 1 ||
+		mtx.InverseParentScale.X != 1 || mtx.InverseParentScale.Y != 1 || mtx.InverseParentScale.Z != 1 ||
+		mtx.CompensateForParentScale == false {
+		t.Errorf(msg, "Attr", sa.Attr, nil)
+	}
+}

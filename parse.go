@@ -911,6 +911,10 @@ func MakeMatrixXform(token *[]string, start int) (Attr, AttrType, int, error) {
 	if err != nil {
 		return nil, TypeInvalid, 0, err
 	}
+	componentForParentScale, err := isOnYesOrOffNo((*token)[start+38])
+	if err != nil {
+		return nil, TypeInvalid, 0, err
+	}
 	mx := AttrMatrixXform{
 		Scale:                    AttrVector{floats[0], floats[1], floats[2]},
 		Rotate:                   AttrVector{floats[3], floats[4], floats[5]},
@@ -924,7 +928,7 @@ func MakeMatrixXform(token *[]string, start int) (Attr, AttrType, int, error) {
 		RotateOrient:             AttrOrient{floats[25], floats[26], floats[27], floats[28]},
 		JointOrient:              AttrOrient{floats[29], floats[30], floats[31], floats[32]},
 		InverseParentScale:       AttrVector{floats[33], floats[34], floats[35]},
-		CompensateForParentScale: (*token)[start+37] == "on",
+		CompensateForParentScale: componentForParentScale,
 	}
 	var a Attr = &mx
 	return a, TypeMatrixXform, 39, nil
