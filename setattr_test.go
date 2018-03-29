@@ -527,3 +527,30 @@ func TestMakeSetAttr_matrix_xform(t *testing.T) {
 		t.Errorf(msg, "Attr", sa.Attr, nil)
 	}
 }
+
+func TestMakeSetAttr_pointArray(t *testing.T) {
+	c := &CmdBuilder{}
+	c.Append(`setAttr ".attrName" -type "pointArray" 1 1.1 2.2 3.3 4.4;`)
+	sa, err := MakeSetAttr(c.Parse(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	msg := `got SetAttr %s %s, wont %s`
+	if sa.AttrType != TypePointArray {
+		t.Errorf(msg, "AttrType", sa.AttrType, TypePointArray)
+	}
+	pa, ok := sa.Attr.(*AttrPointArray)
+	if !ok || (*pa)[0].X != 1.1 || (*pa)[0].Y != 2.2 || (*pa)[0].Z != 3.3 || (*pa)[0].W != 4.4 {
+		t.Errorf(msg, "Attr", sa.Attr, AttrPointArray{
+			{
+				1.1,
+				2.2,
+				3.3,
+				4.4,
+			},
+		})
+	}
+	if len(*pa) != 1 {
+		t.Errorf(msg, "len(Attr)", len(*pa), 1)
+	}
+}
