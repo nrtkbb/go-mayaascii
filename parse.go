@@ -817,7 +817,7 @@ func MakeFloat3Double3(token *[]string, start int, size *uint) (Attr, AttrType, 
 	}
 	if (*token)[start] == "\"float3\"" {
 		f3 := make([]AttrFloat3, (end-start-1)/3)
-		for i := 0; i < len(f3); i += 3 {
+		for i := 0; i < len(f3); i++ {
 			f3[i][0] = v[i*3]
 			f3[i][1] = v[i*3+1]
 			f3[i][2] = v[i*3+2]
@@ -826,7 +826,7 @@ func MakeFloat3Double3(token *[]string, start int, size *uint) (Attr, AttrType, 
 		return a, TypeFloat3, end - start, nil
 	} else {
 		d3 := make([]AttrDouble3, (end-start-1)/3)
-		for i := 0; i < len(d3); i += 3 {
+		for i := 0; i < len(d3); i++ {
 			d3[i][0] = v[i*3]
 			d3[i][1] = v[i*3+1]
 			d3[i][2] = v[i*3+2]

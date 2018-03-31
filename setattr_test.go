@@ -361,10 +361,35 @@ func TestMakeSetAttr_float2(t *testing.T) {
 	}
 	f2, ok := sa.Attr.(*[]AttrFloat2)
 	if !ok || (*f2)[0][0] != 1.0 || (*f2)[0][1] != 2.2 {
-		t.Errorf(msg, "Attr", sa.Attr, []float64{1, 2.2})
+		t.Errorf(msg, "Attr", sa.Attr, [][2]float64{
+			{1, 2.2},
+		})
 	}
 	if len(*f2) != 1 {
 		t.Errorf(msg, "len(Attr)", len(*f2), 1)
+	}
+	c.Clear()
+	c.Append(`setAttr -s 2 ".attrName" -type "float2" 1 2.2 1 2.2;`)
+	sa, err = MakeSetAttr(c.Parse(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if sa.AttrType != TypeFloat2 {
+		t.Errorf(msg, "AttrType", sa.AttrType, TypeFloat2)
+	}
+	f2, ok = sa.Attr.(*[]AttrFloat2)
+	if !ok ||
+		(*f2)[0][0] != 1.0 ||
+		(*f2)[0][1] != 2.2 ||
+		(*f2)[1][0] != 1.0 ||
+		(*f2)[1][1] != 2.2 {
+		t.Errorf(msg, "Attr", sa.Attr, [][2]float64{
+			{1, 2.2,},
+			{1, 2.2,},
+		})
+	}
+	if len(*f2) != 2 {
+		t.Errorf(msg, "len(Attr)", len(*f2), 2)
 	}
 }
 
@@ -386,6 +411,31 @@ func TestMakeSetAttr_float3(t *testing.T) {
 	if len(*f3) != 1 {
 		t.Errorf(msg, "len(Attr)", len(*f3), 1)
 	}
+	c.Clear()
+	c.Append(`setAttr -s 2 ".attrName" -type "float3" 1 2.2 3.3 1 2.2 3.3;`)
+	sa, err = MakeSetAttr(c.Parse(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if sa.AttrType != TypeFloat3 {
+		t.Errorf(msg, "AttrType", sa.AttrType, TypeFloat3)
+	}
+	f3, ok = sa.Attr.(*[]AttrFloat3)
+	if !ok ||
+		(*f3)[0][0] != 1.0 ||
+		(*f3)[0][1] != 2.2 ||
+		(*f3)[0][2] != 3.3 ||
+		(*f3)[1][0] != 1.0 ||
+		(*f3)[1][1] != 2.2 ||
+		(*f3)[1][2] != 3.3 {
+		t.Errorf(msg, "Attr", sa.Attr, [][3]float64{
+			{1, 2.2, 3.3,},
+			{1, 2.2, 3.3,},
+		})
+	}
+	if len(*f3) != 2 {
+		t.Errorf(msg, "len(Attr)", len(*f3), 2)
+	}
 }
 
 func TestMakeSetAttr_double2(t *testing.T) {
@@ -406,6 +456,29 @@ func TestMakeSetAttr_double2(t *testing.T) {
 	if len(*d2) != 1 {
 		t.Errorf(msg, "len(Attr)", len(*d2), 1)
 	}
+	c.Clear()
+	c.Append(`setAttr -s 2 ".attrName" -type "double2" 1 2.2 1 2.2;`)
+	sa, err = MakeSetAttr(c.Parse(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if sa.AttrType != TypeDouble2 {
+		t.Errorf(msg, "AttrType", sa.AttrType, TypeDouble2)
+	}
+	d2, ok = sa.Attr.(*[]AttrDouble2)
+	if !ok ||
+		(*d2)[0][0] != 1.0 ||
+		(*d2)[0][1] != 2.2 ||
+		(*d2)[1][0] != 1.0 ||
+		(*d2)[1][1] != 2.2 {
+		t.Errorf(msg, "Attr", sa.Attr, [][2]float64{
+			{1, 2.2,},
+			{1, 2.2,},
+		})
+	}
+	if len(*d2) != 2 {
+		t.Errorf(msg, "len(Attr)", len(*d2), 2)
+	}
 }
 
 func TestMakeSetAttr_double3(t *testing.T) {
@@ -425,6 +498,31 @@ func TestMakeSetAttr_double3(t *testing.T) {
 	}
 	if len(*d3) != 1 {
 		t.Errorf(msg, "len(Attr)", len(*d3), 1)
+	}
+	c.Clear()
+	c.Append(`setAttr -s 2 ".attrName" -type "double3" 1 2.2 3.3 1 2.2 3.3;`)
+	sa, err = MakeSetAttr(c.Parse(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if sa.AttrType != TypeDouble3 {
+		t.Errorf(msg, "AttrType", sa.AttrType, TypeDouble3)
+	}
+	d3, ok = sa.Attr.(*[]AttrDouble3)
+	if !ok ||
+		(*d3)[0][0] != 1.0 ||
+		(*d3)[0][1] != 2.2 ||
+		(*d3)[0][2] != 3.3 ||
+		(*d3)[1][0] != 1.0 ||
+		(*d3)[1][1] != 2.2 ||
+		(*d3)[1][2] != 3.3 {
+		t.Errorf(msg, "Attr", sa.Attr, [][3]float64{
+			{1, 2.2, 3.3,},
+			{1, 2.2, 3.3,},
+		})
+	}
+	if len(*d3) != 2 {
+		t.Errorf(msg, "len(Attr)", len(*d3), 2)
 	}
 }
 
