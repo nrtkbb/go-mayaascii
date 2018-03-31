@@ -249,7 +249,9 @@ func TestMakeSetAttr_short2(t *testing.T) {
 		t.Errorf(msg, "len(Attr)", len(*s2), 1)
 	}
 	if !ok || (*s2)[0][0] != 1 || (*s2)[0][1] != 2 {
-		t.Errorf(msg, "Attr", sa.Attr, []int{1, 2})
+		t.Errorf(msg, "Attr", sa.Attr, []AttrShort2{
+			{1, 2},
+		})
 	}
 	c.Append(`setAttr ".attrName" -type "short2" 3 4;`)
 	_, err = MakeSetAttr(c.Parse(), sa)
@@ -264,6 +266,29 @@ func TestMakeSetAttr_short2(t *testing.T) {
 		t.Errorf(msg, "Attr", sa.Attr, []AttrShort2{
 			{1, 2},
 			{3, 4},
+		})
+	}
+	c.Clear()
+	c.Append(`setAttr -s 2 ".attrName" -type "short2" 1 2 1 2;`)
+	sa, err = MakeSetAttr(c.Parse(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if sa.AttrType != TypeShort2 {
+		t.Errorf(msg, "AttrType", sa.AttrType, TypeShort2)
+	}
+	s2, ok = sa.Attr.(*[]AttrShort2)
+	if len(*s2) != 2 {
+		t.Errorf(msg, "len(Attr)", len(*s2), 2)
+	}
+	if !ok ||
+		(*s2)[0][0] != 1 ||
+		(*s2)[0][1] != 2 ||
+		(*s2)[1][0] != 1 ||
+		(*s2)[1][1] != 2 {
+		t.Errorf(msg, "Attr", sa.Attr, []AttrShort2{
+			{1, 2},
+			{1, 2},
 		})
 	}
 }
@@ -281,10 +306,33 @@ func TestMakeSetAttr_long2(t *testing.T) {
 	}
 	l2, ok := sa.Attr.(*[]AttrLong2)
 	if !ok || (*l2)[0][0] != 1 || (*l2)[0][1] != 2 {
-		t.Errorf(msg, "Attr", sa.Attr, []int{1, 2})
+		t.Errorf(msg, "Attr", sa.Attr, [][2]int{{1, 2}})
 	}
 	if len(*l2) != 1 {
 		t.Errorf(msg, "len(Attr)", len(*l2), 1)
+	}
+	c.Clear()
+	c.Append(`setAttr -s 2 ".attrName" -type "long2" 1 2 1 2;`)
+	sa, err = MakeSetAttr(c.Parse(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if sa.AttrType != TypeLong2 {
+		t.Errorf(msg, "AttrType", sa.AttrType, TypeLong2)
+	}
+	l2, ok = sa.Attr.(*[]AttrLong2)
+	if !ok ||
+		(*l2)[0][0] != 1 ||
+		(*l2)[0][1] != 2 ||
+		(*l2)[1][0] != 1 ||
+		(*l2)[1][1] != 2 {
+		t.Errorf(msg, "Attr", sa.Attr, [][2]int{
+			{1, 2},
+			{1, 2},
+		})
+	}
+	if len(*l2) != 2 {
+		t.Errorf(msg, "len(Attr)", len(*l2), 2)
 	}
 }
 
@@ -306,6 +354,30 @@ func TestMakeSetAttr_short3(t *testing.T) {
 	if len(*s3) != 1 {
 		t.Errorf(msg, "len(Attr)", len(*s3), 1)
 	}
+	c.Append(`setAttr -s 2 ".attrName" -type "short3" 1 2 3 1 2 3;`)
+	sa, err = MakeSetAttr(c.Parse(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if sa.AttrType != TypeShort3 {
+		t.Errorf(msg, "AttrType", sa.AttrType, TypeShort3)
+	}
+	s3, ok = sa.Attr.(*[]AttrShort3)
+	if !ok ||
+		(*s3)[0][0] != 1 ||
+		(*s3)[0][1] != 2 ||
+		(*s3)[0][2] != 3 ||
+		(*s3)[1][0] != 1 ||
+		(*s3)[1][1] != 2 ||
+		(*s3)[1][2] != 3 {
+		t.Errorf(msg, "Attr", sa.Attr, [][3]int{
+			{1, 2, 3},
+			{1, 2, 3},
+		})
+	}
+	if len(*s3) != 2 {
+		t.Errorf(msg, "len(Attr)", len(*s3), 2)
+	}
 }
 
 func TestMakeSetAttr_long3(t *testing.T) {
@@ -321,10 +393,37 @@ func TestMakeSetAttr_long3(t *testing.T) {
 	}
 	l3, ok := sa.Attr.(*[]AttrLong3)
 	if !ok || (*l3)[0][0] != 1 || (*l3)[0][1] != 2 || (*l3)[0][2] != 3 {
-		t.Errorf(msg, "Attr", sa.Attr, []int{1, 2, 3})
+		t.Errorf(msg, "Attr", sa.Attr, [][3]int{
+			{1, 2, 3},
+		})
 	}
 	if len(*l3) != 1 {
 		t.Errorf(msg, "len(Attr)", len(*l3), 1)
+	}
+	c.Clear()
+	c.Append(`setAttr -s 2 ".attrName" -type "long3" 1 2 3 1 2 3;`)
+	sa, err = MakeSetAttr(c.Parse(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if sa.AttrType != TypeLong3 {
+		t.Errorf(msg, "AttrType", sa.AttrType, TypeLong3)
+	}
+	l3, ok = sa.Attr.(*[]AttrLong3)
+	if !ok ||
+		(*l3)[0][0] != 1 ||
+		(*l3)[0][1] != 2 ||
+		(*l3)[0][2] != 3 ||
+		(*l3)[1][0] != 1 ||
+		(*l3)[1][1] != 2 ||
+		(*l3)[1][2] != 3 {
+		t.Errorf(msg, "Attr", sa.Attr, [][3]int{
+			{1, 2, 3},
+			{1, 2, 3},
+		})
+	}
+	if len(*l3) != 2 {
+		t.Errorf(msg, "len(Attr)", len(*l3), 2)
 	}
 }
 
