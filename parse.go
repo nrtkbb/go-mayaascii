@@ -946,13 +946,11 @@ func MakePointArray(token *[]string, start int) (Attr, AttrType, int, error) {
 			return nil, TypeInvalid, 0, err
 		}
 		pa := make([]AttrPoint, numberOfArray)
-		for i := 0; i < numberOfArray*4; i += 4 {
-			pa[i] = AttrPoint{
-				X: f[i],
-				Y: f[i+1],
-				Z: f[i+2],
-				W: f[i+3],
-			}
+		for i := 0; i < numberOfArray; i++ {
+			pa[i].X = f[i*4]
+			pa[i].Y = f[i*4+1]
+			pa[i].Z = f[i*4+2]
+			pa[i].W = f[i*4+3]
 		}
 		paa := AttrPointArray(pa)
 		a = &paa

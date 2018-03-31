@@ -542,15 +542,37 @@ func TestMakeSetAttr_pointArray(t *testing.T) {
 	pa, ok := sa.Attr.(*AttrPointArray)
 	if !ok || (*pa)[0].X != 1.1 || (*pa)[0].Y != 2.2 || (*pa)[0].Z != 3.3 || (*pa)[0].W != 4.4 {
 		t.Errorf(msg, "Attr", sa.Attr, AttrPointArray{
-			{
-				1.1,
-				2.2,
-				3.3,
-				4.4,
-			},
+			{1.1, 2.2, 3.3, 4.4,},
 		})
 	}
 	if len(*pa) != 1 {
 		t.Errorf(msg, "len(Attr)", len(*pa), 1)
+	}
+	c.Clear()
+	c.Append(`setAttr ".attrName" -type "pointArray" 2 1.1 2.2 3.3 4.4 1.1 2.2 3.3 4.4;`)
+	sa, err = MakeSetAttr(c.Parse(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if sa.AttrType != TypePointArray {
+		t.Errorf(msg, "AttrType", sa.AttrType, TypePointArray)
+	}
+	pa, ok = sa.Attr.(*AttrPointArray)
+	if !ok ||
+		(*pa)[0].X != 1.1 ||
+		(*pa)[0].Y != 2.2 ||
+		(*pa)[0].Z != 3.3 ||
+		(*pa)[0].W != 4.4 ||
+		(*pa)[1].X != 1.1 ||
+		(*pa)[1].Y != 2.2 ||
+		(*pa)[1].Z != 3.3 ||
+		(*pa)[1].W != 4.4 {
+		t.Errorf(msg, "Attr", sa.Attr, AttrPointArray{
+			{1.1, 2.2, 3.3, 4.4,},
+			{1.1, 2.2, 3.3, 4.4,},
+		})
+	}
+	if len(*pa) != 2 {
+		t.Errorf(msg, "len(Attr)", len(*pa), 2)
 	}
 }
