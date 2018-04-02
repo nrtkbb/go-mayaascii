@@ -696,6 +696,10 @@ func MakeShort2Long2(token *[]string, start int, size *uint) (Attr, AttrType, in
 	var end int
 	if size != nil {
 		end = start + 1 + (2 * int(*size))
+		lenToken := len(*token)
+		if lenToken < end {
+			end = lenToken
+		}
 	} else {
 		end = start + 1 + 2
 	}

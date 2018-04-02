@@ -253,31 +253,44 @@ func TestMakeSetAttr_short2(t *testing.T) {
 			{1, 2},
 		})
 	}
+}
+
+func TestMakeSetAttr_short2_add(t *testing.T) {
+	c := &CmdBuilder{}
+	c.Append(`setAttr ".attrName" -type "short2" 1 2;`)
+	sa, err := MakeSetAttr(c.Parse(), nil)
 	c.Append(`setAttr ".attrName" -type "short2" 3 4;`)
-	_, err = MakeSetAttr(c.Parse(), sa)
+	sa, err = MakeSetAttr(c.Parse(), sa)
 	if err != nil {
 		t.Fatal(err)
 	}
+	msg := `got SetAttr %s %s, wont %s`
+	s2, ok := sa.Attr.(*[]AttrShort2)
 	if len(*s2) != 2 {
 		t.Errorf(msg, "len(Attr)", len(*s2), 2)
 	}
-	if (*s2)[0][0] != 1 || (*s2)[0][1] != 2 ||
+	if !ok ||
+		(*s2)[0][0] != 1 || (*s2)[0][1] != 2 ||
 		(*s2)[1][0] != 3 || (*s2)[1][1] != 4 {
 		t.Errorf(msg, "Attr", sa.Attr, []AttrShort2{
 			{1, 2},
 			{3, 4},
 		})
 	}
-	c.Clear()
+}
+
+func TestMakeSetAttr_short2_size(t *testing.T) {
+	c := &CmdBuilder{}
 	c.Append(`setAttr -s 2 ".attrName" -type "short2" 1 2 1 2;`)
-	sa, err = MakeSetAttr(c.Parse(), nil)
+	sa, err := MakeSetAttr(c.Parse(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
+	msg := `got SetAttr %s %s, wont %s`
 	if sa.AttrType != TypeShort2 {
 		t.Errorf(msg, "AttrType", sa.AttrType, TypeShort2)
 	}
-	s2, ok = sa.Attr.(*[]AttrShort2)
+	s2, ok := sa.Attr.(*[]AttrShort2)
 	if len(*s2) != 2 {
 		t.Errorf(msg, "len(Attr)", len(*s2), 2)
 	}
@@ -287,6 +300,43 @@ func TestMakeSetAttr_short2(t *testing.T) {
 		(*s2)[1][0] != 1 ||
 		(*s2)[1][1] != 2 {
 		t.Errorf(msg, "Attr", sa.Attr, []AttrShort2{
+			{1, 2},
+			{1, 2},
+		})
+	}
+}
+
+func TestMakeSetAttr_short2_sizeOver(t *testing.T) {
+	c := &CmdBuilder{}
+	c.Append(`setAttr -s 4 ".attrName";`)
+	sa, err := MakeSetAttr(c.Parse(), nil)
+	c.Append(`setAttr ".attrName" -type "short2" 1 2 1 2;`)
+	sa, err = MakeSetAttr(c.Parse(), sa)
+	c.Append(`setAttr ".attrName" -type "short2" 1 2 1 2;`)
+	sa, err = MakeSetAttr(c.Parse(), sa)
+	if err != nil {
+		t.Fatal(err)
+	}
+	msg := `got SetAttr %s %s, wont %s`
+	if sa.AttrType != TypeShort2 {
+		t.Errorf(msg, "AttrType", sa.AttrType, TypeShort2)
+	}
+	s2, ok := sa.Attr.(*[]AttrShort2)
+	if len(*s2) != 4 {
+		t.Errorf(msg, "len(Attr)", len(*s2), 4)
+	}
+	if !ok ||
+		(*s2)[0][0] != 1 ||
+		(*s2)[0][1] != 2 ||
+		(*s2)[1][0] != 1 ||
+		(*s2)[1][1] != 2 ||
+		(*s2)[2][0] != 1 ||
+		(*s2)[2][1] != 2 ||
+		(*s2)[3][0] != 1 ||
+		(*s2)[3][1] != 2 {
+		t.Errorf(msg, "Attr", sa.Attr, []AttrShort2{
+			{1, 2},
+			{1, 2},
 			{1, 2},
 			{1, 2},
 		})
