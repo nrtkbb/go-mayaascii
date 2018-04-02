@@ -358,6 +358,14 @@ func isSameAttr(name1, name2 string) bool {
 	return false
 }
 
+func fixSizeOver(end int, token *[]string) int {
+	lenToken := len(*token)
+	if lenToken < end {
+		return lenToken
+	}
+	return end
+}
+
 func MakeSetAttr(cmd *Cmd, beforeSetAttr *SetAttr) (*SetAttr, error) {
 	attrNameIdx, attrName := getAttrNameFromSetAttr(&cmd.Token)
 	sa := &SetAttr{Cmd: cmd}
@@ -695,11 +703,7 @@ func ParseFloats(token ...string) ([]float64, error) {
 func MakeShort2Long2(token *[]string, start int, size *uint) (Attr, AttrType, int, error) {
 	var end int
 	if size != nil {
-		end = start + 1 + (2 * int(*size))
-		lenToken := len(*token)
-		if lenToken < end {
-			end = lenToken
-		}
+		end = fixSizeOver(start + 1 + (2 * int(*size)), token)
 	} else {
 		end = start + 1 + 2
 	}
@@ -729,7 +733,7 @@ func MakeShort2Long2(token *[]string, start int, size *uint) (Attr, AttrType, in
 func MakeShort3Long3(token *[]string, start int, size *uint) (Attr, AttrType, int, error) {
 	var end int
 	if size != nil {
-		end = start + 1 + (3 * int(*size))
+		end = fixSizeOver(start + 1 + (3 * int(*size)), token)
 	} else {
 		end = start + 1 + 3
 	}
@@ -781,7 +785,7 @@ func MakeInt32Array(token *[]string, start int) (Attr, AttrType, int, error) {
 func MakeFloat2Double2(token *[]string, start int, size *uint) (Attr, AttrType, int, error) {
 	var end int
 	if size != nil {
-		end = start + 1 + (2 * int(*size))
+		end = fixSizeOver(start + 1 + (2 * int(*size)), token)
 	} else {
 		end = start + 1 + 2
 	}
@@ -811,7 +815,7 @@ func MakeFloat2Double2(token *[]string, start int, size *uint) (Attr, AttrType, 
 func MakeFloat3Double3(token *[]string, start int, size *uint) (Attr, AttrType, int, error) {
 	var end int
 	if size != nil {
-		end = start + 1 + (3 * int(*size))
+		end = fixSizeOver(start + 1 + (3 * int(*size)), token)
 	} else {
 		end = start + 1 + 3
 	}
