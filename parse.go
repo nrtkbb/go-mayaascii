@@ -636,8 +636,8 @@ func appendSetAttr(beforeAttr Attr, newAttr Attr) Attr {
 		return beforeNurbsTrimface
 	case *[]AttrPolyFaces:
 		beforePolyFaces, _ := beforeAttr.(*[]AttrPolyFaces)
-		newPolyFaces, _ := newAttr.(*AttrPolyFaces)
-		*beforePolyFaces = append(*beforePolyFaces, *newPolyFaces)
+		newPolyFaces, _ := newAttr.(*[]AttrPolyFaces)
+		*beforePolyFaces = append(*beforePolyFaces, *newPolyFaces...)
 		return beforePolyFaces
 	case *[]AttrDataPolyComponent:
 		beforeDataPolyComponent, _ := beforeAttr.(*[]AttrDataPolyComponent)
@@ -1263,8 +1263,18 @@ func MakeCountInt(token *[]string, start int) ([]int, error) {
 func MakePolyFace(token *[]string, start int, size *uint) (Attr, AttrType, int, error) {
 	switchNumber := start + 1
 	var pfs []AttrPolyFaces
+	var fCount uint
+	for _, v := range (*token)[start:] {
+		if v == "f" {
+			fCount ++
+		}
+	}
 	if size != nil {
-		pfs = make([]AttrPolyFaces, *size)
+		s := *size
+		if fCount < s {
+			s = fCount
+		}
+		pfs = make([]AttrPolyFaces, s)
 	}
 	i := -1
 	loop := true
@@ -1275,13 +1285,11 @@ func MakePolyFace(token *[]string, start int, size *uint) (Attr, AttrType, int, 
 			if err != nil {
 				return nil, TypeInvalid, 0, err
 			}
-
 			i++
 			if i >= len(pfs) {
 				pf := AttrPolyFaces{}
 				pfs = append(pfs, pf)
 			}
-
 			pfs[i].FaceEdge = fe
 			switchNumber += 2 + len(fe)
 		case "h":
@@ -1299,12 +1307,17 @@ func MakePolyFace(token *[]string, start int, size *uint) (Attr, AttrType, int, 
 			pfs[i].FaceColor = fc
 			switchNumber += 2 + len(fc)
 		case "mc":
-			mc, err := MakeCountInt(token, switchNumber+1)
+			mcuv, err := strconv.ParseInt((*token)[switchNumber+1], 10, 64)
+			if err != nil {
+				return nil, TypeInvalid, 0, err
+			}
+			pfs[i].MCUV = int(mcuv)
+			mc, err := MakeCountInt(token, switchNumber+2)
 			if err != nil {
 				return nil, TypeInvalid, 0, err
 			}
 			pfs[i].MC = mc
-			switchNumber += 2 + len(mc)
+			switchNumber += 3 + len(mc)
 		case "mu":
 			var fuv AttrFaceUV
 			uvSet, err := strconv.Atoi((*token)[switchNumber+1])
@@ -1647,6 +1660,7 @@ type AttrPolyFaces struct {
 	HoleEdge  []int        `json:"hole_edge"`
 	FaceUV    []AttrFaceUV `json:"face_uv"`
 	FaceColor []int        `json:"face_color"`
+	MCUV      int          `json:"mc_uv"`
 	MC        []int        `json:"mc"`
 }
 

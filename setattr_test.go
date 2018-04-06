@@ -823,3 +823,48 @@ func TestMakeSetAttr_pointArray(t *testing.T) {
 		t.Errorf(msg, "len(Attr)", len(*pa), 2)
 	}
 }
+
+func TestMakeSetAttr_polyFaces(t *testing.T) {
+	c := &CmdBuilder{}
+	c.Append(`setAttr -s 2 ".attrName" -type "polyFaces" f 3 1 2 3 mc 1 3 0 1 2 f 3 2 3 4 mc 2 3 2 3 4;`)
+	sa, err := MakeSetAttr(c.Parse(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	msg := `got SetAttr %s %s, wont %s`
+	if sa.AttrType != TypePolyFaces {
+		t.Errorf(msg, "AttrType", sa.AttrType, TypePolyFaces)
+	}
+	pfs, ok := sa.Attr.(*[]AttrPolyFaces)
+	if !ok ||
+		(*pfs)[0].FaceEdge[0] != 1 ||
+		(*pfs)[0].FaceEdge[1] != 2 ||
+		(*pfs)[0].FaceEdge[2] != 3 ||
+		(*pfs)[0].MCUV != 1 ||
+		(*pfs)[0].MC[0] != 0 ||
+		(*pfs)[0].MC[1] != 1 ||
+		(*pfs)[0].MC[2] != 2 ||
+		(*pfs)[1].FaceEdge[0] != 2 ||
+		(*pfs)[1].FaceEdge[1] != 3 ||
+		(*pfs)[1].FaceEdge[2] != 4 ||
+		(*pfs)[1].MCUV != 2 ||
+		(*pfs)[1].MC[0] != 2 ||
+		(*pfs)[1].MC[1] != 3 ||
+		(*pfs)[1].MC[2] != 4 {
+		t.Errorf(msg, "Attr", sa.Attr, []AttrPolyFaces{
+			{
+				FaceEdge: []int{1, 2, 3},
+				MCUV:     1,
+				MC:       []int{1, 2, 3},
+			},
+			{
+				FaceEdge: []int{2, 3, 4},
+				MCUV:     2,
+				MC:       []int{2, 3, 4},
+			},
+		})
+	}
+	if len(*pfs) != 2 {
+		t.Errorf(msg, "len(Attr)", len(*pfs), 2)
+	}
+}
