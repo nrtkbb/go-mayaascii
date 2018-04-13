@@ -840,27 +840,137 @@ func TestMakeSetAttr_polyFaces(t *testing.T) {
 		(*pfs)[0].FaceEdge[0] != 1 ||
 		(*pfs)[0].FaceEdge[1] != 2 ||
 		(*pfs)[0].FaceEdge[2] != 3 ||
-		(*pfs)[0].MCUV != 1 ||
-		(*pfs)[0].MC[0] != 0 ||
-		(*pfs)[0].MC[1] != 1 ||
-		(*pfs)[0].MC[2] != 2 ||
+		(*pfs)[0].MultiColor[0].ColorIndex != 1 ||
+		(*pfs)[0].MultiColor[0].ColorIDs[0] != 0 ||
+		(*pfs)[0].MultiColor[0].ColorIDs[1] != 1 ||
+		(*pfs)[0].MultiColor[0].ColorIDs[2] != 2 ||
 		(*pfs)[1].FaceEdge[0] != 2 ||
 		(*pfs)[1].FaceEdge[1] != 3 ||
 		(*pfs)[1].FaceEdge[2] != 4 ||
-		(*pfs)[1].MCUV != 2 ||
-		(*pfs)[1].MC[0] != 2 ||
-		(*pfs)[1].MC[1] != 3 ||
-		(*pfs)[1].MC[2] != 4 {
+		(*pfs)[1].MultiColor[0].ColorIndex != 2 ||
+		(*pfs)[1].MultiColor[0].ColorIDs[0] != 2 ||
+		(*pfs)[1].MultiColor[0].ColorIDs[1] != 3 ||
+		(*pfs)[1].MultiColor[0].ColorIDs[2] != 4 {
+		t.Errorf(msg, "Attr", sa.Attr, []AttrPolyFaces{
+			{
+				FaceEdge:   []int{1, 2, 3},
+				MultiColor: []AttrMultiColor{
+					{
+						ColorIndex: 1,
+						ColorIDs:   []int{1, 2, 3},
+					},
+				},
+			},
+			{
+				FaceEdge:   []int{2, 3, 4},
+				MultiColor: []AttrMultiColor{
+					{
+						ColorIndex: 2,
+						ColorIDs:   []int{2, 3, 4},
+					},
+				},
+			},
+		})
+	}
+	if len(*pfs) != 2 {
+		t.Errorf(msg, "len(Attr)", len(*pfs), 2)
+	}
+}
+
+func TestMakeSetAttr_polyFacesMax(t *testing.T) {
+	c := &CmdBuilder{}
+	c.Append(`setAttr -s 2 ".attrName" -type "polyFaces"
+	f 3 1 2 3
+	h 3 5 6 7
+	mu 0 3 0 1 3
+	mu 1 3 0 1 3
+	mc 1 3 0 1 2
+	f 3 2 3 4
+	mu 0 3 2 3 4
+	mu 1 3 2 3 4
+	mc 2 3 2 3 4;`)
+	sa, err := MakeSetAttr(c.Parse(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	msg := `got SetAttr %s %s, wont %s`
+	if sa.AttrType != TypePolyFaces {
+		t.Errorf(msg, "AttrType", sa.AttrType, TypePolyFaces)
+	}
+	pfs, ok := sa.Attr.(*[]AttrPolyFaces)
+	if !ok ||
+		(*pfs)[0].FaceEdge[0] != 1 ||
+		(*pfs)[0].FaceEdge[1] != 2 ||
+		(*pfs)[0].FaceEdge[2] != 3 ||
+		(*pfs)[0].HoleEdge[0] != 5 ||
+		(*pfs)[0].HoleEdge[1] != 6 ||
+		(*pfs)[0].HoleEdge[2] != 7 ||
+		(*pfs)[0].FaceUV[0].UVSet != 0 ||
+		(*pfs)[0].FaceUV[0].FaceUV[0] != 0 ||
+		(*pfs)[0].FaceUV[0].FaceUV[1] != 1 ||
+		(*pfs)[0].FaceUV[0].FaceUV[2] != 3 ||
+		(*pfs)[0].FaceUV[1].UVSet != 1 ||
+		(*pfs)[0].FaceUV[1].FaceUV[0] != 0 ||
+		(*pfs)[0].FaceUV[1].FaceUV[1] != 1 ||
+		(*pfs)[0].FaceUV[1].FaceUV[2] != 3 ||
+		(*pfs)[0].MultiColor[0].ColorIndex != 1 ||
+		(*pfs)[0].MultiColor[0].ColorIDs[0] != 0 ||
+		(*pfs)[0].MultiColor[0].ColorIDs[1] != 1 ||
+		(*pfs)[0].MultiColor[0].ColorIDs[2] != 2 ||
+		(*pfs)[1].FaceEdge[0] != 2 ||
+		(*pfs)[1].FaceEdge[1] != 3 ||
+		(*pfs)[1].FaceEdge[2] != 4 ||
+		(*pfs)[1].FaceUV[0].UVSet != 0 ||
+		(*pfs)[1].FaceUV[0].FaceUV[0] != 2 ||
+		(*pfs)[1].FaceUV[0].FaceUV[1] != 3 ||
+		(*pfs)[1].FaceUV[0].FaceUV[2] != 4 ||
+		(*pfs)[1].FaceUV[1].UVSet != 1 ||
+		(*pfs)[1].FaceUV[1].FaceUV[0] != 2 ||
+		(*pfs)[1].FaceUV[1].FaceUV[1] != 3 ||
+		(*pfs)[1].FaceUV[1].FaceUV[2] != 4 ||
+		(*pfs)[1].MultiColor[0].ColorIndex != 2 ||
+		(*pfs)[1].MultiColor[0].ColorIDs[0] != 2 ||
+		(*pfs)[1].MultiColor[0].ColorIDs[1] != 3 ||
+		(*pfs)[1].MultiColor[0].ColorIDs[2] != 4 {
 		t.Errorf(msg, "Attr", sa.Attr, []AttrPolyFaces{
 			{
 				FaceEdge: []int{1, 2, 3},
-				MCUV:     1,
-				MC:       []int{1, 2, 3},
+				HoleEdge: []int{5, 6, 7},
+				FaceUV: []AttrFaceUV{
+					{
+						UVSet:  0,
+						FaceUV: []int{0, 1, 3},
+					},
+					{
+						UVSet:  1,
+						FaceUV: []int{0, 1, 3},
+					},
+				},
+				MultiColor: []AttrMultiColor{
+					{
+						ColorIndex: 0,
+						ColorIDs:   []int{0, 1, 2},
+					},
+				},
 			},
 			{
 				FaceEdge: []int{2, 3, 4},
-				MCUV:     2,
-				MC:       []int{2, 3, 4},
+				FaceUV: []AttrFaceUV{
+					{
+						UVSet:  0,
+						FaceUV: []int{2, 3, 4},
+					},
+					{
+						UVSet:  1,
+						FaceUV: []int{2, 3, 4},
+					},
+				},
+				MultiColor: []AttrMultiColor{
+					{
+						ColorIndex: 2,
+						ColorIDs:   []int{2, 3, 4},
+					},
+				},
 			},
 		})
 	}

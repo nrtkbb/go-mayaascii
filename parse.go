@@ -1307,17 +1307,20 @@ func MakePolyFace(token *[]string, start int, size *uint) (Attr, AttrType, int, 
 			pfs[i].FaceColor = fc
 			switchNumber += 2 + len(fc)
 		case "mc":
-			mcuv, err := strconv.ParseInt((*token)[switchNumber+1], 10, 64)
+			colorIndex, err := strconv.ParseInt((*token)[switchNumber+1], 10, 64)
 			if err != nil {
 				return nil, TypeInvalid, 0, err
 			}
-			pfs[i].MCUV = int(mcuv)
-			mc, err := MakeCountInt(token, switchNumber+2)
+			colorIDs, err := MakeCountInt(token, switchNumber+2)
 			if err != nil {
 				return nil, TypeInvalid, 0, err
 			}
-			pfs[i].MC = mc
-			switchNumber += 3 + len(mc)
+			mc := AttrMultiColor{
+				ColorIndex: int(colorIndex),
+				ColorIDs:   colorIDs,
+			}
+			pfs[i].MultiColor = append(pfs[i].MultiColor, mc)
+			switchNumber += 3 + len(colorIDs)
 		case "mu":
 			var fuv AttrFaceUV
 			uvSet, err := strconv.Atoi((*token)[switchNumber+1])
@@ -1655,13 +1658,17 @@ type AttrFaceUV struct {
 	FaceUV []int `json:"face_uv"`
 }
 
+type AttrMultiColor struct {
+	ColorIndex int   `json:"color_index"`
+	ColorIDs   []int `json:"color_ids"`
+}
+
 type AttrPolyFaces struct {
-	FaceEdge  []int        `json:"face_edge"`
-	HoleEdge  []int        `json:"hole_edge"`
-	FaceUV    []AttrFaceUV `json:"face_uv"`
-	FaceColor []int        `json:"face_color"`
-	MCUV      int          `json:"mc_uv"`
-	MC        []int        `json:"mc"`
+	FaceEdge   []int            `json:"face_edge"`
+	HoleEdge   []int            `json:"hole_edge"`
+	FaceUV     []AttrFaceUV     `json:"face_uv"`
+	FaceColor  []int            `json:"face_color"`
+	MultiColor []AttrMultiColor `json:"multi_color"`
 }
 
 type AttrDPCType int
@@ -1900,12 +1907,14 @@ const (
 	//       {"mf" int {int}}
 	//       {"mh" int {int}}
 	//       {"mu" int int {int}}
+	//       {"mc" int int {int}}
 	//       {"fc" int {int}}
 	// mean: {"f" faceEdgeCount {edgeIdValue}}
 	//       {"h" holeEdgeCount {edgeIdValue}}
 	//       {"mf" faceUVCount {uvIdValue}}
 	//       {"mh" holeUVCount {uvIdValue}}
 	//       {"mu" uvSet faceUVCount {uvIdValue}}
+	//       {"mc" colorIndex colorIdCount {colorIdValue}}
 	//       {"fc" faceColorCount {colorIndexValue}}
 	// このデータ型(polyFace)は、setAttrs で頂点位置配列、
 	// エッジ接続性配列(および対応する開始/終了頂点の記述)、
@@ -1929,7 +1938,21 @@ const (
 	// "mf" や "mh" を指定する際に使用するものです。
 	// "mu" は複数指定することもできます(固有の UV セットごとに 1 つ)。
 	// "fc" はフェースのカラー インデックス値を指定します。
-	// TODO: "mc" についてメールを元に記述する
+	//
+	//
+	// `mc` (multi-color) is a replacement the old `fc` flag for color maps.
+	// The first argument to `mc` is the color map (index) to use.
+	//
+	// setAttr ".fc[0]" -type "polyFaces"
+	// f 4 0 2 -4 -2
+	// mu 0 4 0 1 3 2
+	// mc 0 4 0 1 3 2;
+	//
+	// Looking at the code the first value is the colour index, the second
+	// one is the number of colour IDs to follow, then the rest are the list
+	// of those colour IDs. In this case it’s colour index 0 with 4 colour
+	// IDs of 0, 1, 3, and 2.
+	//
 	//
 	// setAttr node.polyFaceAttr -type polyFaces "f" 3 1 2 3 "fc" 3 4 4 6;
 	TypePolyFaces
