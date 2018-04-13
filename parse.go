@@ -1899,7 +1899,32 @@ const (
 	// mean: flipNormal boundaryCount {boundaryType tedgeCountOnBoundary
 	//       {splineCountOnEdge {edgeTolerance isEdgeReversed geometricContinuity}
 	//       {splineCountOnPedge {isMonotone pedgeTolerance}}}
-	// TODO: Maya Online Help が間違ってる可能性があり、未実装
+	// ↑こちらは online help に記載されてる内容だが、間違い。
+	// ↓こちらはAutodeskから回答いただいた内容。
+	//
+	// BSPR-30157 - Doc: setAttr -type nurbsTrimface description shows "int"
+	// but actually double and bool type value can be input
+	//
+	// 正しくは、下記のような値タイプになります。
+	//
+	// 値の意味flipNormal boundaryCount {boundaryType tedgeCountOnBoundary
+	// {splineCountOnEdge {edgeTolerance isEdgeReversed geometricContinuity}
+	// {splineCountOnPedge {isMonotone pedgeTolerance}}}
+	// // flipNormal は true の場合にサーフェスを反転させる -> Bool
+	// // boundaryCount: 境界の数 -> Int
+	// // boundaryType: -> Int
+	// // tedgeCountOnBoundary : 境界のエッジ数 -> Int
+	// // splineCountOnEdge : エッジのスプライン数 -> Int
+	// // edgeTolerance : 3D エッジを構築する際に使用する許容値 -> Double
+	// // isEdgeReversed : true の場合、エッジは逆向きになる -> Bool
+	// // geometricContinuity : true の場合、エッジは接線連続性を持つ -> Bool
+	// // splineCountOnPedge : 2D エッジのスプライン数 -> Int
+	// // isMonotone : true の場合、曲率は単調になる -> Bool
+	// // pedgeTolerance : 2D エッジの許容値 -> Double
+	//
+	//よって、値の構文は下記になります。
+	//
+	//bool int {int {int {double bool bool} int {bool double}}}
 	TypeNurbsTrimface
 
 	// type: {"f" int {int}}
