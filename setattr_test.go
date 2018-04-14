@@ -74,7 +74,7 @@ func TestMakeSetAttr_int(t *testing.T) {
 	if sa.AttrType != TypeInt {
 		t.Errorf(msg, "AttrType", sa.AttrType, TypeInt)
 	}
-	i, ok := sa.Attr.(*[]int);
+	i, ok := sa.Attr.(*[]int)
 	if len(*i) != 2 {
 		t.Errorf(msg, "len(Attr)", len(*i), 2)
 	}
