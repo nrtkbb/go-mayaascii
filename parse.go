@@ -641,8 +641,8 @@ func appendSetAttr(beforeAttr Attr, newAttr Attr) Attr {
 		return beforePolyFaces
 	case *[]AttrDataPolyComponent:
 		beforeDataPolyComponent, _ := beforeAttr.(*[]AttrDataPolyComponent)
-		newDataPolyComponent, _ := newAttr.(*AttrDataPolyComponent)
-		*beforeDataPolyComponent = append(*beforeDataPolyComponent, *newDataPolyComponent)
+		newDataPolyComponent, _ := newAttr.(*[]AttrDataPolyComponent)
+		*beforeDataPolyComponent = append(*beforeDataPolyComponent, *newDataPolyComponent...)
 		return beforeDataPolyComponent
 	case *[]AttrLattice:
 		beforeLattice, _ := beforeAttr.(*[]AttrLattice)
@@ -1381,7 +1381,8 @@ func MakeDataPolyComponent(token *[]string, start int) (Attr, AttrType, int, err
 		}
 		dpc.IndexValue[index] = value
 	}
-	var a Attr = &dpc
+	adpc := []AttrDataPolyComponent{dpc,}
+	var a Attr = &adpc
 	return a, TypeDataPolyComponent, 4 + (count * 2), nil
 }
 

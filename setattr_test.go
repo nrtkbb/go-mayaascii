@@ -978,3 +978,180 @@ func TestMakeSetAttr_polyFacesMax(t *testing.T) {
 		t.Errorf(msg, "len(Attr)", len(*pfs), 2)
 	}
 }
+
+func TestMakeDataPolyComponent(t *testing.T) {
+	c := &CmdBuilder{}
+	c.Append(`setAttr ".cd" -type "dataPolyComponent" Index_Data Edge 24
+		0 9.0600013732910156
+		1 4.409998893737793
+		2 9.0600013732910156
+		3 9.2000007629394531
+		4 9.0600013732910156
+		5 9.0600013732910156
+		9 9.0600013732910156
+		10 9.0600013732910156
+		11 9.0600013732910156
+		12 9.0600013732910156
+		13 4.409998893737793
+		15 4.6099758148193359
+		18 4.409998893737793
+		19 4.6099758148193359
+		20 4.409998893737793
+		21 9.2000007629394531
+		23 9.2000007629394531
+		26 9.2000007629394531
+		27 9.2000007629394531
+		28 9.2000007629394531
+		30 4.6099758148193359
+		32 4.6099758148193359
+		34 4.6099758148193359
+		35 4.6099758148193359 ;`)
+	sa, err := MakeSetAttr(c.Parse(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	msg := `got SetAttr %s %s, wont %s`
+	if sa.AttrType != TypeDataPolyComponent {
+		t.Errorf(msg, "AttrType", sa.AttrType, TypeDataPolyComponent)
+	}
+	dpc, ok := sa.Attr.(*[]AttrDataPolyComponent)
+	if !ok ||
+		(*dpc)[0].PolyComponentType != DPCedge ||
+		(*dpc)[0].IndexValue[0] != 9.0600013732910156 ||
+		(*dpc)[0].IndexValue[1] != 4.409998893737793 ||
+		(*dpc)[0].IndexValue[2] != 9.0600013732910156 ||
+		(*dpc)[0].IndexValue[3] != 9.2000007629394531 ||
+		(*dpc)[0].IndexValue[4] != 9.0600013732910156 ||
+		(*dpc)[0].IndexValue[5] != 9.0600013732910156 ||
+		(*dpc)[0].IndexValue[9] != 9.0600013732910156 ||
+		(*dpc)[0].IndexValue[10] != 9.0600013732910156 ||
+		(*dpc)[0].IndexValue[11] != 9.0600013732910156 ||
+		(*dpc)[0].IndexValue[12] != 9.0600013732910156 ||
+		(*dpc)[0].IndexValue[13] != 4.409998893737793 ||
+		(*dpc)[0].IndexValue[15] != 4.6099758148193359 ||
+		(*dpc)[0].IndexValue[18] != 4.409998893737793 ||
+		(*dpc)[0].IndexValue[19] != 4.6099758148193359 ||
+		(*dpc)[0].IndexValue[20] != 4.409998893737793 ||
+		(*dpc)[0].IndexValue[21] != 9.2000007629394531 ||
+		(*dpc)[0].IndexValue[23] != 9.2000007629394531 ||
+		(*dpc)[0].IndexValue[26] != 9.2000007629394531 ||
+		(*dpc)[0].IndexValue[27] != 9.2000007629394531 ||
+		(*dpc)[0].IndexValue[28] != 9.2000007629394531 ||
+		(*dpc)[0].IndexValue[30] != 4.6099758148193359 ||
+		(*dpc)[0].IndexValue[32] != 4.6099758148193359 ||
+		(*dpc)[0].IndexValue[34] != 4.6099758148193359 ||
+		(*dpc)[0].IndexValue[35] != 4.6099758148193359 {
+		t.Errorf(msg, "Attr", dpc, []AttrDataPolyComponent{
+			{
+				PolyComponentType: DPCedge,
+				IndexValue: map[int]float64{
+					0:  9.0600013732910156,
+					1:  4.409998893737793,
+					2:  9.0600013732910156,
+					3:  9.2000007629394531,
+					4:  9.0600013732910156,
+					5:  9.0600013732910156,
+					9:  9.0600013732910156,
+					10: 9.0600013732910156,
+					11: 9.0600013732910156,
+					12: 9.0600013732910156,
+					13: 4.409998893737793,
+					15: 4.6099758148193359,
+					18: 4.409998893737793,
+					19: 4.6099758148193359,
+					20: 4.409998893737793,
+					21: 9.2000007629394531,
+					23: 9.2000007629394531,
+					26: 9.2000007629394531,
+					27: 9.2000007629394531,
+					28: 9.2000007629394531,
+					30: 4.6099758148193359,
+					32: 4.6099758148193359,
+					34: 4.6099758148193359,
+					35: 4.6099758148193359,
+				},
+			},
+		})
+	}
+	if len(*dpc) != 1 {
+		t.Errorf(msg, "len(Attr)", len(*dpc), 1)
+	}
+	if len((*dpc)[0].IndexValue) != 24 {
+		t.Errorf(msg, "len(Attr.IndexValue)", len((*dpc)[0].IndexValue), 24)
+	}
+}
+
+ func sameDPC(t *testing.T, ok bool, dpc *[]AttrDataPolyComponent, dpcType AttrDPCType) {
+	 if !ok || (*dpc)[0].PolyComponentType != dpcType {
+		 msg := `got SetAttr %s %s, wont %s`
+		 t.Errorf(msg, "Attr", dpc, []AttrDataPolyComponent{
+			 {
+				 PolyComponentType: dpcType,
+				 IndexValue:        map[int]float64{},
+			 },
+		 })
+	 }
+ }
+
+func TestMakeDataPolyComponentVertex(t *testing.T) {
+	c := &CmdBuilder{}
+	c.Append(`setAttr ".cvd" -type "dataPolyComponent" Index_Data Vertex 0;`)
+	sa, err := MakeSetAttr(c.Parse(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	msg := `got SetAttr %s %s, wont %s`
+	if sa.AttrType != TypeDataPolyComponent {
+		t.Errorf(msg, "AttrType", sa.AttrType, TypeDataPolyComponent)
+	}
+	dpc, ok := sa.Attr.(*[]AttrDataPolyComponent)
+	sameDPC(t, ok, dpc, DPCvertex)
+	if len(*dpc) != 1 {
+		t.Errorf(msg, "len(Attr)", len(*dpc), 1)
+	}
+	if len((*dpc)[0].IndexValue) != 0 {
+		t.Errorf(msg, "len(Attr.IndexValue)", len((*dpc)[0].IndexValue), 0)
+	}
+}
+
+func TestMakeDataPolyComponentUV(t *testing.T) {
+	c := &CmdBuilder{}
+	c.Append(`setAttr ".pd[0]" -type "dataPolyComponent" Index_Data UV 0 ;`)
+	sa, err := MakeSetAttr(c.Parse(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	msg := `got SetAttr %s %s, wont %s`
+	if sa.AttrType != TypeDataPolyComponent {
+		t.Errorf(msg, "AttrType", sa.AttrType, TypeDataPolyComponent)
+	}
+	dpc, ok := sa.Attr.(*[]AttrDataPolyComponent)
+	sameDPC(t, ok, dpc, DPCuv)
+	if len(*dpc) != 1 {
+		t.Errorf(msg, "len(Attr)", len(*dpc), 1)
+	}
+	if len((*dpc)[0].IndexValue) != 0 {
+		t.Errorf(msg, "len(Attr.IndexValue)", len((*dpc)[0].IndexValue), 0)
+	}
+}
+
+func TestMakeDataPolyComponentFace(t *testing.T) {
+	c := &CmdBuilder{}
+	c.Append(`setAttr ".hfd" -type "dataPolyComponent" Index_Data Face 0 ;`)
+	sa, err := MakeSetAttr(c.Parse(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	msg := `got SetAttr %s %s, wont %s`
+	if sa.AttrType != TypeDataPolyComponent {
+		t.Errorf(msg, "AttrType", sa.AttrType, TypeDataPolyComponent)
+	}
+	dpc, ok := sa.Attr.(*[]AttrDataPolyComponent)
+	sameDPC(t, ok, dpc, DPCface)
+	if len(*dpc) != 1 {
+		t.Errorf(msg, "len(Attr)", len(*dpc), 1)
+	}
+	if len((*dpc)[0].IndexValue) != 0 {
+		t.Errorf(msg, "len(Attr.IndexValue)", len((*dpc)[0].IndexValue), 0)
+	}
+}
