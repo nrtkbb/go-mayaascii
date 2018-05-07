@@ -853,7 +853,7 @@ func TestMakeSetAttr_polyFaces(t *testing.T) {
 		(*pfs)[1].MultiColor[0].ColorIDs[2] != 4 {
 		t.Errorf(msg, "Attr", sa.Attr, []AttrPolyFaces{
 			{
-				FaceEdge:   []int{1, 2, 3},
+				FaceEdge: []int{1, 2, 3},
 				MultiColor: []AttrMultiColor{
 					{
 						ColorIndex: 1,
@@ -862,7 +862,7 @@ func TestMakeSetAttr_polyFaces(t *testing.T) {
 				},
 			},
 			{
-				FaceEdge:   []int{2, 3, 4},
+				FaceEdge: []int{2, 3, 4},
 				MultiColor: []AttrMultiColor{
 					{
 						ColorIndex: 2,
