@@ -1081,17 +1081,17 @@ func TestMakeDataPolyComponent(t *testing.T) {
 	}
 }
 
- func sameDPC(t *testing.T, ok bool, dpc *[]AttrDataPolyComponent, dpcType AttrDPCType) {
-	 if !ok || (*dpc)[0].PolyComponentType != dpcType {
-		 msg := `got SetAttr %s %s, wont %s`
-		 t.Errorf(msg, "Attr", dpc, []AttrDataPolyComponent{
-			 {
-				 PolyComponentType: dpcType,
-				 IndexValue:        map[int]float64{},
-			 },
-		 })
-	 }
- }
+func sameDPC(t *testing.T, ok bool, dpc *[]AttrDataPolyComponent, dpcType AttrDPCType) {
+	if !ok || (*dpc)[0].PolyComponentType != dpcType {
+		msg := `got SetAttr %s %s, wont %s`
+		t.Errorf(msg, "Attr", dpc, []AttrDataPolyComponent{
+			{
+				PolyComponentType: dpcType,
+				IndexValue:        map[int]float64{},
+			},
+		})
+	}
+}
 
 func TestMakeDataPolyComponentVertex(t *testing.T) {
 	c := &CmdBuilder{}
@@ -1153,5 +1153,54 @@ func TestMakeDataPolyComponentFace(t *testing.T) {
 	}
 	if len((*dpc)[0].IndexValue) != 0 {
 		t.Errorf(msg, "len(Attr.IndexValue)", len((*dpc)[0].IndexValue), 0)
+	}
+}
+
+func TestMakeAttributeAlias(t *testing.T) {
+	c := &CmdBuilder{}
+
+	c.Append(`setAttr ".aal" -type "attributeAlias" {"detonationFrame","borderConnections[0]","incandescence"
+		,"borderConnections[1]","color","borderConnections[2]","nucleusSolver","publishedNodeInfo[0]"
+		} ;`)
+	sa, err := MakeSetAttr(c.Parse(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	msg := `got SetAttr %s %s, wont %s`
+	if sa.AttrType != TypeAttributeAlias {
+		t.Errorf(msg, "AttrType", sa.AttrType, TypeAttributeAlias)
+	}
+	aaa, ok := sa.Attr.(*[]AttrAttributeAlias)
+	if !ok ||
+		(*aaa)[0].NewAlias != "detonationFrame" ||
+		(*aaa)[0].CurrentName != "borderConnections[0]" ||
+		(*aaa)[1].NewAlias != "incandescence" ||
+		(*aaa)[1].CurrentName != "borderConnections[1]" ||
+		(*aaa)[2].NewAlias != "color" ||
+		(*aaa)[2].CurrentName != "borderConnections[2]" ||
+		(*aaa)[3].NewAlias != "nucleusSolver" ||
+		(*aaa)[3].CurrentName != "publishedNodeInfo[0]" {
+		msg := `got SetAttr %s %s, wont %s`
+		t.Errorf(msg, "Attr", aaa, &[]AttrAttributeAlias{
+			{
+				NewAlias:    "detonationFrame",
+				CurrentName: "borderConnections[0]",
+			},
+			{
+				NewAlias:    "incandescence",
+				CurrentName: "borderConnections[1]",
+			},
+			{
+				NewAlias:    "color",
+				CurrentName: "borderConnections[2]",
+			},
+			{
+				NewAlias:    "nucleusSolver",
+				CurrentName: "publishedNodeInfo[0]",
+			},
+		})
+	}
+	if len(*aaa) != 4 {
+		t.Errorf(msg, "len(Attr)", len(*aaa), 4)
 	}
 }

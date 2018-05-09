@@ -616,8 +616,8 @@ func appendSetAttr(beforeAttr Attr, newAttr Attr) Attr {
 		return beforeComponentList
 	case *[]AttrAttributeAlias:
 		beforeAttributeAlias, _ := beforeAttr.(*[]AttrAttributeAlias)
-		newAttributeAlias, _ := newAttr.(*AttrAttributeAlias)
-		*beforeAttributeAlias = append(*beforeAttributeAlias, *newAttributeAlias)
+		newAttributeAlias, _ := newAttr.(*[]AttrAttributeAlias)
+		*beforeAttributeAlias = append(*beforeAttributeAlias, *newAttributeAlias...)
 		return beforeAttributeAlias
 	case *[]AttrNurbsCurve:
 		beforeNurbsCurve, _ := beforeAttr.(*[]AttrNurbsCurve)
