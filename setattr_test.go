@@ -1158,7 +1158,6 @@ func TestMakeDataPolyComponentFace(t *testing.T) {
 
 func TestMakeAttributeAlias(t *testing.T) {
 	c := &CmdBuilder{}
-
 	c.Append(`setAttr ".aal" -type "attributeAlias" {"detonationFrame","borderConnections[0]","incandescence"
 		,"borderConnections[1]","color","borderConnections[2]","nucleusSolver","publishedNodeInfo[0]"
 		} ;`)
@@ -1202,5 +1201,31 @@ func TestMakeAttributeAlias(t *testing.T) {
 	}
 	if len(*aaa) != 4 {
 		t.Errorf(msg, "len(Attr)", len(*aaa), 4)
+	}
+}
+
+func TestMakeComponentList(t *testing.T) {
+	c := &CmdBuilder{}
+	c.Append(`setAttr ".ics" -type "componentList" 2 "vtx[130]" "vtx[147]";`)
+	sa, err := MakeSetAttr(c.Parse(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	msg := `got SetAttr %s %s, wont %s`
+	if sa.AttrType != TypeComponentList {
+		t.Errorf(msg, "AttrType", sa.AttrType, TypeComponentList)
+	}
+	cl, ok := sa.Attr.(*AttrComponentList)
+	if !ok ||
+		(*cl)[0] != "vtx[130]" ||
+		(*cl)[1] != "vtx[147]" {
+		msg := `got SetAttr %s %s, wont %s`
+		t.Errorf(msg, "Attr", cl, &AttrComponentList{
+			"vtx[130]",
+			"vtx[147]",
+		})
+	}
+	if len(*cl) != 2 {
+		t.Errorf(msg, "len(Attr)", len(*cl), 2)
 	}
 }

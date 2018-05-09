@@ -1067,7 +1067,10 @@ func MakeComponentList(token *[]string, start int) (Attr, AttrType, int, error) 
 	if err != nil {
 		return nil, TypeInvalid, 0, err
 	}
-	cl := AttrComponentList((*token)[start+2: start+2+numberOfArray])
+	var cl AttrComponentList
+	for _, c := range (*token)[start+2: start+2+numberOfArray] {
+		cl = append(cl, strings.Trim(c, "\""))
+	}
 	var a Attr = &cl
 	return a, TypeComponentList, 2 + numberOfArray, nil
 }
