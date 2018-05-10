@@ -596,8 +596,8 @@ func appendSetAttr(beforeAttr Attr, newAttr Attr) Attr {
 		return beforeSphere
 	case *[]AttrCone:
 		beforeCone, _ := beforeAttr.(*[]AttrCone)
-		newCone, _ := newAttr.(*AttrCone)
-		*beforeCone = append(*beforeCone, *newCone)
+		newCone, _ := newAttr.(*[]AttrCone)
+		*beforeCone = append(*beforeCone, *newCone...)
 		return beforeCone
 	case *[]AttrReflectanceRGB:
 		beforeReflectanceRGB, _ := beforeAttr.(*[]AttrReflectanceRGB)
@@ -1028,9 +1028,11 @@ func MakeCone(token *[]string, start int) (Attr, AttrType, int, error) {
 	if err != nil {
 		return nil, TypeInvalid, 0, err
 	}
-	c := AttrCone{
-		ConeAngle: f[0],
-		ConeCap:   f[1],
+	c := []AttrCone{
+		{
+			ConeAngle: f[0],
+			ConeCap:   f[1],
+		},
 	}
 	var a Attr = &c
 	return a, TypeCone, 3, nil

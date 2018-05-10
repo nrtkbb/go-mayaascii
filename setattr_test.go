@@ -1229,3 +1229,31 @@ func TestMakeComponentList(t *testing.T) {
 		t.Errorf(msg, "len(Attr)", len(*cl), 2)
 	}
 }
+
+func TestMakeCone(t *testing.T) {
+	c := &CmdBuilder{}
+	c.Append(`setAttr ".cone" -type "cone" 45.0 5.0;`)
+	sa, err := MakeSetAttr(c.Parse(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	msg := `got SetAttr %s %s, wont %s`
+	if sa.AttrType != TypeCone {
+		t.Errorf(msg, "AttrType", sa.AttrType, TypeCone)
+	}
+	cone, ok := sa.Attr.(*[]AttrCone)
+	if !ok ||
+		(*cone)[0].ConeAngle != 45.0 ||
+		(*cone)[0].ConeCap != 5.0 {
+		msg := `got SetAttr %s %s, wont %s`
+		t.Errorf(msg, "Attr", sa.Attr, &[]AttrCone{
+			{
+				ConeAngle: 45.0,
+				ConeCap:   5.0,
+			},
+		})
+	}
+	if len(*cone) != 1 {
+		t.Errorf(msg, "len(Attr)", len(*cone), 1)
+	}
+}
