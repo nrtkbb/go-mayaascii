@@ -1257,3 +1257,33 @@ func TestMakeCone(t *testing.T) {
 		t.Errorf(msg, "len(Attr)", len(*cone), 1)
 	}
 }
+
+func TestMakeDoubleArray(t *testing.T) {
+	c := &CmdBuilder{}
+	c.Append(`setAttr ".dd" -type "doubleArray" 7 -1 1 0 0 0.5 1 -0.11000000000000004 ;`)
+	sa, err := MakeSetAttr(c.Parse(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	msg := `got SetAttr %s %s, wont %s`
+	if sa.AttrType != TypeDoubleArray {
+		t.Errorf(msg, "AttrType", sa.AttrType, TypeDoubleArray)
+	}
+	da, ok := sa.Attr.(*AttrDoubleArray)
+	if !ok ||
+		(*da)[0] != -1 ||
+		(*da)[1] != 1 ||
+		(*da)[2] != 0 ||
+		(*da)[3] != 0 ||
+		(*da)[4] != 0.5 ||
+		(*da)[5] != 1 ||
+		(*da)[6] != -0.11000000000000004 {
+		msg := `got SetAttr %s %s, wont %s`
+		t.Errorf(msg, "Attr", sa.Attr, &AttrDoubleArray{
+			-1, 1, 0, 0, 0.5, 1, -0.11000000000000004,
+		})
+	}
+	if len(*da) != 7 {
+		t.Errorf(msg, "len(Attr)", len(*da), 7)
+	}
+}
