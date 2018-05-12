@@ -1287,3 +1287,75 @@ func TestMakeDoubleArray(t *testing.T) {
 		t.Errorf(msg, "len(Attr)", len(*da), 7)
 	}
 }
+
+func TestMakeLattice(t *testing.T) {
+	c := &CmdBuilder{}
+	c.Append(`setAttr ".cc" -type "lattice" 2 2 2 8
+	-0.5 -0.5 -0.5
+	0.5 -0.5 -0.5
+	-0.5 0.5 -0.5
+	0.5 0.5 -0.5
+	-0.5 -0.5 0.5
+	0.5 -0.5 0.5
+	-0.5 0.5 0.5
+	0.5 0.5 0.5 ;`)
+	sa, err := MakeSetAttr(c.Parse(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	msg := `got SetAttr %s %s, wont %s`
+	if sa.AttrType != TypeLattice {
+		t.Errorf(msg, "AttrType", sa.AttrType, TypeLattice)
+	}
+	la, ok := sa.Attr.(*[]AttrLattice)
+	if !ok ||
+		(*la)[0].DivisionS != 2 ||
+		(*la)[0].DivisionT != 2 ||
+		(*la)[0].DivisionU != 2 ||
+		(*la)[0].Points[0].S != -0.5 ||
+		(*la)[0].Points[0].T != -0.5 ||
+		(*la)[0].Points[0].U != -0.5 ||
+		(*la)[0].Points[1].S != 0.5 ||
+		(*la)[0].Points[1].T != -0.5 ||
+		(*la)[0].Points[1].U != -0.5 ||
+		(*la)[0].Points[2].S != -0.5 ||
+		(*la)[0].Points[2].T != 0.5 ||
+		(*la)[0].Points[2].U != -0.5 ||
+		(*la)[0].Points[3].S != 0.5 ||
+		(*la)[0].Points[3].T != 0.5 ||
+		(*la)[0].Points[3].U != -0.5 ||
+		(*la)[0].Points[4].S != -0.5 ||
+		(*la)[0].Points[4].T != -0.5 ||
+		(*la)[0].Points[4].U != 0.5 ||
+		(*la)[0].Points[5].S != 0.5 ||
+		(*la)[0].Points[5].T != -0.5 ||
+		(*la)[0].Points[5].U != 0.5 ||
+		(*la)[0].Points[6].S != -0.5 ||
+		(*la)[0].Points[6].T != 0.5 ||
+		(*la)[0].Points[6].U != 0.5 ||
+		(*la)[0].Points[7].S != 0.5 ||
+		(*la)[0].Points[7].T != 0.5 ||
+		(*la)[0].Points[7].U != 0.5 {
+		msg := `got SetAttr %s %s, wont %s`
+		t.Errorf(msg, "Attr", sa.Attr, &[]AttrLattice{
+			{
+				DivisionS: 2,
+				DivisionT: 2,
+				DivisionU: 2,
+				Points: []AttrLaticePoint{
+					{-0.5, -0.5, -0.5},
+					{0.5, -0.5, -0.5},
+					{-0.5, 0.5, -0.5},
+					{0.5, 0.5, -0.5},
+					{-0.5, -0.5, 0.5},
+					{0.5, -0.5, 0.5},
+					{-0.5, 0.5, 0.5},
+					{0.5, 0.5, 0.5},
+				},
+			},
+		})
+	}
+	if len(*la) != 1 {
+		t.Errorf(msg, "len(Attr)", len(*la), 1)
+	}
+}

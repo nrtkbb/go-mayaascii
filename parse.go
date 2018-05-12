@@ -646,8 +646,8 @@ func appendSetAttr(beforeAttr Attr, newAttr Attr) Attr {
 		return beforeDataPolyComponent
 	case *[]AttrLattice:
 		beforeLattice, _ := beforeAttr.(*[]AttrLattice)
-		newLattice, _ := newAttr.(*AttrLattice)
-		*beforeLattice = append(*beforeLattice, *newLattice)
+		newLattice, _ := newAttr.(*[]AttrLattice)
+		*beforeLattice = append(*beforeLattice, *newLattice...)
 		return beforeLattice
 	}
 	return newAttr
@@ -1402,21 +1402,24 @@ func MakeLattice(token *[]string, start int) (Attr, AttrType, int, error) {
 	if err != nil {
 		return nil, TypeInvalid, 0, err
 	}
-	var l AttrLattice
-	l.DivisionS = c[0]
-	l.DivisionT = c[1]
-	l.DivisionU = c[2]
-	l.Points = make([]AttrLaticePoint, c[3])
+	la := []AttrLattice{
+		{
+			DivisionS: c[0],
+			DivisionT: c[1],
+			DivisionU: c[2],
+		},
+	}
+	la[0].Points = make([]AttrLaticePoint, c[3])
 	for i := 0; i < c[3]*3; i += 3 {
 		p, err := ParseFloats((*token)[start+5+i: start+5+i+3]...)
 		if err != nil {
 			return nil, TypeInvalid, 0, err
 		}
-		l.Points[i/3].S = p[0]
-		l.Points[i/3].T = p[1]
-		l.Points[i/3].U = p[2]
+		la[0].Points[i/3].S = p[0]
+		la[0].Points[i/3].T = p[1]
+		la[0].Points[i/3].U = p[2]
 	}
-	var a Attr = l
+	var a Attr = &la
 	return a, TypeLattice, 5 + (c[3] * 3), nil
 }
 
