@@ -621,8 +621,8 @@ func appendSetAttr(beforeAttr Attr, newAttr Attr) Attr {
 		return beforeAttributeAlias
 	case *[]AttrNurbsCurve:
 		beforeNurbsCurve, _ := beforeAttr.(*[]AttrNurbsCurve)
-		newNurbsCurve, _ := newAttr.(*AttrNurbsCurve)
-		*beforeNurbsCurve = append(*beforeNurbsCurve, *newNurbsCurve)
+		newNurbsCurve, _ := newAttr.(*[]AttrNurbsCurve)
+		*beforeNurbsCurve = append(*beforeNurbsCurve, *newNurbsCurve...)
 		return beforeNurbsCurve
 	case *[]AttrNurbsSurface:
 		beforeNurbsSurface, _ := beforeAttr.(*[]AttrNurbsSurface)
@@ -1153,7 +1153,7 @@ func MakeNurbsCurve(token *[]string, start int) (Attr, AttrType, int, error) {
 			}
 		}
 	}
-	var a Attr = &AttrNurbsCurve{
+	var a Attr = &[]AttrNurbsCurve{{
 		Degree:     degree,
 		Spans:      spans,
 		Form:       form,
@@ -1161,7 +1161,7 @@ func MakeNurbsCurve(token *[]string, start int) (Attr, AttrType, int, error) {
 		Dimension:  dimension,
 		KnotValues: kv,
 		CvValues:   cvValues,
-	}
+	}}
 	count := 8 + knotCount + (cvCount * divideCv)
 	return a, TypeNurbsCurve, count, nil
 }

@@ -1359,3 +1359,100 @@ func TestMakeLattice(t *testing.T) {
 		t.Errorf(msg, "len(Attr)", len(*la), 1)
 	}
 }
+
+func TestMakeNurbsCurve(t *testing.T) {
+	c := &CmdBuilder{}
+	c.Append(`setAttr ".cc" -type "nurbsCurve"
+	3 1 0 no 3
+	6 0 0 0 1 1 1
+	4
+	0 0 0
+	0.33333333333333326 0 -0.33333333333333326
+	0.66666666666666663 0 -0.66666666666666663
+	1 0 -1
+	;`)
+	sa, err := MakeSetAttr(c.Parse(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	msg := `got SetAttr %s %s, wont %s`
+	if sa.AttrType != TypeNurbsCurve {
+		t.Errorf(msg, "AttrType", sa.AttrType, TypeNurbsCurve)
+	}
+	nc, ok := sa.Attr.(*[]AttrNurbsCurve)
+	if !ok ||
+		(*nc)[0].Degree != 3 ||
+		(*nc)[0].Spans != 1 ||
+		(*nc)[0].Form != AttrFormOpen ||
+		(*nc)[0].IsRational != false ||
+		(*nc)[0].Dimension != 3 ||
+		(*nc)[0].KnotValues[0] != 0 ||
+		(*nc)[0].KnotValues[1] != 0 ||
+		(*nc)[0].KnotValues[2] != 0 ||
+		(*nc)[0].KnotValues[3] != 1 ||
+		(*nc)[0].KnotValues[4] != 1 ||
+		(*nc)[0].KnotValues[5] != 1 ||
+		(*nc)[0].CvValues[0].X != 0 ||
+		(*nc)[0].CvValues[0].Y != 0 ||
+		*(*nc)[0].CvValues[0].Z != 0 ||
+		(*nc)[0].CvValues[0].W != nil ||
+		(*nc)[0].CvValues[1].X != 0.33333333333333326 ||
+		(*nc)[0].CvValues[1].Y != 0 ||
+		*(*nc)[0].CvValues[1].Z != -0.33333333333333326 ||
+		(*nc)[0].CvValues[1].W != nil ||
+		(*nc)[0].CvValues[2].X != 0.66666666666666663 ||
+		(*nc)[0].CvValues[2].Y != 0 ||
+		*(*nc)[0].CvValues[2].Z != -0.66666666666666663 ||
+		(*nc)[0].CvValues[2].W != nil ||
+		(*nc)[0].CvValues[3].X != 1 ||
+		(*nc)[0].CvValues[3].Y != 0 ||
+		*(*nc)[0].CvValues[3].Z != -1 ||
+		(*nc)[0].CvValues[3].W != nil {
+		msg := `got SetAttr %s %s, wont %s`
+		zero := 0.0
+		minus03 := -0.33333333333333326
+		minus06 := -0.66666666666666663
+		minus1 := -1.0
+		t.Errorf(msg, "Attr", sa.Attr, &[]AttrNurbsCurve{
+			{
+				Degree:     3,
+				Spans:      1,
+				Form:       AttrFormOpen,
+				IsRational: false,
+				Dimension:  3,
+				KnotValues: []float64{
+					0, 0, 0, 1, 1, 1,
+				},
+				CvValues: []AttrCvValue{
+					{
+						X: 0,
+						Y: 0,
+						Z: &zero,
+						W: nil,
+					},
+					{
+						X: 0.33333333333333326,
+						Y: 0,
+						Z: &minus03,
+						W: nil,
+					},
+					{
+						X: 0.66666666666666663,
+						Y: 0,
+						Z: &minus06,
+						W: nil,
+					},
+					{
+						X: 1,
+						Y: 0,
+						Z: &minus1,
+						W: nil,
+					},
+				},
+			},
+		})
+	}
+	if len(*nc) != 1 {
+		t.Errorf(msg, "len(Attr)", len(*nc), 1)
+	}
+}
