@@ -156,6 +156,53 @@ func TestMakeSetAttr_int_toDouble_toInt(t *testing.T) {
 	}
 }
 
+func TestMakeSetAttr_string(t *testing.T) {
+	c := &CmdBuilder{}
+	c.Append(`setAttr ".attrName" -type "string" "//network/folder/texture.jpg";`)
+	sa, err := MakeSetAttr(c.Parse(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	msg := `got SetAttr %s %s, wont %s`
+	if sa.AttrType != TypeString {
+		t.Errorf(msg, "AttrType", sa.AttrType, TypeString)
+	}
+	str, ok := sa.Attr.(*AttrString)
+	if !ok {
+		t.Errorf(msg, "Attr", *str, "//network/folder/texture.jpg")
+	}
+	if *str != "//network/folder/texture.jpg" {
+		t.Errorf(msg, "Attr", *str, "//network/folder/texture.jpg")
+	}
+}
+
+func TestMakeSetAttr_stringArray(t *testing.T) {
+	c := &CmdBuilder{}
+	c.Append(`setAttr ".attrName" -type "stringArray" 2 "//network/folder/texture.jpg" "//network/folder/texture.jpg";`)
+	sa, err := MakeSetAttr(c.Parse(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	msg := `got SetAttr %s %s, wont %s`
+	if sa.AttrType != TypeStringArray {
+		t.Errorf(msg, "AttrType", sa.AttrType, TypeStringArray)
+	}
+	asa, ok := sa.Attr.(*AttrStringArray)
+	if !ok {
+		t.Errorf(msg, "Attr", *asa, AttrStringArray{
+			"//network/folder/texture.jpg",
+			"//network/folder/texture.jpg",
+		})
+	}
+	if (*asa)[0] != "//network/folder/texture.jpg" &&
+		(*asa)[1] != "//network/folder/texture.jpg" {
+		t.Errorf(msg, "Attr", *asa, AttrStringArray{
+			"//network/folder/texture.jpg",
+			"//network/folder/texture.jpg",
+		})
+	}
+}
+
 func TestMakeSetAttr_doubleWithExponent(t *testing.T) {
 	c := &CmdBuilder{}
 	c.Append(`setAttr ".attrName" 1e+020 2;`)
