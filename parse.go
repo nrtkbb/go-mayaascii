@@ -1,12 +1,42 @@
 package mayaascii
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
+	"github.com/nrtkbb/bufscan"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 )
+
+type File struct {
+	Path string
+	Cmds []*Cmd
+}
+
+func (f *File) Parse() error {
+	fp, err := os.Open(f.Path)
+	if err != nil {
+		return err
+	}
+	defer fp.Close()
+
+	reader := bufio.NewReader(fp)
+	f.Cmds = []*Cmd{}
+	cmdBuilder := &CmdBuilder{}
+	err = bufscan.BufScan(reader, func(line string) error {
+		cmdBuilder.Append(line)
+		if cmdBuilder.IsCmdEOF() {
+			cmd := cmdBuilder.Parse()
+			f.Cmds = append(f.Cmds, cmd)
+			cmdBuilder.Clear()
+		}
+		return nil
+	})
+	return nil
+}
 
 type CmdBuilder struct {
 	cmdLine []string
@@ -224,7 +254,7 @@ func MakeConnectAttr(cmd *Cmd) (*ConnectAttr, error) {
 			// trim "nodeName.attrName" -> {node: nodeName, attr: .attrName}
 			dotIndex := strings.Index(ca.Token[i], ".")
 			node := ca.Token[i][1:dotIndex]
-			attr := ca.Token[i][dotIndex+1: len(ca.Token[i])-1]
+			attr := ca.Token[i][dotIndex+1 : len(ca.Token[i])-1]
 			if ca.SrcNode == "" {
 				ca.SrcNode = node
 				ca.SrcAttr = attr
@@ -253,10 +283,10 @@ func MakeCreateNode(cmd *Cmd) *CreateNode {
 		switch n.Token[i] {
 		case "-n":
 			i++
-			n.NodeName = n.Token[i][1: len(cmd.Token[i])-1]
+			n.NodeName = n.Token[i][1 : len(cmd.Token[i])-1]
 		case "-p":
 			i++
-			p := n.Token[i][1: len(cmd.Token[i])-1]
+			p := n.Token[i][1 : len(cmd.Token[i])-1]
 			n.Parent = &p
 		case "-s":
 			n.Shared = true
@@ -319,7 +349,7 @@ func getAttrNameFromSetAttr(token *[]string) (int, string) {
 			t[1] == '.' &&
 			t[len(t)-1] == '"' {
 			// ".attr" -> .attr
-			return i, t[1: len(t)-1]
+			return i, t[1 : len(t)-1]
 		}
 	}
 	return -1, ""
@@ -707,7 +737,7 @@ func MakeShort2Long2(token *[]string, start int, size *uint) (Attr, AttrType, in
 	} else {
 		end = start + 1 + 2
 	}
-	v, err := ParseInts((*token)[start+1: end]...)
+	v, err := ParseInts((*token)[start+1 : end]...)
 	if err != nil {
 		return nil, TypeInvalid, 0, err
 	}
@@ -737,7 +767,7 @@ func MakeShort3Long3(token *[]string, start int, size *uint) (Attr, AttrType, in
 	} else {
 		end = start + 1 + 3
 	}
-	v, err := ParseInts((*token)[start+1: end]...)
+	v, err := ParseInts((*token)[start+1 : end]...)
 	if err != nil {
 		return nil, TypeInvalid, 0, err
 	}
@@ -769,7 +799,7 @@ func MakeInt32Array(token *[]string, start int) (Attr, AttrType, int, error) {
 	}
 	var a Attr
 	if numberOfArray != 0 {
-		result, err := ParseInts((*token)[start+2: start+2+numberOfArray]...)
+		result, err := ParseInts((*token)[start+2 : start+2+numberOfArray]...)
 		if err != nil {
 			return nil, TypeInvalid, 0, err
 		}
@@ -789,7 +819,7 @@ func MakeFloat2Double2(token *[]string, start int, size *uint) (Attr, AttrType, 
 	} else {
 		end = start + 1 + 2
 	}
-	v, err := ParseFloats((*token)[start+1: end]...)
+	v, err := ParseFloats((*token)[start+1 : end]...)
 	if err != nil {
 		return nil, TypeInvalid, 0, err
 	}
@@ -819,7 +849,7 @@ func MakeFloat3Double3(token *[]string, start int, size *uint) (Attr, AttrType, 
 	} else {
 		end = start + 1 + 3
 	}
-	v, err := ParseFloats((*token)[start+1: end]...)
+	v, err := ParseFloats((*token)[start+1 : end]...)
 	if err != nil {
 		return nil, TypeInvalid, 0, err
 	}
@@ -851,7 +881,7 @@ func MakeDoubleArray(token *[]string, start int) (Attr, AttrType, int, error) {
 	}
 	var a Attr
 	if numberOfArray != 0 {
-		f, err := ParseFloats((*token)[start+2: start+2+numberOfArray]...)
+		f, err := ParseFloats((*token)[start+2 : start+2+numberOfArray]...)
 		if err != nil {
 			return nil, TypeInvalid, 0, err
 		}
@@ -869,7 +899,7 @@ func MakeMatrix(token *[]string, start int) (Attr, AttrType, int, error) {
 	if first == "\"xform\"" {
 		return MakeMatrixXform(token, start)
 	}
-	mat4x4, err := ParseFloats((*token)[start+1: start+17]...)
+	mat4x4, err := ParseFloats((*token)[start+1 : start+17]...)
 	if err != nil {
 		return nil, TypeInvalid, 0, err
 	}
@@ -911,7 +941,7 @@ func MakeMatrixXform(token *[]string, start int) (Attr, AttrType, int, error) {
 	// jointOrientW jointOrientX jointOrientY jointOrientZ
 	// inverseParentScaleX inverseParentScaleY inverseParentScaleZ
 	// compensateForParentScale
-	floats, err := ParseFloats((*token)[start+2: start+38]...)
+	floats, err := ParseFloats((*token)[start+2 : start+38]...)
 	if err != nil {
 		return nil, TypeInvalid, 0, err
 	}
@@ -949,7 +979,7 @@ func MakePointArray(token *[]string, start int) (Attr, AttrType, int, error) {
 	}
 	var a Attr
 	if numberOfArray != 0 {
-		f, err := ParseFloats((*token)[start+2: start+2+(numberOfArray*4)]...)
+		f, err := ParseFloats((*token)[start+2 : start+2+(numberOfArray*4)]...)
 		if err != nil {
 			return nil, TypeInvalid, 0, err
 		}
@@ -976,7 +1006,7 @@ func MakeVectorArray(token *[]string, start int) (Attr, AttrType, int, error) {
 	}
 	var a Attr
 	if numberOfArray != 0 {
-		f, err := ParseFloats((*token)[start+2: start+2+numberOfArray]...)
+		f, err := ParseFloats((*token)[start+2 : start+2+numberOfArray]...)
 		if err != nil {
 			return nil, TypeInvalid, 0, err
 		}
@@ -998,7 +1028,7 @@ func MakeVectorArray(token *[]string, start int) (Attr, AttrType, int, error) {
 }
 
 func MakeString(token *[]string, start int) (Attr, AttrType, int, error) {
-	s := AttrString((*token)[start+1])
+	s := AttrString((*token)[start+1][1 : len((*token)[start+1])-1])
 	var a Attr = &s
 	return a, TypeString, 2, nil
 }
@@ -1008,7 +1038,10 @@ func MakeStringArray(token *[]string, start int) (Attr, AttrType, int, error) {
 	if err != nil {
 		return nil, TypeInvalid, 0, err
 	}
-	sa := AttrStringArray((*token)[start+2: start+2+numberOfArray])
+	sa := AttrStringArray((*token)[start+2 : start+2+numberOfArray])
+	for i, s := range sa {
+		sa[i] = s[1 : len(s)-1]
+	}
 	var a Attr = &sa
 	return a, TypeStringArray, 2 + numberOfArray, nil
 }
@@ -1024,7 +1057,7 @@ func MakeSphere(token *[]string, start int) (Attr, AttrType, int, error) {
 }
 
 func MakeCone(token *[]string, start int) (Attr, AttrType, int, error) {
-	f, err := ParseFloats((*token)[start+1: start+3]...)
+	f, err := ParseFloats((*token)[start+1 : start+3]...)
 	if err != nil {
 		return nil, TypeInvalid, 0, err
 	}
@@ -1039,7 +1072,7 @@ func MakeCone(token *[]string, start int) (Attr, AttrType, int, error) {
 }
 
 func MakeReflectanceRGB(token *[]string, start int) (Attr, AttrType, int, error) {
-	f, err := ParseFloats((*token)[start+1: start+4]...)
+	f, err := ParseFloats((*token)[start+1 : start+4]...)
 	if err != nil {
 		return nil, TypeInvalid, 0, err
 	}
@@ -1052,7 +1085,7 @@ func MakeReflectanceRGB(token *[]string, start int) (Attr, AttrType, int, error)
 }
 
 func MakeSpectrumRGB(token *[]string, start int) (Attr, AttrType, int, error) {
-	f, err := ParseFloats((*token)[start+1: start+4]...)
+	f, err := ParseFloats((*token)[start+1 : start+4]...)
 	if err != nil {
 		return nil, TypeInvalid, 0, err
 	}
@@ -1070,7 +1103,7 @@ func MakeComponentList(token *[]string, start int) (Attr, AttrType, int, error) 
 		return nil, TypeInvalid, 0, err
 	}
 	var cl AttrComponentList
-	for _, c := range (*token)[start+2: start+2+numberOfArray] {
+	for _, c := range (*token)[start+2 : start+2+numberOfArray] {
 		cl = append(cl, strings.Trim(c, "\""))
 	}
 	var a Attr = &cl
@@ -1099,7 +1132,7 @@ func MakeAttributeAlias(token *[]string, start int) (Attr, AttrType, int, error)
 }
 
 func MakeNurbsCurve(token *[]string, start int) (Attr, AttrType, int, error) {
-	i1, err := ParseInts((*token)[start+1: start+4]...)
+	i1, err := ParseInts((*token)[start+1 : start+4]...)
 	if err != nil {
 		return nil, TypeInvalid, 0, err
 	}
@@ -1113,13 +1146,13 @@ func MakeNurbsCurve(token *[]string, start int) (Attr, AttrType, int, error) {
 	if err != nil {
 		return nil, TypeInvalid, 0, err
 	}
-	i2, err := ParseInts((*token)[start+5: start+7]...)
+	i2, err := ParseInts((*token)[start+5 : start+7]...)
 	if err != nil {
 		return nil, TypeInvalid, 0, err
 	}
 	dimension := i2[0]
 	knotCount := i2[1]
-	kv, err := ParseFloats((*token)[start+7: start+7+knotCount]...)
+	kv, err := ParseFloats((*token)[start+7 : start+7+knotCount]...)
 	if err != nil {
 		return nil, TypeInvalid, 0, err
 	}
@@ -1134,7 +1167,7 @@ func MakeNurbsCurve(token *[]string, start int) (Attr, AttrType, int, error) {
 	if dimension == 3 {
 		divideCv += 1
 	}
-	cv, err := ParseFloats((*token)[start+8+knotCount: start+8+knotCount+(cvCount*divideCv)]...)
+	cv, err := ParseFloats((*token)[start+8+knotCount : start+8+knotCount+(cvCount*divideCv)]...)
 	if err != nil {
 		return nil, TypeInvalid, 0, err
 	}
@@ -1167,7 +1200,7 @@ func MakeNurbsCurve(token *[]string, start int) (Attr, AttrType, int, error) {
 }
 
 func MakeNurbsSurface(token *[]string, start int) (Attr, AttrType, int, error) {
-	i1, err := ParseInts((*token)[start+1: start+5]...)
+	i1, err := ParseInts((*token)[start+1 : start+5]...)
 	if err != nil {
 		return nil, TypeInvalid, 0, err
 	}
@@ -1186,7 +1219,7 @@ func MakeNurbsSurface(token *[]string, start int) (Attr, AttrType, int, error) {
 	if err != nil {
 		return nil, TypeInvalid, 0, err
 	}
-	uKnotValues, err := ParseFloats((*token)[start+7: start+7+uKnotCount]...)
+	uKnotValues, err := ParseFloats((*token)[start+7 : start+7+uKnotCount]...)
 	if err != nil {
 		return nil, TypeInvalid, 0, err
 	}
@@ -1195,7 +1228,7 @@ func MakeNurbsSurface(token *[]string, start int) (Attr, AttrType, int, error) {
 		return nil, TypeInvalid, 0, err
 	}
 	vKnotValues, err := ParseFloats(
-		(*token)[start+9+uKnotCount: start+9+uKnotCount+vKnotCount]...)
+		(*token)[start+9+uKnotCount : start+9+uKnotCount+vKnotCount]...)
 	if err != nil {
 		return nil, TypeInvalid, 0, err
 	}
@@ -1219,7 +1252,7 @@ func MakeNurbsSurface(token *[]string, start int) (Attr, AttrType, int, error) {
 	if isRational {
 		divideCv++
 	}
-	cv, err := ParseFloats((*token)[cvStart+1: cvStart+1+(cvCount*divideCv)]...)
+	cv, err := ParseFloats((*token)[cvStart+1 : cvStart+1+(cvCount*divideCv)]...)
 	if err != nil {
 		return nil, TypeInvalid, 0, err
 	}
@@ -1258,7 +1291,7 @@ func MakeCountInt(token *[]string, start int) ([]int, error) {
 	if err != nil {
 		return nil, err
 	}
-	result, err := ParseInts((*token)[start+1: start+1+count]...)
+	result, err := ParseInts((*token)[start+1 : start+1+count]...)
 	if err != nil {
 		return nil, err
 	}
@@ -1398,7 +1431,7 @@ func MakeMesh(token *[]string, start int) (Attr, AttrType, int, error) {
 }
 
 func MakeLattice(token *[]string, start int) (Attr, AttrType, int, error) {
-	c, err := ParseInts((*token)[start+1: start+5]...)
+	c, err := ParseInts((*token)[start+1 : start+5]...)
 	if err != nil {
 		return nil, TypeInvalid, 0, err
 	}
@@ -1411,7 +1444,7 @@ func MakeLattice(token *[]string, start int) (Attr, AttrType, int, error) {
 	}
 	la[0].Points = make([]AttrLaticePoint, c[3])
 	for i := 0; i < c[3]*3; i += 3 {
-		p, err := ParseFloats((*token)[start+5+i: start+5+i+3]...)
+		p, err := ParseFloats((*token)[start+5+i : start+5+i+3]...)
 		if err != nil {
 			return nil, TypeInvalid, 0, err
 		}
@@ -1610,7 +1643,7 @@ type AttrAttributeAlias struct {
 type AttrFormType int
 
 const (
-	AttrFormOpen     AttrFormType = iota
+	AttrFormOpen AttrFormType = iota
 	AttrFormClosed
 	AttrFormPeriodic
 )
@@ -1683,7 +1716,7 @@ type AttrPolyFaces struct {
 type AttrDPCType int
 
 const (
-	DPCedge   AttrDPCType = iota
+	DPCedge AttrDPCType = iota
 	DPCface
 	DPCvertex
 	DPCuv
