@@ -1427,8 +1427,8 @@ func MakeDataPolyComponent(token *[]string, start int) (Attr, AttrType, int, err
 	return a, TypeDataPolyComponent, 4 + (count * 2), nil
 }
 
-func MakeMesh(token *[]string, start int) (Attr, AttrType, int, error) {
-	// Not Impremented
+func MakeMesh(_ *[]string, _ int) (Attr, AttrType, int, error) {
+	// Not Implement
 	var a Attr
 	return a, TypeMesh, -1, nil
 }
