@@ -1542,12 +1542,14 @@ func TestMakeNurbsSurface(t *testing.T) {
 		(*ns)[0].UForm != AttrFormOpen ||
 		(*ns)[0].VForm != AttrFormOpen ||
 		(*ns)[0].IsRational != false ||
+		len((*ns)[0].UKnotValues) != 6 ||
 		(*ns)[0].UKnotValues[0] != 0 ||
 		(*ns)[0].UKnotValues[1] != 0 ||
 		(*ns)[0].UKnotValues[2] != 0 ||
 		(*ns)[0].UKnotValues[3] != 1 ||
 		(*ns)[0].UKnotValues[4] != 1 ||
 		(*ns)[0].UKnotValues[5] != 1 ||
+		len((*ns)[0].VKnotValues) != 6 ||
 		(*ns)[0].VKnotValues[0] != 0 ||
 		(*ns)[0].VKnotValues[1] != 0 ||
 		(*ns)[0].VKnotValues[2] != 0 ||
@@ -1555,6 +1557,7 @@ func TestMakeNurbsSurface(t *testing.T) {
 		(*ns)[0].VKnotValues[4] != 1 ||
 		(*ns)[0].VKnotValues[5] != 1 ||
 		(*ns)[0].IsTrim != nil ||
+		len((*ns)[0].CvValues) != 16 ||
 		(*ns)[0].CvValues[0].X != -0.5 ||
 		(*ns)[0].CvValues[0].Y != -3.061616997868383e-17 ||
 		(*ns)[0].CvValues[0].Z == nil ||
