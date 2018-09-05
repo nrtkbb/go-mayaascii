@@ -1190,24 +1190,24 @@ func MakeNurbsSurface(token *[]string, start int) (Attr, AttrType, int, error) {
 	if err != nil {
 		return nil, TypeInvalid, 0, err
 	}
-	vKnotCount, err := strconv.Atoi((*token)[start+8+uKnotCount])
+	vKnotCount, err := strconv.Atoi((*token)[start+7+uKnotCount])
 	if err != nil {
 		return nil, TypeInvalid, 0, err
 	}
 	vKnotValues, err := ParseFloats(
-		(*token)[start+9+uKnotCount: start+9+uKnotCount+vKnotCount]...)
+		(*token)[start+8+uKnotCount: start+8+uKnotCount+vKnotCount]...)
 	if err != nil {
 		return nil, TypeInvalid, 0, err
 	}
 	var isTrim *bool
-	if (*token)[start+9+uKnotCount+vKnotCount] == "\"TRIM\"" {
+	if (*token)[start+8+uKnotCount+vKnotCount] == "\"TRIM\"" {
 		v := true
 		isTrim = &v
-	} else if (*token)[start+9+uKnotCount+vKnotCount] == "\"NOTRIM\"" {
+	} else if (*token)[start+8+uKnotCount+vKnotCount] == "\"NOTRIM\"" {
 		v := false
 		isTrim = &v
 	}
-	cvStart := start + 9 + uKnotCount + vKnotCount
+	cvStart := start + 8 + uKnotCount + vKnotCount
 	if isTrim != nil {
 		cvStart++
 	}
@@ -1223,6 +1223,7 @@ func MakeNurbsSurface(token *[]string, start int) (Attr, AttrType, int, error) {
 	if err != nil {
 		return nil, TypeInvalid, 0, err
 	}
+	print(cv, cvCount)
 	cvValue := make([]AttrCvValue, cvCount)
 	for i := 0; i < cvCount; i++ {
 		cvValue[i].X = cv[i*divideCv]
@@ -1232,18 +1233,20 @@ func MakeNurbsSurface(token *[]string, start int) (Attr, AttrType, int, error) {
 			cvValue[i].W = &cv[i*divideCv+3]
 		}
 	}
-	var a Attr = &AttrNurbsSurface{
-		UDegree:     uDegree,
-		VDegree:     vDegree,
-		UForm:       uForm,
-		VForm:       vForm,
-		IsRational:  isRational,
-		UKnotValues: uKnotValues,
-		VKnotValues: vKnotValues,
-		IsTrim:      isTrim,
-		CvValues:    cvValue,
+	var a Attr = &[]AttrNurbsSurface{
+		{
+			UDegree:     uDegree,
+			VDegree:     vDegree,
+			UForm:       uForm,
+			VForm:       vForm,
+			IsRational:  isRational,
+			UKnotValues: uKnotValues,
+			VKnotValues: vKnotValues,
+			IsTrim:      isTrim,
+			CvValues:    cvValue,
+		},
 	}
-	count := start - (cvStart + 1 + (cvCount * divideCv))
+	count := (cvStart + (cvCount * divideCv)) - start
 	return a, TypeNurbsSurface, count, nil
 }
 

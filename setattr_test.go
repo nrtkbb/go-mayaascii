@@ -1456,3 +1456,183 @@ func TestMakeNurbsCurve(t *testing.T) {
 		t.Errorf(msg, "len(Attr)", len(*nc), 1)
 	}
 }
+
+func TestMakeNurbsSurface(t *testing.T) {
+	c := &CmdBuilder{}
+	c.Append(`setAttr ".cc" -type "nurbsSurface"
+		3 3 0 0 no
+		6 0 0 0 1 1 1
+		6 0 0 0 1 1 1
+		16
+		-0.5 -3.061616997868383e-17 0.5
+		-0.5 -1.0205389992894611e-17 0.16666666666666669
+		-0.5 1.0205389992894608e-17 -0.16666666666666663
+		-0.5 3.061616997868383e-17 -0.5
+		-0.16666666666666669 -3.061616997868383e-17 0.5
+		-0.16666666666666669 -1.0205389992894611e-17 0.16666666666666669
+		-0.16666666666666669 1.0205389992894608e-17 -0.16666666666666663
+		-0.16666666666666669 3.061616997868383e-17 -0.5
+		0.16666666666666663 -3.061616997868383e-17 0.5
+		0.16666666666666663 -1.0205389992894611e-17 0.16666666666666669
+		0.16666666666666663 1.0205389992894608e-17 -0.16666666666666663
+		0.16666666666666663 3.061616997868383e-17 -0.5
+		0.5 -3.061616997868383e-17 0.5
+		0.5 -1.0205389992894611e-17 0.16666666666666669
+		0.5 1.0205389992894608e-17 -0.16666666666666663
+		0.5 3.061616997868383e-17 -0.5;`)
+	sa, err := MakeSetAttr(c.Parse(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	msg := `got SetAttr %s %s, wont %s`
+	if sa.AttrType != TypeNurbsSurface {
+		t.Errorf(msg, "AttrType", sa.AttrType, TypeNurbsSurface)
+	}
+	ns, ok := sa.Attr.(*[]AttrNurbsSurface)
+	if !ok ||
+		(*ns)[0].UDegree != 3 ||
+		(*ns)[0].VDegree != 3 ||
+		(*ns)[0].UForm != AttrFormOpen ||
+		(*ns)[0].VForm != AttrFormOpen ||
+		(*ns)[0].IsRational != false ||
+		(*ns)[0].UKnotValues[0] != 0 ||
+		(*ns)[0].UKnotValues[1] != 0 ||
+		(*ns)[0].UKnotValues[2] != 0 ||
+		(*ns)[0].UKnotValues[3] != 1 ||
+		(*ns)[0].UKnotValues[4] != 1 ||
+		(*ns)[0].UKnotValues[5] != 1 ||
+		(*ns)[0].VKnotValues[0] != 0 ||
+		(*ns)[0].VKnotValues[1] != 0 ||
+		(*ns)[0].VKnotValues[2] != 0 ||
+		(*ns)[0].VKnotValues[3] != 1 ||
+		(*ns)[0].VKnotValues[4] != 1 ||
+		(*ns)[0].VKnotValues[5] != 1 ||
+		(*ns)[0].IsTrim != nil ||
+		(*ns)[0].CvValues[0].X != -0.5 ||
+		(*ns)[0].CvValues[0].Y != -3.061616997868383e-17 ||
+		(*ns)[0].CvValues[0].Z == nil ||
+		*(*ns)[0].CvValues[0].Z != 0.5 ||
+		(*ns)[0].CvValues[0].W != nil ||
+		(*ns)[0].CvValues[1].X != -0.5 ||
+		(*ns)[0].CvValues[1].Y != -1.0205389992894611e-17 ||
+		(*ns)[0].CvValues[1].Z == nil ||
+		*(*ns)[0].CvValues[1].Z != 0.16666666666666669 ||
+		(*ns)[0].CvValues[1].W != nil ||
+		(*ns)[0].CvValues[2].X != -0.5 ||
+		(*ns)[0].CvValues[2].Y != 1.0205389992894608e-17 ||
+		(*ns)[0].CvValues[2].Z == nil ||
+		*(*ns)[0].CvValues[2].Z != -0.16666666666666663 ||
+		(*ns)[0].CvValues[2].W != nil ||
+		(*ns)[0].CvValues[3].X != -0.5 ||
+		(*ns)[0].CvValues[3].Y != 3.061616997868383e-17 ||
+		(*ns)[0].CvValues[3].Z == nil ||
+		*(*ns)[0].CvValues[3].Z != -0.5 ||
+		(*ns)[0].CvValues[3].W != nil ||
+		(*ns)[0].CvValues[4].X != -0.16666666666666669 ||
+		(*ns)[0].CvValues[4].Y != -3.061616997868383e-17 ||
+		(*ns)[0].CvValues[4].Z == nil ||
+		*(*ns)[0].CvValues[4].Z != 0.5 ||
+		(*ns)[0].CvValues[4].W != nil ||
+		(*ns)[0].CvValues[5].X != -0.16666666666666669 ||
+		(*ns)[0].CvValues[5].Y != -1.0205389992894611e-17 ||
+		(*ns)[0].CvValues[5].Z == nil ||
+		*(*ns)[0].CvValues[5].Z != 0.16666666666666669 ||
+		(*ns)[0].CvValues[5].W != nil ||
+		(*ns)[0].CvValues[6].X != -0.16666666666666669 ||
+		(*ns)[0].CvValues[6].Y != 1.0205389992894608e-17 ||
+		(*ns)[0].CvValues[6].Z == nil ||
+		*(*ns)[0].CvValues[6].Z != -0.16666666666666663 ||
+		(*ns)[0].CvValues[6].W != nil ||
+		(*ns)[0].CvValues[7].X != -0.16666666666666669 ||
+		(*ns)[0].CvValues[7].Y != 3.061616997868383e-17 ||
+		(*ns)[0].CvValues[7].Z == nil ||
+		*(*ns)[0].CvValues[7].Z != -0.5 ||
+		(*ns)[0].CvValues[7].W != nil ||
+		(*ns)[0].CvValues[8].X != 0.16666666666666663 ||
+		(*ns)[0].CvValues[8].Y != -3.061616997868383e-17 ||
+		(*ns)[0].CvValues[8].Z == nil ||
+		*(*ns)[0].CvValues[8].Z != 0.5 ||
+		(*ns)[0].CvValues[8].W != nil ||
+		(*ns)[0].CvValues[9].X != 0.16666666666666663 ||
+		(*ns)[0].CvValues[9].Y != -1.0205389992894611e-17 ||
+		(*ns)[0].CvValues[9].Z == nil ||
+		*(*ns)[0].CvValues[9].Z != 0.16666666666666669 ||
+		(*ns)[0].CvValues[9].W != nil ||
+		(*ns)[0].CvValues[10].X != 0.16666666666666663 ||
+		(*ns)[0].CvValues[10].Y != 1.0205389992894608e-17 ||
+		(*ns)[0].CvValues[10].Z == nil ||
+		*(*ns)[0].CvValues[10].Z != -0.16666666666666663 ||
+		(*ns)[0].CvValues[10].W != nil ||
+		(*ns)[0].CvValues[11].X != 0.16666666666666663 ||
+		(*ns)[0].CvValues[11].Y != 3.061616997868383e-17 ||
+		(*ns)[0].CvValues[11].Z == nil ||
+		*(*ns)[0].CvValues[11].Z != -0.5 ||
+		(*ns)[0].CvValues[11].W != nil ||
+		(*ns)[0].CvValues[12].X != 0.5 ||
+		(*ns)[0].CvValues[12].Y != -3.061616997868383e-17 ||
+		(*ns)[0].CvValues[12].Z == nil ||
+		*(*ns)[0].CvValues[12].Z != 0.5 ||
+		(*ns)[0].CvValues[12].W != nil ||
+		(*ns)[0].CvValues[13].X != 0.5 ||
+		(*ns)[0].CvValues[13].Y != -1.0205389992894611e-17 ||
+		(*ns)[0].CvValues[13].Z == nil ||
+		*(*ns)[0].CvValues[13].Z != 0.16666666666666669 ||
+		(*ns)[0].CvValues[13].W != nil ||
+		(*ns)[0].CvValues[14].X != 0.5 ||
+		(*ns)[0].CvValues[14].Y != 1.0205389992894608e-17 ||
+		(*ns)[0].CvValues[14].Z == nil ||
+		*(*ns)[0].CvValues[14].Z != -0.16666666666666663 ||
+		(*ns)[0].CvValues[14].W != nil ||
+		(*ns)[0].CvValues[15].X != 0.5 ||
+		(*ns)[0].CvValues[15].Y != 3.061616997868383e-17 ||
+		(*ns)[0].CvValues[15].Z == nil ||
+		*(*ns)[0].CvValues[15].Z != -0.5 ||
+		(*ns)[0].CvValues[15].W != nil {
+		msg := `got SetAttr %s %s, wont %s`
+		plus05 := 0.5
+		plus016 := 0.16666666666666669
+		minus016 := -0.16666666666666663
+		minus05 := -0.5
+		t.Errorf(msg, "Attr", sa.Attr, &[]AttrNurbsSurface{
+			{
+				UDegree:     3,
+				VDegree:     3,
+				UForm:       AttrFormOpen,
+				VForm:       AttrFormOpen,
+				IsRational: false,
+				UKnotValues: []float64{
+					0, 0, 0, 1, 1, 1,
+				},
+				VKnotValues: []float64{
+					0, 0, 0, 1, 1, 1,
+				},
+				IsTrim: nil,
+				CvValues: []AttrCvValue{
+					{ X: -0.5, Y: -3.061616997868383e-17, Z: &plus05, W: nil, },
+					{ X: -0.5, Y: -1.0205389992894611e-17, Z: &plus016, W: nil, },
+					{ X: -0.5, Y: 1.0205389992894611e-17, Z: &minus016, W: nil, },
+					{ X: -0.5, Y: 3.061616997868383e-17, Z: &minus05, W: nil, },
+					{ X: -0.16666666666666669, Y: -3.061616997868383e-17, Z: &plus05, W: nil, },
+					{ X: -0.16666666666666669, Y: -1.0205389992894611e-17, Z: &plus016, W: nil, },
+					{ X: -0.16666666666666669, Y: 1.0205389992894611e-17, Z: &minus016, W: nil, },
+					{ X: -0.16666666666666669, Y: 3.061616997868383e-17, Z: &minus05, W: nil, },
+					{ X: 0.16666666666666663, Y: -3.061616997868383e-17, Z: &plus05, W: nil, },
+					{ X: 0.16666666666666663, Y: -1.0205389992894611e-17, Z: &plus016, W: nil, },
+					{ X: 0.16666666666666663, Y: 1.0205389992894611e-17, Z: &minus016, W: nil, },
+					{ X: 0.16666666666666663, Y: 3.061616997868383e-17, Z: &minus05, W: nil, },
+					{ X: 0.5, Y: -3.061616997868383e-17, Z: &plus05, W: nil, },
+					{ X: 0.5, Y: -1.0205389992894611e-17, Z: &plus016, W: nil, },
+					{ X: 0.5, Y: 1.0205389992894611e-17, Z: &minus016, W: nil, },
+					{ X: 0.5, Y: 3.061616997868383e-17, Z: &minus05, W: nil, },
+				},
+			},
+		})
+	}
+	if len(*ns) != 1 {
+		t.Errorf(msg, "len(Attr)", len(*ns), 1)
+	}
+}
+
+func TestMakeNurbsTrimface(t *testing.T) {
+
+}
