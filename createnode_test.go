@@ -1,4 +1,4 @@
-package main
+package mayaascii
 
 import "testing"
 
@@ -8,7 +8,7 @@ func TestMakeCreateNode_Min(t *testing.T) {
 	cn := MakeCreateNode(c.Parse())
 	msg := `got CreateNode %s "%s", wont "%s"`
 	if cn.NodeType != "transform" {
-		t.Errorf(msg, "NodeType", cn.NodeName, "transform")
+		t.Errorf(msg, "NodeType", cn.NodeType, "transform")
 	}
 	if cn.NodeName != "nodeName" {
 		t.Errorf(msg, "NodeName", cn.NodeName, "nodeName")
