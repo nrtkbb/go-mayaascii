@@ -90,6 +90,10 @@ func TestMakeSetAttr_int(t *testing.T) {
 	if sa.AttrType != TypeInt {
 		t.Errorf(msg, "AttrType", sa.AttrType, TypeInt)
 	}
+	i, ok = sa.Attr.(*[]int)
+	if !ok {
+		t.Fatal("Can not cast *[]int")
+	}
 	if len(*i) != 4 {
 		t.Errorf(msg, "len(Attr)", len(*i), 4)
 	}
@@ -127,6 +131,9 @@ func TestMakeSetAttr_int_toDouble_toInt(t *testing.T) {
 		t.Errorf(msg, "AttrType", sa.AttrType, TypeDouble)
 	}
 	f, ok := sa.Attr.(*[]float64)
+	if !ok {
+		t.Fatal("Can not cast to *[]float64")
+	}
 	if len(*f) != 5 {
 		t.Errorf(msg, "len(Attr)", len(*f), 5)
 	}
@@ -246,6 +253,10 @@ func TestMakeSetAttr_double(t *testing.T) {
 	sa, err = MakeSetAttr(c.Parse(), sa)
 	if sa.AttrType != TypeDouble {
 		t.Errorf(msg, "AttrType", sa.AttrType, TypeDouble)
+	}
+	f, ok = sa.Attr.(*[]float64)
+	if !ok {
+		t.Fatalf("Can not cast to *[]float64. sa.Attr type is %T\n", sa.Attr)
 	}
 	if len(*f) != 4 {
 		t.Errorf(msg, "len(Attr)", len(*f), 4)
@@ -873,7 +884,11 @@ func TestMakeSetAttr_pointArray(t *testing.T) {
 
 func TestMakeSetAttr_polyFaces(t *testing.T) {
 	c := &CmdBuilder{}
-	c.Append(`setAttr -s 2 ".attrName" -type "polyFaces" f 3 1 2 3 mc 1 3 0 1 2 f 3 2 3 4 mc 2 3 2 3 4;`)
+	c.Append(`setAttr -s 2 ".attrName" -type "polyFaces"
+f 3 1 2 3
+mc 1 3 0 1 2
+f 3 2 3 4
+mc 2 3 2 3 4;`)
 	sa, err := MakeSetAttr(c.Parse(), nil)
 	if err != nil {
 		t.Fatal(err)
@@ -1645,10 +1660,10 @@ func TestMakeNurbsSurface(t *testing.T) {
 		minus05 := -0.5
 		t.Errorf(msg, "Attr", sa.Attr, &[]AttrNurbsSurface{
 			{
-				UDegree:     3,
-				VDegree:     3,
-				UForm:       AttrFormOpen,
-				VForm:       AttrFormOpen,
+				UDegree:    3,
+				VDegree:    3,
+				UForm:      AttrFormOpen,
+				VForm:      AttrFormOpen,
 				IsRational: false,
 				UKnotValues: []float64{
 					0, 0, 0, 1, 1, 1,
@@ -1658,22 +1673,22 @@ func TestMakeNurbsSurface(t *testing.T) {
 				},
 				IsTrim: nil,
 				CvValues: []AttrCvValue{
-					{ X: -0.5, Y: -3.061616997868383e-17, Z: &plus05, W: nil, },
-					{ X: -0.5, Y: -1.0205389992894611e-17, Z: &plus016, W: nil, },
-					{ X: -0.5, Y: 1.0205389992894611e-17, Z: &minus016, W: nil, },
-					{ X: -0.5, Y: 3.061616997868383e-17, Z: &minus05, W: nil, },
-					{ X: -0.16666666666666669, Y: -3.061616997868383e-17, Z: &plus05, W: nil, },
-					{ X: -0.16666666666666669, Y: -1.0205389992894611e-17, Z: &plus016, W: nil, },
-					{ X: -0.16666666666666669, Y: 1.0205389992894611e-17, Z: &minus016, W: nil, },
-					{ X: -0.16666666666666669, Y: 3.061616997868383e-17, Z: &minus05, W: nil, },
-					{ X: 0.16666666666666663, Y: -3.061616997868383e-17, Z: &plus05, W: nil, },
-					{ X: 0.16666666666666663, Y: -1.0205389992894611e-17, Z: &plus016, W: nil, },
-					{ X: 0.16666666666666663, Y: 1.0205389992894611e-17, Z: &minus016, W: nil, },
-					{ X: 0.16666666666666663, Y: 3.061616997868383e-17, Z: &minus05, W: nil, },
-					{ X: 0.5, Y: -3.061616997868383e-17, Z: &plus05, W: nil, },
-					{ X: 0.5, Y: -1.0205389992894611e-17, Z: &plus016, W: nil, },
-					{ X: 0.5, Y: 1.0205389992894611e-17, Z: &minus016, W: nil, },
-					{ X: 0.5, Y: 3.061616997868383e-17, Z: &minus05, W: nil, },
+					{X: -0.5, Y: -3.061616997868383e-17, Z: &plus05, W: nil,},
+					{X: -0.5, Y: -1.0205389992894611e-17, Z: &plus016, W: nil,},
+					{X: -0.5, Y: 1.0205389992894611e-17, Z: &minus016, W: nil,},
+					{X: -0.5, Y: 3.061616997868383e-17, Z: &minus05, W: nil,},
+					{X: -0.16666666666666669, Y: -3.061616997868383e-17, Z: &plus05, W: nil,},
+					{X: -0.16666666666666669, Y: -1.0205389992894611e-17, Z: &plus016, W: nil,},
+					{X: -0.16666666666666669, Y: 1.0205389992894611e-17, Z: &minus016, W: nil,},
+					{X: -0.16666666666666669, Y: 3.061616997868383e-17, Z: &minus05, W: nil,},
+					{X: 0.16666666666666663, Y: -3.061616997868383e-17, Z: &plus05, W: nil,},
+					{X: 0.16666666666666663, Y: -1.0205389992894611e-17, Z: &plus016, W: nil,},
+					{X: 0.16666666666666663, Y: 1.0205389992894611e-17, Z: &minus016, W: nil,},
+					{X: 0.16666666666666663, Y: 3.061616997868383e-17, Z: &minus05, W: nil,},
+					{X: 0.5, Y: -3.061616997868383e-17, Z: &plus05, W: nil,},
+					{X: 0.5, Y: -1.0205389992894611e-17, Z: &plus016, W: nil,},
+					{X: 0.5, Y: 1.0205389992894611e-17, Z: &minus016, W: nil,},
+					{X: 0.5, Y: 3.061616997868383e-17, Z: &minus05, W: nil,},
 				},
 			},
 		})
