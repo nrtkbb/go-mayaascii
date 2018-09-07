@@ -396,6 +396,13 @@ func fixSizeOver(end int, token *[]string) int {
 	return end
 }
 
+var PrimitiveTypes = map[AttrType]struct{}{
+	TypeInvalid: struct{}{},
+	TypeBool:    struct{}{},
+	TypeInt:     struct{}{},
+	TypeDouble:  struct{}{},
+}
+
 func MakeSetAttr(cmd *Cmd, beforeSetAttr *SetAttr) (*SetAttr, error) {
 	attrNameIdx, attrName := getAttrNameFromSetAttr(&cmd.Token)
 	sa := &SetAttr{Cmd: cmd}
@@ -464,22 +471,14 @@ func MakeSetAttr(cmd *Cmd, beforeSetAttr *SetAttr) (*SetAttr, error) {
 			sa.Size = &us
 		case "-type":
 			i++
-			a, t, count, err := MakeAttr(&sa.Token, i, sa.Size)
+			attrType, err := MakeAttrType(&sa.Token, i)
 			if err != nil {
 				return nil, err
 			}
-			log.Printf("%T, ", a)
-			log.Println(a, t, count, sa.Attr)
-			sa.AttrType = t
-			sa.Attr = appendSetAttr(sa.Attr, a)
-			if count == -1 {
-				break
-			}
-			i += count
+			sa.AttrType = attrType
 		default:
-			if sa.AttrType != TypeInvalid {
-				a, _, count, err := MakeAttrType(&sa.Token, i, sa.Size, sa.AttrType)
-				log.Println(count, i)
+			if _, ok := PrimitiveTypes[sa.AttrType]; !ok {
+				a, count, err := MakeAttr(&sa.Token, i, sa.Size, sa.AttrType)
 				if err != nil {
 					log.Println(sa.Token)
 					log.Println(i)
@@ -549,8 +548,6 @@ func appendSetAttr(beforeAttr Attr, newAttr Attr) Attr {
 	if beforeAttr == nil {
 		return newAttr
 	}
-	log.Printf("old Attr Type is %T", beforeAttr)
-	log.Printf("new Attr Type is %T", newAttr)
 	switch newAttr.(type) {
 	case *[]int:
 		beforeInt, _ := beforeAttr.(*[]int)
@@ -558,16 +555,9 @@ func appendSetAttr(beforeAttr Attr, newAttr Attr) Attr {
 		*beforeInt = append(*beforeInt, *newInt...)
 		return beforeInt
 	case *[]float64:
-		log.Println("hogehoge")
-		beforeFloat, ok := beforeAttr.(*[]float64)
-		if !ok {
-			log.Printf("before type is %T\nnew type is %T", beforeAttr, newAttr)
-		}
-		log.Println("hogehoge")
+		beforeFloat, _ := beforeAttr.(*[]float64)
 		newFloat, _ := newAttr.(*[]float64)
-		log.Println("hogehoge")
 		*beforeFloat = append(*beforeFloat, (*newFloat)...)
-		log.Println("hogehoge")
 		return beforeFloat
 	case *[]AttrShort2:
 		beforeShort2, _ := beforeAttr.(*[]AttrShort2)
@@ -759,78 +749,78 @@ func ParseFloats(token ...string) ([]float64, error) {
 	return result, nil
 }
 
-func MakeShort2Long2(token *[]string, start int, size *uint, at *AttrType) (Attr, AttrType, int, error) {
+func MakeShort2Long2(token *[]string, start int, size *uint, at *AttrType) (Attr, int, error) {
 	var end int
 	if size != nil {
-		end = fixSizeOver(start+1+(2*int(*size)), token)
+		end = fixSizeOver(start+(2*int(*size)), token)
 	} else {
-		end = start + 1 + 2
+		end = start + 2
 	}
-	v, err := ParseInts((*token)[start+1 : end]...)
+	v, err := ParseInts((*token)[start : end]...)
 	if err != nil {
-		return nil, TypeInvalid, 0, err
+		return nil, 0, err
 	}
-	if at != nil && *at == TypeShort2 || (*token)[start] == "\"short2\"" {
-		s2 := make([]AttrShort2, (end-start-1)/2)
+	if at != nil && *at == TypeShort2 {
+		s2 := make([]AttrShort2, (end-start)/2)
 		for i := 0; i < len(s2); i++ {
 			s2[i][0] = v[i*2]
 			s2[i][1] = v[i*2+1]
 		}
 		var a Attr = &s2
-		return a, TypeShort2, end - start, nil
+		return a, end - start, nil
 	} else {
-		l2 := make([]AttrLong2, (end-start-1)/2)
+		l2 := make([]AttrLong2, (end-start)/2)
 		for i := 0; i < len(l2); i++ {
 			l2[i][0] = v[i*2]
 			l2[i][1] = v[i*2+1]
 		}
 		var a Attr = &l2
-		return a, TypeLong2, end - start, nil
+		return a, end - start, nil
 	}
 }
 
-func MakeShort3Long3(token *[]string, start int, size *uint, at *AttrType) (Attr, AttrType, int, error) {
+func MakeShort3Long3(token *[]string, start int, size *uint, at *AttrType) (Attr, int, error) {
 	var end int
 	if size != nil {
-		end = fixSizeOver(start+1+(3*int(*size)), token)
+		end = fixSizeOver(start+(3*int(*size)), token)
 	} else {
-		end = start + 1 + 3
+		end = start + 3
 	}
-	v, err := ParseInts((*token)[start+1 : end]...)
+	v, err := ParseInts((*token)[start : end]...)
 	if err != nil {
-		return nil, TypeInvalid, 0, err
+		return nil, 0, err
 	}
-	if at != nil && *at == TypeShort3 || (*token)[start] == "\"short3\"" {
-		s3 := make([]AttrShort3, (end-start-1)/3)
+	if at != nil && *at == TypeShort3 {
+		s3 := make([]AttrShort3, (end-start)/3)
 		for i := 0; i < len(s3); i++ {
 			s3[i][0] = v[i*3]
 			s3[i][1] = v[i*3+1]
 			s3[i][2] = v[i*3+2]
 		}
 		var a Attr = &s3
-		return a, TypeShort3, end - start, nil
+		return a, end - start, nil
 	} else {
-		l3 := make([]AttrLong3, (end-start-1)/3)
+		l3 := make([]AttrLong3, (end-start)/3)
 		for i := 0; i < len(l3); i++ {
 			l3[i][0] = v[i*3]
 			l3[i][1] = v[i*3+1]
 			l3[i][2] = v[i*3+2]
 		}
 		var a Attr = &l3
-		return a, TypeLong3, end - start, nil
+		return a, end - start, nil
 	}
 }
 
-func MakeInt32Array(token *[]string, start int) (Attr, AttrType, int, error) {
-	numberOfArray, err := strconv.Atoi((*token)[start+1])
+func MakeInt32Array(token *[]string, start int) (Attr, int, error) {
+	numberOfArray, err := strconv.Atoi((*token)[start])
 	if err != nil {
-		return nil, TypeInvalid, 0, err
+		return nil, 0, err
 	}
 	var a Attr
 	if numberOfArray != 0 {
-		result, err := ParseInts((*token)[start+2 : start+2+numberOfArray]...)
+		result, err := ParseInts((*token)[start+1 : start+1+numberOfArray]...)
 		if err != nil {
-			return nil, TypeInvalid, 0, err
+			return nil, 0, err
 		}
 		ia := AttrInt32Array(result)
 		a = &ia
@@ -838,81 +828,81 @@ func MakeInt32Array(token *[]string, start int) (Attr, AttrType, int, error) {
 		ia := AttrInt32Array{}
 		a = &ia
 	}
-	return a, TypeInt32Array, 2 + numberOfArray, nil
+	return a, 1 + numberOfArray, nil
 }
 
-func MakeFloat2Double2(token *[]string, start int, size *uint, at *AttrType) (Attr, AttrType, int, error) {
+func MakeFloat2Double2(token *[]string, start int, size *uint, at *AttrType) (Attr, int, error) {
 	var end int
 	if size != nil {
-		end = fixSizeOver(start+1+(2*int(*size)), token)
+		end = fixSizeOver(start+(2*int(*size)), token)
 	} else {
-		end = start + 1 + 2
+		end = start + 2
 	}
-	v, err := ParseFloats((*token)[start+1 : end]...)
+	v, err := ParseFloats((*token)[start : end]...)
 	if err != nil {
-		return nil, TypeInvalid, 0, err
+		return nil, 0, err
 	}
-	if at != nil && *at == TypeFloat2 || (*token)[start] == "\"float2\"" {
-		f2 := make([]AttrFloat2, (end-start-1)/2)
+	if at != nil && *at == TypeFloat2 {
+		f2 := make([]AttrFloat2, (end-start)/2)
 		for i := 0; i < len(f2); i++ {
 			f2[i][0] = v[i*2]
 			f2[i][1] = v[i*2+1]
 		}
 		var a Attr = &f2
-		return a, TypeFloat2, end - start, nil
+		return a, end - start, nil
 	} else {
-		d2 := make([]AttrDouble2, (end-start-1)/2)
+		d2 := make([]AttrDouble2, (end-start)/2)
 		for i := 0; i < len(d2); i++ {
 			d2[i][0] = v[i*2]
 			d2[i][1] = v[i*2+1]
 		}
 		var a Attr = &d2
-		return a, TypeDouble2, end - start, nil
+		return a, end - start, nil
 	}
 }
 
-func MakeFloat3Double3(token *[]string, start int, size *uint, at *AttrType) (Attr, AttrType, int, error) {
+func MakeFloat3Double3(token *[]string, start int, size *uint, at *AttrType) (Attr, int, error) {
 	var end int
 	if size != nil {
-		end = fixSizeOver(start+1+(3*int(*size)), token)
+		end = fixSizeOver(start+(3*int(*size)), token)
 	} else {
-		end = start + 1 + 3
+		end = start + 3
 	}
-	v, err := ParseFloats((*token)[start+1 : end]...)
+	v, err := ParseFloats((*token)[start : end]...)
 	if err != nil {
-		return nil, TypeInvalid, 0, err
+		return nil, 0, err
 	}
-	if at != nil && *at == TypeFloat3 || (*token)[start] == "\"float3\"" {
-		f3 := make([]AttrFloat3, (end-start-1)/3)
+	if at != nil && *at == TypeFloat3 {
+		f3 := make([]AttrFloat3, (end-start)/3)
 		for i := 0; i < len(f3); i++ {
 			f3[i][0] = v[i*3]
 			f3[i][1] = v[i*3+1]
 			f3[i][2] = v[i*3+2]
 		}
 		var a Attr = &f3
-		return a, TypeFloat3, end - start, nil
+		return a, end - start, nil
 	} else {
-		d3 := make([]AttrDouble3, (end-start-1)/3)
+		d3 := make([]AttrDouble3, (end-start)/3)
 		for i := 0; i < len(d3); i++ {
 			d3[i][0] = v[i*3]
 			d3[i][1] = v[i*3+1]
 			d3[i][2] = v[i*3+2]
 		}
 		var a Attr = &d3
-		return a, TypeDouble3, end - start, nil
+		return a, end - start, nil
 	}
 }
 
-func MakeDoubleArray(token *[]string, start int) (Attr, AttrType, int, error) {
-	numberOfArray, err := strconv.Atoi((*token)[start+1])
+func MakeDoubleArray(token *[]string, start int) (Attr, int, error) {
+	numberOfArray, err := strconv.Atoi((*token)[start])
 	if err != nil {
-		return nil, TypeInvalid, 0, err
+		return nil, 0, err
 	}
 	var a Attr
 	if numberOfArray != 0 {
-		f, err := ParseFloats((*token)[start+2 : start+2+numberOfArray]...)
+		f, err := ParseFloats((*token)[start+1 : start+1+numberOfArray]...)
 		if err != nil {
-			return nil, TypeInvalid, 0, err
+			return nil, 0, err
 		}
 		da := AttrDoubleArray(f)
 		a = &da
@@ -920,17 +910,13 @@ func MakeDoubleArray(token *[]string, start int) (Attr, AttrType, int, error) {
 		da := AttrDoubleArray{}
 		a = &da
 	}
-	return a, TypeDoubleArray, 2 + numberOfArray, nil
+	return a, 1 + numberOfArray, nil
 }
 
-func MakeMatrix(token *[]string, start int) (Attr, AttrType, int, error) {
-	first := (*token)[start+1]
-	if first == "\"xform\"" {
-		return MakeMatrixXform(token, start)
-	}
-	mat4x4, err := ParseFloats((*token)[start+1 : start+17]...)
+func MakeMatrix(token *[]string, start int) (Attr, int, error) {
+	mat4x4, err := ParseFloats((*token)[start : start+16]...)
 	if err != nil {
-		return nil, TypeInvalid, 0, err
+		return nil, 0, err
 	}
 	var a Attr = &AttrMatrix{
 		mat4x4[0], mat4x4[1], mat4x4[2], mat4x4[3],
@@ -938,10 +924,10 @@ func MakeMatrix(token *[]string, start int) (Attr, AttrType, int, error) {
 		mat4x4[8], mat4x4[9], mat4x4[10], mat4x4[11],
 		mat4x4[12], mat4x4[13], mat4x4[14], mat4x4[15],
 	}
-	return a, TypeMatrix, 17, nil
+	return a, 16, nil
 }
 
-func MakeMatrixXform(token *[]string, start int) (Attr, AttrType, int, error) {
+func MakeMatrixXform(token *[]string, start int) (Attr, int, error) {
 	// type:
 	// string double double double
 	// double double double
@@ -970,17 +956,17 @@ func MakeMatrixXform(token *[]string, start int) (Attr, AttrType, int, error) {
 	// jointOrientW jointOrientX jointOrientY jointOrientZ
 	// inverseParentScaleX inverseParentScaleY inverseParentScaleZ
 	// compensateForParentScale
-	floats, err := ParseFloats((*token)[start+2 : start+38]...)
+	floats, err := ParseFloats((*token)[start+1 : start+37]...)
 	if err != nil {
-		return nil, TypeInvalid, 0, err
+		return nil, 0, err
 	}
 	rotateOrder, err := ConvertAttrRotateOrder(int(floats[6]))
 	if err != nil {
-		return nil, TypeInvalid, 0, err
+		return nil, 0, err
 	}
-	componentForParentScale, err := isOnYesOrOffNo((*token)[start+38])
+	componentForParentScale, err := isOnYesOrOffNo((*token)[start+37])
 	if err != nil {
-		return nil, TypeInvalid, 0, err
+		return nil, 0, err
 	}
 	mx := AttrMatrixXform{
 		Scale:                    AttrVector{floats[0], floats[1], floats[2]},
@@ -998,19 +984,19 @@ func MakeMatrixXform(token *[]string, start int) (Attr, AttrType, int, error) {
 		CompensateForParentScale: componentForParentScale,
 	}
 	var a Attr = &mx
-	return a, TypeMatrixXform, 39, nil
+	return a, 38, nil
 }
 
-func MakePointArray(token *[]string, start int) (Attr, AttrType, int, error) {
-	numberOfArray, err := strconv.Atoi((*token)[start+1])
+func MakePointArray(token *[]string, start int) (Attr, int, error) {
+	numberOfArray, err := strconv.Atoi((*token)[start])
 	if err != nil {
-		return nil, TypeInvalid, 0, err
+		return nil, 0, err
 	}
 	var a Attr
 	if numberOfArray != 0 {
-		f, err := ParseFloats((*token)[start+2 : start+2+(numberOfArray*4)]...)
+		f, err := ParseFloats((*token)[start+1 : start+1+(numberOfArray*4)]...)
 		if err != nil {
-			return nil, TypeInvalid, 0, err
+			return nil, 0, err
 		}
 		pa := make([]AttrPoint, numberOfArray)
 		for i := 0; i < numberOfArray; i++ {
@@ -1025,19 +1011,19 @@ func MakePointArray(token *[]string, start int) (Attr, AttrType, int, error) {
 		paa := AttrPointArray{}
 		a = &paa
 	}
-	return a, TypePointArray, 2 + (numberOfArray * 4), nil
+	return a, 1 + (numberOfArray * 4), nil
 }
 
-func MakeVectorArray(token *[]string, start int) (Attr, AttrType, int, error) {
-	numberOfArray, err := strconv.Atoi((*token)[start+1])
+func MakeVectorArray(token *[]string, start int) (Attr, int, error) {
+	numberOfArray, err := strconv.Atoi((*token)[start])
 	if err != nil {
-		return nil, TypeInvalid, 0, err
+		return nil, 0, err
 	}
 	var a Attr
 	if numberOfArray != 0 {
-		f, err := ParseFloats((*token)[start+2 : start+2+numberOfArray]...)
+		f, err := ParseFloats((*token)[start+1 : start+1+numberOfArray]...)
 		if err != nil {
-			return nil, TypeInvalid, 0, err
+			return nil, 0, err
 		}
 		va := make([]AttrVector, numberOfArray)
 		for i := 0; i < numberOfArray; i += 3 {
@@ -1053,42 +1039,42 @@ func MakeVectorArray(token *[]string, start int) (Attr, AttrType, int, error) {
 		vaa := AttrVectorArray{}
 		a = &vaa
 	}
-	return a, TypeVectorArray, 2 + (numberOfArray * 3), nil
+	return a, 1 + (numberOfArray * 3), nil
 }
 
-func MakeString(token *[]string, start int) (Attr, AttrType, int, error) {
-	s := AttrString((*token)[start+1][1 : len((*token)[start+1])-1])
+func MakeString(token *[]string, start int) (Attr, int, error) {
+	s := AttrString((*token)[start][1 : len((*token)[start])-1])
 	var a Attr = &s
-	return a, TypeString, 2, nil
+	return a, 1, nil
 }
 
-func MakeStringArray(token *[]string, start int) (Attr, AttrType, int, error) {
-	numberOfArray, err := strconv.Atoi((*token)[start+1])
+func MakeStringArray(token *[]string, start int) (Attr, int, error) {
+	numberOfArray, err := strconv.Atoi((*token)[start])
 	if err != nil {
-		return nil, TypeInvalid, 0, err
+		return nil, 0, err
 	}
-	sa := AttrStringArray((*token)[start+2 : start+2+numberOfArray])
+	sa := AttrStringArray((*token)[start+1 : start+1+numberOfArray])
 	for i, s := range sa {
 		sa[i] = s[1 : len(s)-1]
 	}
 	var a Attr = &sa
-	return a, TypeStringArray, 2 + numberOfArray, nil
+	return a, 1 + numberOfArray, nil
 }
 
-func MakeSphere(token *[]string, start int) (Attr, AttrType, int, error) {
-	s, err := strconv.ParseFloat((*token)[start+1], 64)
+func MakeSphere(token *[]string, start int) (Attr, int, error) {
+	s, err := strconv.ParseFloat((*token)[start], 64)
 	if err != nil {
-		return nil, TypeInvalid, 0, err
+		return nil, 0, err
 	}
 	sp := AttrSphere(s)
 	var a Attr = &sp
-	return a, TypeSphere, 2, nil
+	return a, 1, nil
 }
 
-func MakeCone(token *[]string, start int) (Attr, AttrType, int, error) {
-	f, err := ParseFloats((*token)[start+1 : start+3]...)
+func MakeCone(token *[]string, start int) (Attr, int, error) {
+	f, err := ParseFloats((*token)[start : start+2]...)
 	if err != nil {
-		return nil, TypeInvalid, 0, err
+		return nil, 0, err
 	}
 	c := []AttrCone{
 		{
@@ -1097,57 +1083,54 @@ func MakeCone(token *[]string, start int) (Attr, AttrType, int, error) {
 		},
 	}
 	var a Attr = &c
-	return a, TypeCone, 3, nil
+	return a, 2, nil
 }
 
-func MakeReflectanceRGB(token *[]string, start int) (Attr, AttrType, int, error) {
-	f, err := ParseFloats((*token)[start+1 : start+4]...)
+func MakeReflectanceRGB(token *[]string, start int) (Attr, int, error) {
+	f, err := ParseFloats((*token)[start : start+3]...)
 	if err != nil {
-		return nil, TypeInvalid, 0, err
+		return nil, 0, err
 	}
 	var a Attr = &AttrReflectanceRGB{
 		RedReflect:   f[0],
 		GreenReflect: f[1],
 		BlueReflect:  f[2],
 	}
-	return a, TypeReflectanceRGB, 4, nil
+	return a, 3, nil
 }
 
-func MakeSpectrumRGB(token *[]string, start int) (Attr, AttrType, int, error) {
-	f, err := ParseFloats((*token)[start+1 : start+4]...)
+func MakeSpectrumRGB(token *[]string, start int) (Attr, int, error) {
+	f, err := ParseFloats((*token)[start : start+3]...)
 	if err != nil {
-		return nil, TypeInvalid, 0, err
+		return nil, 0, err
 	}
 	var a Attr = &AttrSpectrumRGB{
 		RedSpectrum:   f[0],
 		GreenSpectrum: f[1],
 		BlueSpectrum:  f[2],
 	}
-	return a, TypeSpectrumRGB, 4, nil
+	return a, 3, nil
 }
 
-func MakeComponentList(token *[]string, start int) (Attr, AttrType, int, error) {
-	numberOfArray, err := strconv.Atoi((*token)[start+1])
+func MakeComponentList(token *[]string, start int) (Attr, int, error) {
+	numberOfArray, err := strconv.Atoi((*token)[start])
 	if err != nil {
-		return nil, TypeInvalid, 0, err
+		return nil, 0, err
 	}
 	var cl AttrComponentList
-	for _, c := range (*token)[start+2 : start+2+numberOfArray] {
+	for _, c := range (*token)[start+1 : start+1+numberOfArray] {
 		cl = append(cl, strings.Trim(c, "\""))
 	}
 	var a Attr = &cl
-	return a, TypeComponentList, 2 + numberOfArray, nil
+	return a, 1 + numberOfArray, nil
 }
 
-func MakeAttributeAlias(token *[]string, start int) (Attr, AttrType, int, error) {
-	if (*token)[start+1] != "{" {
-		return nil,
-			TypeInvalid,
-			0,
-			errors.New("there was no necessary token")
+func MakeAttributeAlias(token *[]string, start int) (Attr, int, error) {
+	if (*token)[start] != "{" {
+		return nil, 0, errors.New("there was no necessary token")
 	}
 	var aaa []AttrAttributeAlias
-	for i := start + 2; i < len(*token); i += 2 {
+	for i := start + 1; i < len(*token); i += 2 {
 		if (*token)[i] == "}" {
 			break
 		}
@@ -1157,37 +1140,37 @@ func MakeAttributeAlias(token *[]string, start int) (Attr, AttrType, int, error)
 		})
 	}
 	var a Attr = &aaa
-	return a, TypeAttributeAlias, 3 + (len(aaa) * 2), nil
+	return a, 2 + (len(aaa) * 2), nil
 }
 
-func MakeNurbsCurve(token *[]string, start int) (Attr, AttrType, int, error) {
-	i1, err := ParseInts((*token)[start+1 : start+4]...)
+func MakeNurbsCurve(token *[]string, start int) (Attr, int, error) {
+	i1, err := ParseInts((*token)[start : start+3]...)
 	if err != nil {
-		return nil, TypeInvalid, 0, err
+		return nil, 0, err
 	}
 	degree := i1[0]
 	spans := i1[1]
 	form, err := ConvertAttrFormType(i1[2]) // open(0), closed(1), periodic(2)
 	if err != nil {
-		return nil, TypeInvalid, 0, err
+		return nil, 0, err
 	}
-	isRational, err := isOnYesOrOffNo((*token)[start+4])
+	isRational, err := isOnYesOrOffNo((*token)[start+3])
 	if err != nil {
-		return nil, TypeInvalid, 0, err
+		return nil, 0, err
 	}
-	i2, err := ParseInts((*token)[start+5 : start+7]...)
+	i2, err := ParseInts((*token)[start+4 : start+6]...)
 	if err != nil {
-		return nil, TypeInvalid, 0, err
+		return nil, 0, err
 	}
 	dimension := i2[0]
 	knotCount := i2[1]
-	kv, err := ParseFloats((*token)[start+7 : start+7+knotCount]...)
+	kv, err := ParseFloats((*token)[start+6 : start+6+knotCount]...)
 	if err != nil {
-		return nil, TypeInvalid, 0, err
+		return nil, 0, err
 	}
-	cvCount, err := strconv.Atoi((*token)[start+7+knotCount])
+	cvCount, err := strconv.Atoi((*token)[start+6+knotCount])
 	if err != nil {
-		return nil, TypeInvalid, 0, err
+		return nil, 0, err
 	}
 	divideCv := 2
 	if isRational {
@@ -1196,9 +1179,9 @@ func MakeNurbsCurve(token *[]string, start int) (Attr, AttrType, int, error) {
 	if dimension == 3 {
 		divideCv += 1
 	}
-	cv, err := ParseFloats((*token)[start+8+knotCount : start+8+knotCount+(cvCount*divideCv)]...)
+	cv, err := ParseFloats((*token)[start+7+knotCount : start+7+knotCount+(cvCount*divideCv)]...)
 	if err != nil {
-		return nil, TypeInvalid, 0, err
+		return nil, 0, err
 	}
 	cvValues := make([]AttrCvValue, len(cv)/divideCv)
 	for i := 0; i < cvCount; i++ {
@@ -1224,58 +1207,58 @@ func MakeNurbsCurve(token *[]string, start int) (Attr, AttrType, int, error) {
 		KnotValues: kv,
 		CvValues:   cvValues,
 	}}
-	count := 8 + knotCount + (cvCount * divideCv)
-	return a, TypeNurbsCurve, count, nil
+	count := 7 + knotCount + (cvCount * divideCv)
+	return a, count, nil
 }
 
-func MakeNurbsSurface(token *[]string, start int) (Attr, AttrType, int, error) {
-	i1, err := ParseInts((*token)[start+1 : start+5]...)
+func MakeNurbsSurface(token *[]string, start int) (Attr, int, error) {
+	i1, err := ParseInts((*token)[start : start+4]...)
 	if err != nil {
-		return nil, TypeInvalid, 0, err
+		return nil, 0, err
 	}
 	uDegree := i1[0]
 	vDegree := i1[1]
 	uForm, err := ConvertAttrFormType(i1[2])
 	if err != nil {
-		return nil, TypeInvalid, 0, err
+		return nil, 0, err
 	}
 	vForm, err := ConvertAttrFormType(i1[3])
 	if err != nil {
-		return nil, TypeInvalid, 0, err
+		return nil, 0, err
 	}
-	isRational, err := isOnYesOrOffNo((*token)[start+5])
-	uKnotCount, err := strconv.Atoi((*token)[start+6])
+	isRational, err := isOnYesOrOffNo((*token)[start+4])
+	uKnotCount, err := strconv.Atoi((*token)[start+5])
 	if err != nil {
-		return nil, TypeInvalid, 0, err
+		return nil, 0, err
 	}
-	uKnotValues, err := ParseFloats((*token)[start+7 : start+7+uKnotCount]...)
+	uKnotValues, err := ParseFloats((*token)[start+6 : start+6+uKnotCount]...)
 	if err != nil {
-		return nil, TypeInvalid, 0, err
+		return nil, 0, err
 	}
-	vKnotCount, err := strconv.Atoi((*token)[start+7+uKnotCount])
+	vKnotCount, err := strconv.Atoi((*token)[start+6+uKnotCount])
 	if err != nil {
-		return nil, TypeInvalid, 0, err
+		return nil, 0, err
 	}
 	vKnotValues, err := ParseFloats(
-		(*token)[start+8+uKnotCount: start+8+uKnotCount+vKnotCount]...)
+		(*token)[start+7+uKnotCount : start+7+uKnotCount+vKnotCount]...)
 	if err != nil {
-		return nil, TypeInvalid, 0, err
+		return nil, 0, err
 	}
 	var isTrim *bool
-	if (*token)[start+8+uKnotCount+vKnotCount] == "\"TRIM\"" {
+	if (*token)[start+7+uKnotCount+vKnotCount] == "\"TRIM\"" {
 		v := true
 		isTrim = &v
-	} else if (*token)[start+8+uKnotCount+vKnotCount] == "\"NOTRIM\"" {
+	} else if (*token)[start+7+uKnotCount+vKnotCount] == "\"NOTRIM\"" {
 		v := false
 		isTrim = &v
 	}
-	cvStart := start + 8 + uKnotCount + vKnotCount
+	cvStart := start + 7 + uKnotCount + vKnotCount
 	if isTrim != nil {
 		cvStart++
 	}
 	cvCount, err := strconv.Atoi((*token)[cvStart])
 	if err != nil {
-		return nil, TypeInvalid, 0, err
+		return nil, 0, err
 	}
 	divideCv := 3
 	if isRational {
@@ -1283,7 +1266,7 @@ func MakeNurbsSurface(token *[]string, start int) (Attr, AttrType, int, error) {
 	}
 	cv, err := ParseFloats((*token)[cvStart+1 : cvStart+1+(cvCount*divideCv)]...)
 	if err != nil {
-		return nil, TypeInvalid, 0, err
+		return nil, 0, err
 	}
 	cvValue := make([]AttrCvValue, cvCount)
 	for i := 0; i < cvCount; i++ {
@@ -1308,13 +1291,13 @@ func MakeNurbsSurface(token *[]string, start int) (Attr, AttrType, int, error) {
 		},
 	}
 	count := (cvStart + (cvCount * divideCv)) - start
-	return a, TypeNurbsSurface, count, nil
+	return a, count, nil
 }
 
-func MakeNurbsTrimface(token *[]string, start int) (Attr, AttrType, int, error) {
+func MakeNurbsTrimface(token *[]string, start int) (Attr, int, error) {
 	// TODO: Waiting for Autodesk
 	var a Attr = &AttrNurbsTrimface{}
-	return a, TypeNurbsTrimface, -1, nil
+	return a, -1, nil
 }
 
 func MakeCountInt(token *[]string, start int) ([]int, error) {
@@ -1329,8 +1312,8 @@ func MakeCountInt(token *[]string, start int) ([]int, error) {
 	return result, nil
 }
 
-func MakePolyFace(token *[]string, start int, size *uint) (Attr, AttrType, int, error) {
-	switchNumber := start + 1
+func MakePolyFace(token *[]string, start int, size *uint) (Attr, int, error) {
+	switchNumber := start
 	var pfs []AttrPolyFaces
 	var fCount uint
 	for _, v := range (*token)[start:] {
@@ -1353,8 +1336,8 @@ func MakePolyFace(token *[]string, start int, size *uint) (Attr, AttrType, int, 
 			fe, err := MakeCountInt(token, switchNumber+1)
 			if err != nil {
 				log.Println("error case f")
-				log.Printf("token number is %d", switchNumber + 1)
-				return nil, TypeInvalid, 0, err
+				log.Printf("token number is %d", switchNumber+1)
+				return nil, 0, err
 			}
 			i++
 			if i >= len(pfs) {
@@ -1366,25 +1349,25 @@ func MakePolyFace(token *[]string, start int, size *uint) (Attr, AttrType, int, 
 		case "h":
 			he, err := MakeCountInt(token, switchNumber+1)
 			if err != nil {
-				return nil, TypeInvalid, 0, err
+				return nil, 0, err
 			}
 			pfs[i].HoleEdge = he
 			switchNumber += 2 + len(he)
 		case "fc":
 			fc, err := MakeCountInt(token, switchNumber+1)
 			if err != nil {
-				return nil, TypeInvalid, 0, err
+				return nil, 0, err
 			}
 			pfs[i].FaceColor = fc
 			switchNumber += 2 + len(fc)
 		case "mc":
 			colorIndex, err := strconv.ParseInt((*token)[switchNumber+1], 10, 64)
 			if err != nil {
-				return nil, TypeInvalid, 0, err
+				return nil, 0, err
 			}
 			colorIDs, err := MakeCountInt(token, switchNumber+2)
 			if err != nil {
-				return nil, TypeInvalid, 0, err
+				return nil, 0, err
 			}
 			mc := AttrMultiColor{
 				ColorIndex: int(colorIndex),
@@ -1396,12 +1379,12 @@ func MakePolyFace(token *[]string, start int, size *uint) (Attr, AttrType, int, 
 			var fuv AttrFaceUV
 			uvSet, err := strconv.Atoi((*token)[switchNumber+1])
 			if err != nil {
-				return nil, TypeInvalid, 0, err
+				return nil, 0, err
 			}
 			fuv.UVSet = uvSet
 			uv, err := MakeCountInt(token, switchNumber+2)
 			if err != nil {
-				return nil, TypeInvalid, 0, err
+				return nil, 0, err
 			}
 			fuv.FaceUV = uv
 			pfs[i].FaceUV = append(pfs[i].FaceUV, fuv)
@@ -1412,17 +1395,17 @@ func MakePolyFace(token *[]string, start int, size *uint) (Attr, AttrType, int, 
 		}
 	}
 	var a Attr = &pfs
-	return a, TypePolyFaces, switchNumber - start, nil
+	return a, switchNumber - start, nil
 }
 
-func MakeDataPolyComponent(token *[]string, start int) (Attr, AttrType, int, error) {
-	if "Index_Data" != (*token)[start+1] {
-		return nil, TypeInvalid, 0, errors.New(
+func MakeDataPolyComponent(token *[]string, start int) (Attr, int, error) {
+	if "Index_Data" != (*token)[start] {
+		return nil, 0, errors.New(
 			"since the Index_Data did not exist, " +
 				"this token is an unknown dataPolyComponent")
 	}
 	var dpc AttrDataPolyComponent
-	switch (*token)[start+2] {
+	switch (*token)[start+1] {
 	case "Edge":
 		dpc.PolyComponentType = DPCedge
 	case "Face":
@@ -1432,41 +1415,41 @@ func MakeDataPolyComponent(token *[]string, start int) (Attr, AttrType, int, err
 	case "UV":
 		dpc.PolyComponentType = DPCuv
 	default:
-		return nil, TypeInvalid, 0, errors.New(
+		return nil, 0, errors.New(
 			"it is an unknown dataPolyComponent " +
 				"that is neither Edge, Face, Vertex, UV")
 	}
-	count, err := strconv.Atoi((*token)[start+3])
+	count, err := strconv.Atoi((*token)[start+2])
 	if err != nil {
-		return nil, TypeInvalid, 0, err
+		return nil, 0, err
 	}
 	dpc.IndexValue = map[int]float64{}
 	for i := 0; i < count; i++ {
-		index, err := strconv.Atoi((*token)[start+4+(i*2)])
+		index, err := strconv.Atoi((*token)[start+3+(i*2)])
 		if err != nil {
-			return nil, TypeInvalid, 0, err
+			return nil, 0, err
 		}
-		value, err := strconv.ParseFloat((*token)[start+5+(i*2)], 64)
+		value, err := strconv.ParseFloat((*token)[start+4+(i*2)], 64)
 		if err != nil {
-			return nil, TypeInvalid, 0, err
+			return nil, 0, err
 		}
 		dpc.IndexValue[index] = value
 	}
 	adpc := []AttrDataPolyComponent{dpc,}
 	var a Attr = &adpc
-	return a, TypeDataPolyComponent, 4 + (count * 2), nil
+	return a, 3 + (count * 2), nil
 }
 
-func MakeMesh(_ *[]string, _ int) (Attr, AttrType, int, error) {
+func MakeMesh(_ *[]string, _ int) (Attr, int, error) {
 	// Not Implement
 	var a Attr
-	return a, TypeMesh, -1, nil
+	return a, -1, nil
 }
 
-func MakeLattice(token *[]string, start int) (Attr, AttrType, int, error) {
-	c, err := ParseInts((*token)[start+1 : start+5]...)
+func MakeLattice(token *[]string, start int) (Attr, int, error) {
+	c, err := ParseInts((*token)[start : start+4]...)
 	if err != nil {
-		return nil, TypeInvalid, 0, err
+		return nil, 0, err
 	}
 	la := []AttrLattice{
 		{
@@ -1477,149 +1460,140 @@ func MakeLattice(token *[]string, start int) (Attr, AttrType, int, error) {
 	}
 	la[0].Points = make([]AttrLaticePoint, c[3])
 	for i := 0; i < c[3]*3; i += 3 {
-		p, err := ParseFloats((*token)[start+5+i : start+5+i+3]...)
+		p, err := ParseFloats((*token)[start+4+i : start+4+i+3]...)
 		if err != nil {
-			return nil, TypeInvalid, 0, err
+			return nil, 0, err
 		}
 		la[0].Points[i/3].S = p[0]
 		la[0].Points[i/3].T = p[1]
 		la[0].Points[i/3].U = p[2]
 	}
 	var a Attr = &la
-	return a, TypeLattice, 5 + (c[3] * 3), nil
+	return a, 4 + (c[3] * 3), nil
 }
 
-func MakeAttrType(token *[]string, start int, size *uint, attrType AttrType) (Attr, AttrType, int, error) {
-	start -= 1
+func MakeAttr(token *[]string, start int, size *uint, attrType AttrType) (Attr, int, error) {
 	switch attrType {
 	case TypeShort2, TypeLong2:
-		a, t, s, err := MakeShort2Long2(token, start, size, &attrType)
-		return a, t, s-1, err
+		return MakeShort2Long2(token, start, size, &attrType)
 	case TypeShort3, TypeLong3:
-		a, t, s, err := MakeShort3Long3(token, start, size, &attrType)
-		return a, t, s-1, err
+		return MakeShort3Long3(token, start, size, &attrType)
 	case TypeInt32Array:
-		a, t, s, err := MakeInt32Array(token, start)
-		return a, t, s-1, err
-	case TypeFloat2, TypeDouble2:
-		a, t, s, err := MakeFloat2Double2(token, start, size, &attrType)
-		return a, t, s-1, err
-	case TypeFloat3, TypeDouble3:
-		a, t, s, err := MakeFloat3Double3(token, start, size, &attrType)
-		return a, t, s-1, err
-	case TypeDoubleArray:
-		a, t, s, err := MakeDoubleArray(token, start)
-		return a, t, s-1, err
-	case TypeMatrix, TypeMatrixXform:
-		a, t, s, err := MakeMatrix(token, start)
-		return a, t, s-1, err
-	case TypePointArray:
-		a, t, s, err := MakePointArray(token, start)
-		return a, t, s-1, err
-	case TypeVectorArray:
-		a, t, s, err := MakeVectorArray(token, start)
-		return a, t, s-1, err
-	case TypeString:
-		a, t, s, err := MakeString(token, start)
-		return a, t, s-1, err
-	case TypeStringArray:
-		a, t, s, err := MakeStringArray(token, start)
-		return a, t, s-1, err
-	case TypeSphere:
-		a, t, s, err := MakeSphere(token, start)
-		return a, t, s-1, err
-	case TypeCone:
-		a, t, s, err := MakeCone(token, start)
-		return a, t, s-1, err
-	case TypeReflectanceRGB:
-		a, t, s, err := MakeReflectanceRGB(token, start)
-		return a, t, s-1, err
-	case TypeSpectrumRGB:
-		a, t, s, err := MakeSpectrumRGB(token, start)
-		return a, t, s-1, err
-	case TypeComponentList:
-		a, t, s, err := MakeComponentList(token, start)
-		return a, t, s-1, err
-	case TypeAttributeAlias:
-		a, t, s, err := MakeAttributeAlias(token, start)
-		return a, t, s-1, err
-	case TypeNurbsCurve:
-		a, t, s, err := MakeNurbsCurve(token, start)
-		return a, t, s-1, err
-	case TypeNurbsSurface:
-		a, t, s, err := MakeNurbsSurface(token, start)
-		return a, t, s-1, err
-	case TypeNurbsTrimface:
-		a, t, s, err := MakeNurbsTrimface(token, start)
-		return a, t, s-1, err
-	case TypePolyFaces:
-		a, t, s, err := MakePolyFace(token, start, size)
-		return a, t, s-1, err
-	case TypeDataPolyComponent:
-		a, t, s, err := MakeDataPolyComponent(token, start)
-		return a, t, s-1, err
-	case TypeMesh:
-		a, t, s, err := MakeMesh(token, start)
-		return a, t, s-1, err
-	case TypeLattice:
-		a, t, s, err := MakeLattice(token, start)
-		return a, t, s-1, err
-	}
-	return nil, TypeInvalid, 0, nil
-}
-
-func MakeAttr(token *[]string, start int, size *uint) (Attr, AttrType, int, error) {
-	switch (*token)[start] {
-	case "\"short2\"", "\"long2\"":
-		return MakeShort2Long2(token, start, size, nil)
-	case "\"short3\"", "\"long3\"":
-		return MakeShort3Long3(token, start, size, nil)
-	case "\"Int32Array\"":
 		return MakeInt32Array(token, start)
-	case "\"float2\"", "\"double2\"":
-		return MakeFloat2Double2(token, start, size, nil)
-	case "\"float3\"", "\"double3\"":
-		return MakeFloat3Double3(token, start, size, nil)
-	case "\"doubleArray\"":
+	case TypeFloat2, TypeDouble2:
+		return MakeFloat2Double2(token, start, size, &attrType)
+	case TypeFloat3, TypeDouble3:
+		return MakeFloat3Double3(token, start, size, &attrType)
+	case TypeDoubleArray:
 		return MakeDoubleArray(token, start)
-	case "\"matrix\"":
+	case TypeMatrix:
 		return MakeMatrix(token, start)
-	case "\"pointArray\"":
+	case TypeMatrixXform:
+		return MakeMatrixXform(token, start)
+	case TypePointArray:
 		return MakePointArray(token, start)
-	case "\"vectorArray\"":
+	case TypeVectorArray:
 		return MakeVectorArray(token, start)
-	case "\"string\"":
+	case TypeString:
 		return MakeString(token, start)
-	case "\"stringArray\"":
+	case TypeStringArray:
 		return MakeStringArray(token, start)
-	case "\"sphere\"":
+	case TypeSphere:
 		return MakeSphere(token, start)
-	case "\"cone\"":
+	case TypeCone:
 		return MakeCone(token, start)
-	case "\"reflectanceRGB\"":
+	case TypeReflectanceRGB:
 		return MakeReflectanceRGB(token, start)
-	case "\"spectrumRGB\"":
+	case TypeSpectrumRGB:
 		return MakeSpectrumRGB(token, start)
-	case "\"componentList\"":
+	case TypeComponentList:
 		return MakeComponentList(token, start)
-	case "\"attributeAlias\"":
+	case TypeAttributeAlias:
 		return MakeAttributeAlias(token, start)
-	case "\"nurbsCurve\"":
+	case TypeNurbsCurve:
 		return MakeNurbsCurve(token, start)
-	case "\"nurbsSurface\"":
+	case TypeNurbsSurface:
 		return MakeNurbsSurface(token, start)
-	case "\"nurbsTrimface\"":
+	case TypeNurbsTrimface:
 		return MakeNurbsTrimface(token, start)
-	case "\"polyFaces\"":
+	case TypePolyFaces:
 		return MakePolyFace(token, start, size)
-	case "\"dataPolyComponent\"":
+	case TypeDataPolyComponent:
 		return MakeDataPolyComponent(token, start)
-	case "\"mesh\"":
+	case TypeMesh:
 		return MakeMesh(token, start)
-	case "\"lattice\"":
+	case TypeLattice:
 		return MakeLattice(token, start)
 	}
-	return nil, TypeInvalid, 0, nil
+	return nil, 0, nil
+}
+
+func MakeAttrType(token *[]string, start int) (AttrType, error) {
+	typeString := (*token)[start][1 : len((*token)[start])-1]
+	switch typeString {
+	case "short2":
+		return TypeShort2, nil
+	case "short3":
+		return TypeShort3, nil
+	case "long2":
+		return TypeLong2, nil
+	case "long3":
+		return TypeLong3, nil
+	case "Int32Array":
+		return TypeInt32Array, nil
+	case "float2":
+		return TypeFloat2, nil
+	case "double2":
+		return TypeDouble2, nil
+	case "float3":
+		return TypeFloat3, nil
+	case "double3":
+		return TypeDouble3, nil
+	case "doubleArray":
+		return TypeDoubleArray, nil
+	case "matrix":
+		typeString2 := (*token)[start+1]
+		if typeString2 == "\"xform\"" {
+			return TypeMatrixXform, nil
+		} else {
+			return TypeMatrix, nil
+		}
+	case "pointArray":
+		return TypePointArray, nil
+	case "vectorArray":
+		return TypeVectorArray, nil
+	case "string":
+		return TypeString, nil
+	case "stringArray":
+		return TypeStringArray, nil
+	case "sphere":
+		return TypeSphere, nil
+	case "cone":
+		return TypeCone, nil
+	case "reflectanceRGB":
+		return TypeReflectanceRGB, nil
+	case "spectrumRGB":
+		return TypeSpectrumRGB, nil
+	case "componentList":
+		return TypeComponentList, nil
+	case "attributeAlias":
+		return TypeAttributeAlias, nil
+	case "nurbsCurve":
+		return TypeNurbsCurve, nil
+	case "nurbsSurface":
+		return TypeNurbsSurface, nil
+	case "nurbsTrimface":
+		return TypeNurbsTrimface, nil
+	case "polyFaces":
+		return TypePolyFaces, nil
+	case "dataPolyComponent":
+		return TypeDataPolyComponent, nil
+	case "mesh":
+		return TypeMesh, nil
+	case "lattice":
+		return TypeLattice, nil
+	}
+	return TypeInvalid, errors.New("Invalid type " + typeString)
 }
 
 type Attr interface{}
@@ -1755,7 +1729,7 @@ type AttrAttributeAlias struct {
 type AttrFormType int
 
 const (
-	AttrFormOpen AttrFormType = iota
+	AttrFormOpen     AttrFormType = iota
 	AttrFormClosed
 	AttrFormPeriodic
 )
@@ -1828,7 +1802,7 @@ type AttrPolyFaces struct {
 type AttrDPCType int
 
 const (
-	DPCedge AttrDPCType = iota
+	DPCedge   AttrDPCType = iota
 	DPCface
 	DPCvertex
 	DPCuv
