@@ -189,6 +189,27 @@ func (c *CmdBuilder) Parse() *Cmd {
 	return &cmd
 }
 
+type Workspace struct {
+	*Cmd
+	FileRule string `json:"file_rule" tag:"-fileRule"`
+	Place    string `json:"place"`
+}
+
+func MakeWorkspace(cmd *Cmd) *Workspace {
+	w := Workspace{Cmd: cmd}
+	for i := 1; i < len(w.Token); i++ {
+		switch w.Token[i] {
+		case "-fr":
+			w.FileRule = strings.Trim(w.Token[i+1], "\"")
+			w.Place = strings.Trim(w.Token[i+2], "\"")
+			i += 2
+		default:
+			panic("this option can not parse yet " + w.Token[i])
+		}
+	}
+	return &w
+}
+
 type Requires struct {
 	*Cmd
 	PluginName string   `json:"plugin_name"`
