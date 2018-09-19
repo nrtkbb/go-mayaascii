@@ -38,6 +38,24 @@ func (f *File) Parse() error {
 	return nil
 }
 
+func (f *File) SaveSceneAs(outputPath string) error {
+	if _, err := os.Stat(outputPath); err == nil {
+		return errors.New("file already existed.")
+	}
+	fp, err := os.Create(outputPath)
+	if err != nil {
+		return err
+	}
+	defer fp.Close()
+	writer := bufio.NewWriter(fp)
+	defer writer.Flush()
+
+	for _, cmd := range f.Cmds {
+		fmt.Fprintln(writer, cmd.Raw)
+	}
+	return nil
+}
+
 type CmdBuilder struct {
 	cmdLine []string
 }
@@ -777,7 +795,7 @@ func MakeShort2Long2(token *[]string, start int, size *uint, at *AttrType) (Attr
 	} else {
 		end = start + 2
 	}
-	v, err := ParseInts((*token)[start : end]...)
+	v, err := ParseInts((*token)[start:end]...)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -807,7 +825,7 @@ func MakeShort3Long3(token *[]string, start int, size *uint, at *AttrType) (Attr
 	} else {
 		end = start + 3
 	}
-	v, err := ParseInts((*token)[start : end]...)
+	v, err := ParseInts((*token)[start:end]...)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -859,7 +877,7 @@ func MakeFloat2Double2(token *[]string, start int, size *uint, at *AttrType) (At
 	} else {
 		end = start + 2
 	}
-	v, err := ParseFloats((*token)[start : end]...)
+	v, err := ParseFloats((*token)[start:end]...)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -889,7 +907,7 @@ func MakeFloat3Double3(token *[]string, start int, size *uint, at *AttrType) (At
 	} else {
 		end = start + 3
 	}
-	v, err := ParseFloats((*token)[start : end]...)
+	v, err := ParseFloats((*token)[start:end]...)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -1750,7 +1768,7 @@ type AttrAttributeAlias struct {
 type AttrFormType int
 
 const (
-	AttrFormOpen     AttrFormType = iota
+	AttrFormOpen AttrFormType = iota
 	AttrFormClosed
 	AttrFormPeriodic
 )
@@ -1823,7 +1841,7 @@ type AttrPolyFaces struct {
 type AttrDPCType int
 
 const (
-	DPCedge   AttrDPCType = iota
+	DPCedge AttrDPCType = iota
 	DPCface
 	DPCvertex
 	DPCuv
