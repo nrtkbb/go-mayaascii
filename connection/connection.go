@@ -1,9 +1,9 @@
 package connection
 
 import (
+	"fmt"
 	"github.com/nrtkbb/go-mayaascii"
 	"log"
-	"fmt"
 )
 
 type Connections struct {
@@ -16,7 +16,52 @@ func (c *Connections) Append(con *mayaascii.ConnectAttr) {
 	c.DstNodes.Append(con.DstNode, con)
 }
 
-func (c *Connections) Get(
+func (c *Connections) GetNames(
+	node, attr string,
+	up bool,
+	filters *[]string) *[]string {
+	sets := map[string]string{}
+	if up {
+		cons := c.DstNodes.Get(node)
+		for _, con := range cons {
+			if con.DstAttr != attr {
+				continue
+			}
+			if filters == nil {
+				sets[con.SrcNode] = con.SrcAttr
+			} else {
+				for _, filter := range *filters {
+					if filter == con.SrcNode {
+						sets[con.SrcNode] = con.SrcAttr
+					}
+				}
+			}
+		}
+	} else {
+		cons := c.SrcNodes.Get(node)
+		for _, con := range cons {
+			if con.SrcAttr != attr {
+				continue
+			}
+			if filters == nil {
+				sets[con.DstNode] = con.DstAttr
+			} else {
+				for _, filter := range *filters {
+					if filter == con.SrcNode {
+						sets[con.DstAttr] = con.DstAttr
+					}
+				}
+			}
+		}
+	}
+	var results []string
+	for k, v := range sets {
+		results = append(results, fmt.Sprintf("%s.%s", k, v))
+	}
+	return &results
+}
+
+func (c *Connections) GetNodes(
 	node, attr string,
 	up bool,
 	inMap *map[string]*mayaascii.CreateNode) []*mayaascii.CreateNode {
@@ -52,7 +97,7 @@ func (c *Connections) Get(
 	return results
 }
 
-func (c *Connections) Search(
+func (c *Connections) SearchNodes(
 	key string,
 	up bool,
 	inMap *map[string]*mayaascii.CreateNode) []*mayaascii.CreateNode {
