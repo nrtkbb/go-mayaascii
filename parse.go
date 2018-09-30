@@ -769,7 +769,6 @@ func ParseInts(token ...string) ([]int, error) {
 		i, err := strconv.ParseInt(t, 10, 64)
 		if err != nil {
 			panic(err)
-			return nil, err
 		}
 		result = append(result, int(i))
 	}
