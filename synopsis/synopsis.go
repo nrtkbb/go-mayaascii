@@ -1,11 +1,3 @@
-# go-mayaascii
-
-[![Build Status](https://travis-ci.org/nrtkbb/go-mayaascii.svg?branch=master)](https://travis-ci.org/nrtkbb/go-mayaascii)
-
-
-# For example.
-
-```go
 package main
 
 import (
@@ -93,4 +85,3 @@ func main() {
 	// Get all destination connection nodes.
 	dstNodes, err := persp.Dst(nil)  // nil will return all connection nodes.
 }
-```
