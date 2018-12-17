@@ -2,8 +2,9 @@ package connection
 
 import (
 	"fmt"
-	"github.com/nrtkbb/go-mayaascii"
 	"log"
+
+	"github.com/nrtkbb/go-mayaascii/cmd"
 )
 
 type Connections struct {
@@ -11,7 +12,7 @@ type Connections struct {
 	DstNodes conNodes
 }
 
-func (c *Connections) Append(con *mayaascii.ConnectAttr) {
+func (c *Connections) Append(con *cmd.ConnectAttr) {
 	c.SrcNodes.Append(con.SrcNode, con)
 	c.DstNodes.Append(con.DstNode, con)
 }
@@ -64,8 +65,8 @@ func (c *Connections) GetNames(
 func (c *Connections) GetNodes(
 	node, attr string,
 	up bool,
-	inMap *map[string]*mayaascii.CreateNode) []*mayaascii.CreateNode {
-	sets := map[string]*mayaascii.CreateNode{}
+	inMap *map[string]*cmd.CreateNode) []*cmd.CreateNode {
+	sets := map[string]*cmd.CreateNode{}
 	if up {
 		cons := c.DstNodes.Get(node)
 		for _, con := range cons {
@@ -90,7 +91,7 @@ func (c *Connections) GetNodes(
 			}
 		}
 	}
-	var results []*mayaascii.CreateNode
+	var results []*cmd.CreateNode
 	for _, v := range sets {
 		results = append(results, v)
 	}
@@ -100,9 +101,9 @@ func (c *Connections) GetNodes(
 func (c *Connections) SearchNodes(
 	key string,
 	up bool,
-	inMap *map[string]*mayaascii.CreateNode) []*mayaascii.CreateNode {
+	inMap *map[string]*cmd.CreateNode) []*cmd.CreateNode {
 	histories := c.search(key, up)
-	sets := map[string]*mayaascii.CreateNode{}
+	sets := map[string]*cmd.CreateNode{}
 	if up {
 		for _, history := range histories {
 			value, ok := (*inMap)[history.DstNode]
@@ -118,7 +119,7 @@ func (c *Connections) SearchNodes(
 			}
 		}
 	}
-	results := make([]*mayaascii.CreateNode, len(sets))
+	results := make([]*cmd.CreateNode, len(sets))
 	i := 0
 	for _, v := range sets {
 		results[i] = v
@@ -127,8 +128,8 @@ func (c *Connections) SearchNodes(
 	return results
 }
 
-func (c *Connections) search(key string, up bool) []*mayaascii.ConnectAttr {
-	var histories []*mayaascii.ConnectAttr
+func (c *Connections) search(key string, up bool) []*cmd.ConnectAttr {
+	var histories []*cmd.ConnectAttr
 	if up {
 		values := c.DstNodes.Get(key)
 		histories = append(histories, values...)
@@ -146,7 +147,7 @@ func (c *Connections) search(key string, up bool) []*mayaascii.ConnectAttr {
 }
 
 type conNodes struct {
-	m map[string][]*mayaascii.ConnectAttr
+	m map[string][]*cmd.ConnectAttr
 }
 
 func (c *conNodes) Length() int {
@@ -166,19 +167,19 @@ func (c *conNodes) String() string {
 	return string(buf)
 }
 
-func (c *conNodes) Get(key string) []*mayaascii.ConnectAttr {
+func (c *conNodes) Get(key string) []*cmd.ConnectAttr {
 	if c.m == nil {
-		c.m = map[string][]*mayaascii.ConnectAttr{}
+		c.m = map[string][]*cmd.ConnectAttr{}
 	}
 	v, ok := c.m[key]
 	if ok {
 		return v
 	} else {
-		return []*mayaascii.ConnectAttr{}
+		return []*cmd.ConnectAttr{}
 	}
 }
 
-func (c *conNodes) Append(key string, con *mayaascii.ConnectAttr) {
+func (c *conNodes) Append(key string, con *cmd.ConnectAttr) {
 	v := c.Get(key)
 	c.m[key] = append(v, con)
 }

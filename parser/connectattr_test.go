@@ -1,14 +1,16 @@
-package mayaascii
+package parser
 
 import (
 	"testing"
+
+	"github.com/nrtkbb/go-mayaascii/cmd"
 )
 
 func TestMakeConnectAttr_Min(t *testing.T) {
-	c := &CmdBuilder{}
-	c.Append(`connectAttr "tmp_file11.msg" ":defaultTextureList1.tx" -na;`)
-	cmd := c.Parse()
-	ca, err := MakeConnectAttr(cmd)
+	cb := &cmd.CmdBuilder{}
+	cb.Append(`connectAttr "tmp_file11.msg" ":defaultTextureList1.tx" -na;`)
+	c := cb.Parse()
+	ca, err := MakeConnectAttr(c)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -40,10 +42,10 @@ func TestMakeConnectAttr_Min(t *testing.T) {
 }
 
 func TestMakeConnectAttr_Max(t *testing.T) {
-	c := &CmdBuilder{}
-	c.Append(`connectAttr -f -l on -rd "test" "tmp_file11.msg" ":defaultTextureList1.tx" -na;`)
-	cmd := c.Parse()
-	ca, err := MakeConnectAttr(cmd)
+	cb := &cmd.CmdBuilder{}
+	cb.Append(`connectAttr -f -l on -rd "test" "tmp_file11.msg" ":defaultTextureList1.tx" -na;`)
+	c := cb.Parse()
+	ca, err := MakeConnectAttr(c)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -69,7 +71,7 @@ func TestMakeConnectAttr_Max(t *testing.T) {
 	if ca.Lock == nil {
 		t.Errorf(msg, "Lock", ca.Lock, nil)
 	}
-	if ! *ca.Lock {
+	if !*ca.Lock {
 		t.Errorf(msg, "Lock", *ca.Lock, true)
 	}
 	if ca.ReferenceDest == nil {

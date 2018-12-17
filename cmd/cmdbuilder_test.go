@@ -1,76 +1,76 @@
-package mayaascii
+package cmd
 
 import (
-	"testing"
 	"log"
+	"testing"
 )
 
 func TestCmdBuilder_Append(t *testing.T) {
-	c := CmdBuilder{}
-	c.Append("append")
-	if len(c.cmdLine) != 1 {
+	cb := CmdBuilder{}
+	cb.Append("append")
+	if len(cb.cmdLine) != 1 {
 		t.Fatal("Append failed")
 	}
-	if c.cmdLine[0] != "append" {
+	if cb.cmdLine[0] != "append" {
 		t.Fatal("Append failed")
 	}
 }
 
 func TestCmdBuilder_IsCmdEOF(t *testing.T) {
-	c := CmdBuilder{}
-	if c.IsCmdEOF() {
+	cb := CmdBuilder{}
+	if cb.IsCmdEOF() {
 		t.Fatal("IsCmdEOF failed")
 	}
-	c.Append("")
-	if c.IsCmdEOF() {
+	cb.Append("")
+	if cb.IsCmdEOF() {
 		t.Fatal("IsCmdEOF failed")
 	}
-	c.Append("test;")
-	if !c.IsCmdEOF() {
+	cb.Append("test;")
+	if !cb.IsCmdEOF() {
 		t.Fatal("IsCmdEOF failed")
 	}
 }
 
 func TestCmdBuilder_Clear(t *testing.T) {
-	c := CmdBuilder{}
-	if len(c.cmdLine) != 0 {
+	cb := CmdBuilder{}
+	if len(cb.cmdLine) != 0 {
 		t.Fatal("CmdBuilder{} failed")
 	}
-	c.Append("test")
-	if len(c.cmdLine) != 1 {
+	cb.Append("test")
+	if len(cb.cmdLine) != 1 {
 		t.Fatal("Append failed")
 	}
-	c.Clear()
-	if len(c.cmdLine) != 0 {
+	cb.Clear()
+	if len(cb.cmdLine) != 0 {
 		t.Fatal("Clear failed")
 	}
 }
 
 func testParse(t *testing.T, raw string, cmdName string, token []string) {
-	c := &CmdBuilder{}
-	c.Append(raw)
-	if !c.IsCmdEOF() {
+	cb := &CmdBuilder{}
+	cb.Append(raw)
+	if !cb.IsCmdEOF() {
 		t.Fatal("IsCmdEOF failed")
 	}
-	cmd := c.Parse()
-	if cmd.Raw != raw {
+	c := cb.Parse()
+	if c.Raw != raw {
 		t.Fatal("Parsed Raw was failed")
 	}
-	if cmd.CmdName != cmdName {
-		log.Printf("got CmdName %s\nwant CmdName %s", cmd.CmdName, cmdName)
-		t.Fatal("Parsed CmdName was failed")
+	if c.Type != cmdName {
+		log.Printf("got Type %s\nwant Type %s", c.Type, cmdName)
+		t.Fatal("Parsed Type was failed")
 	}
-	if len(cmd.Token) != len(token) {
+	if len(c.Token) != len(token) {
 		log.Printf("got Token len %d\nwant token len %d",
-			len(cmd.Token),
+			len(c.Token),
 			len(token))
-		log.Printf("got cmd.Token is %v", cmd.Token)
+		log.Printf("got c.Token is %v", c.Token)
 		log.Printf("want token is %v", token)
 		t.Fatal("Parsed Token was failed")
 	}
-	for i := 0; i < len(cmd.Token); i++ {
-		if cmd.Token[i] != token[i] {
-			log.Printf("got %v\nwant %v", cmd.Token[i], token[i])
+	for i := 0; i < len(c.Token); i++ {
+		if c.Token[i] != token[i] {
+			log.Printf("got %v\nwant %v", c.Token[i], token[i])
 			t.Fatal("Parsed Token was failed")
 		}
 	}

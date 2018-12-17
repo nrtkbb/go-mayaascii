@@ -33,7 +33,7 @@ func main() {
 
 	// Print all nodes.
 	for _, n := range mo.Nodes {
-		fmt.Printf("%d : %s\n", n.Lineno, n.Name)
+		fmt.Printf("%d : %s\n", n.LineNo, n.Name)
 	}
 
 	// Specify node name.
@@ -43,7 +43,7 @@ func main() {
 	}
 
 	// Get attribute (Must be short name) and cast to string.
-	ow, err := persp.Attr(".ow").asString()  // or .asInt() or .asFloat() etc..
+	ow, err := persp.Attr(".ow").String() // or .Int() or .Float() etc..
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -72,16 +72,26 @@ func main() {
 
 	// Print transform nodes.
 	for _, t := range transforms {
-		fmt.Printf("%d : %s\n", t.Lineno, t.Name)
+		fmt.Printf("%d : %s\n", t.LineNo, t.Name)
 	}
 
 	// Get specified source connection nodes.
 	srcNodes, err := persp.Src(&ma.ConnectInfo{
-		Name: "topShape",  // (Optional)
-		Attr: ".ow",       // (Optional) Must be specified with a short name
-		Type: "camera",    // (Optional)
+		Name: "topShape", // (Optional)
+		Attr: ".ow",      // (Optional) Must be specified with a short name
+		Type: "camera",   // (Optional)
 	})
 
+	// Print src nodes.
+	for _, t := range srcNodes {
+		fmt.Printf("%d : %s\n", t.LineNo, t.Name)
+	}
+
 	// Get all destination connection nodes.
-	dstNodes, err := persp.Dst(nil)  // nil will return all connection nodes.
+	dstNodes, err := persp.Dst(nil) // nil will return all connection nodes.
+
+	// Print dst nodes.
+	for _, t := range dstNodes {
+		fmt.Printf("%d : %s\n", t.LineNo, t.Name)
+	}
 }
