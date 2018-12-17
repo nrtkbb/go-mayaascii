@@ -131,14 +131,46 @@ func (c *Connections) search(key string, up bool) []*mayaascii.ConnectAttr {
 	var histories []*mayaascii.ConnectAttr
 	if up {
 		values := c.DstNodes.Get(key)
-		histories = append(histories, values...)
+		var recursions []*mayaascii.ConnectAttr
 		for _, value := range values {
+			// Check for infinity loop.
+			preHistories := c.DstNodes.Get(value.SrcNode)
+			found := false
+			for _, pre := range preHistories {
+				if pre.DstNode == key {
+					found = true
+					break
+				}
+			}
+			if found {
+				continue
+			}
+			recursions = append(recursions, value)
+		}
+		histories = append(histories, recursions...)
+		for _, value := range recursions {
 			histories = append(histories, c.search(value.SrcNode, up)...)
 		}
 	} else {
 		values := c.SrcNodes.Get(key)
-		histories = append(histories, values...)
+		var recursions []*mayaascii.ConnectAttr
 		for _, value := range values {
+			// Check for infinity loop.
+			preHistories := c.SrcNodes.Get(value.DstNode)
+			found := false
+			for _, pre := range preHistories {
+				if pre.DstNode == key {
+					found = true
+					break
+				}
+			}
+			if found {
+				continue
+			}
+			recursions = append(recursions, value)
+		}
+		histories = append(histories, recursions...)
+		for _, value := range recursions {
 			histories = append(histories, c.search(value.DstNode, up)...)
 		}
 	}
