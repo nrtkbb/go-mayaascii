@@ -1059,8 +1059,8 @@ func MakePolyFace(token *[]string, start int, size *uint) ([]cmd.Attr, int, erro
 		}
 	}
 	a := make([]cmd.Attr, len(pfs))
-	for i, pf := range pfs {
-		a[i] = &pf
+	for i := range pfs {
+		a[i] = &pfs[i]
 	}
 	return a, switchNumber - start, nil
 }
