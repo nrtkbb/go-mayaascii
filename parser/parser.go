@@ -325,10 +325,10 @@ func MakeSetAttr(c *cmd.Cmd, beforeSetAttr *cmd.SetAttr) (*cmd.SetAttr, error) {
 								sa.Attr, floatArray))
 					}
 					floatArrayAttr := make([]cmd.Attr, len(sa.Attr))
-					for _, ia := range sa.Attr {
+					for i, ia := range sa.Attr {
 						ai, _ := ia.(*cmd.AttrInt)
 						af := cmd.AttrFloat(float64(ai.Int()))
-						floatArrayAttr = append(floatArrayAttr, &af)
+						floatArrayAttr[i] = &af
 					}
 					sa.Attr = floatArrayAttr
 				}
