@@ -801,8 +801,8 @@ func MakeAttributeAlias(token *[]string, start int) ([]cmd.Attr, int, error) {
 		})
 	}
 	a := make([]cmd.Attr, len(aaa))
-	for i, aa := range aaa {
-		a[i] = &aa
+	for i := range aaa {
+		a[i] = &aaa[i]
 	}
 	return a, 2 + (len(aaa) * 2), nil
 }
