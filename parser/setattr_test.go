@@ -974,7 +974,7 @@ func TestMakeSetAttr_pointArray(t *testing.T) {
 	pa := *ret[0]
 	if pa[0].X != 1.1 || pa[0].Y != 2.2 || pa[0].Z != 3.3 || pa[0].W != 4.4 {
 		t.Errorf(msg, "Attr", sa.Attr, cmd.AttrPointArray{
-			{1.1, 2.2, 3.3, 4.4},
+			{X: 1.1, Y: 2.2, Z: 3.3, W: 4.4},
 		})
 	}
 	if len(*ret[0]) != 1 {
@@ -1000,8 +1000,8 @@ func TestMakeSetAttr_pointArray(t *testing.T) {
 		pa[1].Z != 3.3 ||
 		pa[1].W != 4.4 {
 		t.Errorf(msg, "Attr", sa.Attr, cmd.AttrPointArray{
-			{1.1, 2.2, 3.3, 4.4},
-			{1.1, 2.2, 3.3, 4.4},
+			{X: 1.1, Y: 2.2, Z: 3.3, W: 4.4},
+			{X: 1.1, Y: 2.2, Z: 3.3, W: 4.4},
 		})
 	}
 	if len(pa) != 2 {
@@ -1558,14 +1558,14 @@ func TestMakeLattice(t *testing.T) {
 				DivisionT: 2,
 				DivisionU: 2,
 				Points: []cmd.AttrLatticePoint{
-					{-0.5, -0.5, -0.5},
-					{0.5, -0.5, -0.5},
-					{-0.5, 0.5, -0.5},
-					{0.5, 0.5, -0.5},
-					{-0.5, -0.5, 0.5},
-					{0.5, -0.5, 0.5},
-					{-0.5, 0.5, 0.5},
-					{0.5, 0.5, 0.5},
+					{S: -0.5, T: -0.5, U: -0.5},
+					{S: 0.5, T: -0.5, U: -0.5},
+					{S: -0.5, T: 0.5, U: -0.5},
+					{S: 0.5, T: 0.5, U: -0.5},
+					{S: -0.5, T: -0.5, U: 0.5},
+					{S: 0.5, T: -0.5, U: 0.5},
+					{S: -0.5, T: 0.5, U: 0.5},
+					{S: 0.5, T: 0.5, U: 0.5},
 				},
 			},
 		})

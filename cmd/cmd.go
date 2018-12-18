@@ -218,9 +218,9 @@ func (c *CmdBuilder) Parse() *Cmd {
 		buf = append(buf, c)
 	}
 	if 0 == len(cmd.Token) {
-		cmd.Type = "None"
+		cmd.Type = Type("None")
 	} else {
-		cmd.Type = cmd.Token[0]
+		cmd.Type = Type(cmd.Token[0])
 	}
 	return &cmd
 }
@@ -1106,7 +1106,7 @@ func ToAttrCvValue(attrs []Attr) ([]*AttrCvValue, error) {
 }
 
 func (acv *AttrCvValue) String() string {
-	return fmt.Sprintf("x: %f, y: %f, z: %f, w: %f",
+	return fmt.Sprintf("x: %f, y: %f, z: %+v, w: %+v",
 		acv.X, acv.Y, acv.Z, acv.W)
 }
 

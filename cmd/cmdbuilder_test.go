@@ -46,7 +46,7 @@ func TestCmdBuilder_Clear(t *testing.T) {
 	}
 }
 
-func testParse(t *testing.T, raw string, cmdName string, token []string) {
+func testParse(t *testing.T, raw string, cmdName Type, token []string) {
 	cb := &CmdBuilder{}
 	cb.Append(raw)
 	if !cb.IsCmdEOF() {
