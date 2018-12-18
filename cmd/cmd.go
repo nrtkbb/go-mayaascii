@@ -306,7 +306,7 @@ func ToAttrBool(attrs []Attr) ([]*AttrBool, error) {
 	for i, a := range attrs {
 		aa, ok := a.(*AttrBool)
 		if !ok {
-			return nil, errors.New("cannot cast")
+			return nil, errors.New(fmt.Sprintf("cannot cast %T", a))
 		}
 		ret[i] = aa
 	}
@@ -328,7 +328,7 @@ func ToAttrInt(attrs []Attr) ([]*AttrInt, error) {
 	for i, a := range attrs {
 		aa, ok := a.(*AttrInt)
 		if !ok {
-			return nil, errors.New("cannot cast")
+			return nil, errors.New(fmt.Sprintf("cannot cast %T", a))
 		}
 		ret[i] = aa
 	}
@@ -350,7 +350,7 @@ func ToAttrFloat(attrs []Attr) ([]*AttrFloat, error) {
 	for i, a := range attrs {
 		aa, ok := a.(*AttrFloat)
 		if !ok {
-			return nil, errors.New("cannot cast")
+			return nil, errors.New(fmt.Sprintf("cannot cast %T", a))
 		}
 		ret[i] = aa
 	}
@@ -372,7 +372,7 @@ func ToAttrShort2(attrs []Attr) ([]*AttrShort2, error) {
 	for i, a := range attrs {
 		aa, ok := a.(*AttrShort2)
 		if !ok {
-			return nil, errors.New("cannot cast")
+			return nil, errors.New(fmt.Sprintf("cannot cast %T", a))
 		}
 		ret[i] = aa
 	}
@@ -396,7 +396,7 @@ func ToAttrShort3(attrs []Attr) ([]*AttrShort3, error) {
 	for i, a := range attrs {
 		aa, ok := a.(*AttrShort3)
 		if !ok {
-			return nil, errors.New("cannot cast")
+			return nil, errors.New(fmt.Sprintf("cannot cast %T", a))
 		}
 		ret[i] = aa
 	}
@@ -422,7 +422,7 @@ func ToAttrLong2(attrs []Attr) ([]*AttrLong2, error) {
 	for i, a := range attrs {
 		aa, ok := a.(*AttrLong2)
 		if !ok {
-			return nil, errors.New("cannot cast")
+			return nil, errors.New(fmt.Sprintf("cannot cast %T", a))
 		}
 		ret[i] = aa
 	}
@@ -446,7 +446,7 @@ func ToAttrLong3(attrs []Attr) ([]*AttrLong3, error) {
 	for i, a := range attrs {
 		aa, ok := a.(*AttrLong3)
 		if !ok {
-			return nil, errors.New("cannot cast")
+			return nil, errors.New(fmt.Sprintf("cannot cast %T", a))
 		}
 		ret[i] = aa
 	}
@@ -472,7 +472,7 @@ func ToAttrInt32Array(attrs []Attr) ([]*AttrInt32Array, error) {
 	for i, a := range attrs {
 		aa, ok := a.(*AttrInt32Array)
 		if !ok {
-			return nil, errors.New("cannot cast")
+			return nil, errors.New(fmt.Sprintf("cannot cast %T", a))
 		}
 		ret[i] = aa
 	}
@@ -494,7 +494,7 @@ func ToAttrFloat2(attrs []Attr) ([]*AttrFloat2, error) {
 	for i, a := range attrs {
 		aa, ok := a.(*AttrFloat2)
 		if !ok {
-			return nil, errors.New("cannot cast")
+			return nil, errors.New(fmt.Sprintf("cannot cast %T", a))
 		}
 		ret[i] = aa
 	}
@@ -512,7 +512,7 @@ func ToAttrFloat3(attrs []Attr) ([]*AttrFloat3, error) {
 	for i, a := range attrs {
 		aa, ok := a.(*AttrFloat3)
 		if !ok {
-			return nil, errors.New("cannot cast")
+			return nil, errors.New(fmt.Sprintf("cannot cast %T", a))
 		}
 		ret[i] = aa
 	}
@@ -530,7 +530,7 @@ func ToAttrDouble2(attrs []Attr) ([]*AttrDouble2, error) {
 	for i, a := range attrs {
 		aa, ok := a.(*AttrDouble2)
 		if !ok {
-			return nil, errors.New("cannot cast")
+			return nil, errors.New(fmt.Sprintf("cannot cast %T", a))
 		}
 		ret[i] = aa
 	}
@@ -548,7 +548,7 @@ func ToAttrDouble3(attrs []Attr) ([]*AttrDouble3, error) {
 	for i, a := range attrs {
 		aa, ok := a.(*AttrDouble3)
 		if !ok {
-			return nil, errors.New("cannot cast")
+			return nil, errors.New(fmt.Sprintf("cannot cast %T", a))
 		}
 		ret[i] = aa
 	}
@@ -566,7 +566,7 @@ func ToAttrDoubleArray(attrs []Attr) ([]*AttrDoubleArray, error) {
 	for i, a := range attrs {
 		aa, ok := a.(*AttrDoubleArray)
 		if !ok {
-			return nil, errors.New("cannot cast")
+			return nil, errors.New(fmt.Sprintf("cannot cast %T", a))
 		}
 		ret[i] = aa
 	}
@@ -611,7 +611,7 @@ func ToAttrRotateOrder(attrs []Attr) ([]*AttrRotateOrder, error) {
 	for i, a := range attrs {
 		aa, ok := a.(*AttrRotateOrder)
 		if !ok {
-			return nil, errors.New("cannot cast")
+			return nil, errors.New(fmt.Sprintf("cannot cast %T", a))
 		}
 		ret[i] = aa
 	}
@@ -672,7 +672,7 @@ func ToAttrMatrix(attrs []Attr) ([]*AttrMatrix, error) {
 	for i, a := range attrs {
 		aa, ok := a.(*AttrMatrix)
 		if !ok {
-			return nil, errors.New("cannot cast")
+			return nil, errors.New(fmt.Sprintf("cannot cast %T", a))
 		}
 		ret[i] = aa
 	}
@@ -708,7 +708,7 @@ func ToAttrMatrixXform(attrs []Attr) ([]*AttrMatrixXform, error) {
 	for i, a := range attrs {
 		aa, ok := a.(*AttrMatrixXform)
 		if !ok {
-			return nil, errors.New("cannot cast")
+			return nil, errors.New(fmt.Sprintf("cannot cast %T", a))
 		}
 		ret[i] = aa
 	}
@@ -760,7 +760,7 @@ func ToAttrPoint(attrs []Attr) ([]*AttrPoint, error) {
 	for i, a := range attrs {
 		aa, ok := a.(*AttrPoint)
 		if !ok {
-			return nil, errors.New("cannot cast")
+			return nil, errors.New(fmt.Sprintf("cannot cast %T", a))
 		}
 		ret[i] = aa
 	}
@@ -779,7 +779,7 @@ func ToAttrPointArray(attrs []Attr) ([]*AttrPointArray, error) {
 	for i, a := range attrs {
 		aa, ok := a.(*AttrPointArray)
 		if !ok {
-			return nil, errors.New("cannot cast")
+			return nil, errors.New(fmt.Sprintf("cannot cast %T", a))
 		}
 		ret[i] = aa
 	}
@@ -806,7 +806,7 @@ func ToAttrVector(attrs []Attr) ([]*AttrVector, error) {
 	for i, a := range attrs {
 		aa, ok := a.(*AttrVector)
 		if !ok {
-			return nil, errors.New("cannot cast")
+			return nil, errors.New(fmt.Sprintf("cannot cast %T", a))
 		}
 		ret[i] = aa
 	}
@@ -825,7 +825,7 @@ func ToAttrVectorArray(attrs []Attr) ([]*AttrVectorArray, error) {
 	for i, a := range attrs {
 		aa, ok := a.(*AttrVectorArray)
 		if !ok {
-			return nil, errors.New("cannot cast")
+			return nil, errors.New(fmt.Sprintf("cannot cast %T", a))
 		}
 		ret[i] = aa
 	}
@@ -847,7 +847,7 @@ func ToAttrString(attrs []Attr) ([]*AttrString, error) {
 	for i, a := range attrs {
 		aa, ok := a.(*AttrString)
 		if !ok {
-			return nil, errors.New("cannot cast")
+			return nil, errors.New(fmt.Sprintf("cannot cast %T", a))
 		}
 		ret[i] = aa
 	}
@@ -865,7 +865,7 @@ func ToAttrStringArray(attrs []Attr) ([]*AttrStringArray, error) {
 	for i, a := range attrs {
 		aa, ok := a.(*AttrStringArray)
 		if !ok {
-			return nil, errors.New("cannot cast")
+			return nil, errors.New(fmt.Sprintf("cannot cast %T", a))
 		}
 		ret[i] = aa
 	}
@@ -887,7 +887,7 @@ func ToAttrSphere(attrs []Attr) ([]*AttrSphere, error) {
 	for i, a := range attrs {
 		aa, ok := a.(*AttrSphere)
 		if !ok {
-			return nil, errors.New("cannot cast")
+			return nil, errors.New(fmt.Sprintf("cannot cast %T", a))
 		}
 		ret[i] = aa
 	}
@@ -908,7 +908,7 @@ func ToAttrCone(attrs []Attr) ([]*AttrCone, error) {
 	for i, a := range attrs {
 		aa, ok := a.(*AttrCone)
 		if !ok {
-			return nil, errors.New("cannot cast")
+			return nil, errors.New(fmt.Sprintf("cannot cast %T", a))
 		}
 		ret[i] = aa
 	}
@@ -937,7 +937,7 @@ func ToAttrReflectanceRGB(attrs []Attr) ([]*AttrReflectanceRGB, error) {
 	for i, a := range attrs {
 		aa, ok := a.(*AttrReflectanceRGB)
 		if !ok {
-			return nil, errors.New("cannot cast")
+			return nil, errors.New(fmt.Sprintf("cannot cast %T", a))
 		}
 		ret[i] = aa
 	}
@@ -968,7 +968,7 @@ func ToAttrSpectrumRGB(attrs []Attr) ([]*AttrSpectrumRGB, error) {
 	for i, a := range attrs {
 		aa, ok := a.(*AttrSpectrumRGB)
 		if !ok {
-			return nil, errors.New("cannot cast")
+			return nil, errors.New(fmt.Sprintf("cannot cast %T", a))
 		}
 		ret[i] = aa
 	}
@@ -995,7 +995,7 @@ func ToAttrComponentList(attrs []Attr) ([]*AttrComponentList, error) {
 	for i, a := range attrs {
 		aa, ok := a.(*AttrComponentList)
 		if !ok {
-			return nil, errors.New("cannot cast")
+			return nil, errors.New(fmt.Sprintf("cannot cast %T", a))
 		}
 		ret[i] = aa
 	}
@@ -1020,7 +1020,7 @@ func ToAttrAttributeAlias(attrs []Attr) ([]*AttrAttributeAlias, error) {
 	for i, a := range attrs {
 		aa, ok := a.(*AttrAttributeAlias)
 		if !ok {
-			return nil, errors.New("cannot cast")
+			return nil, errors.New(fmt.Sprintf("cannot cast %T", a))
 		}
 		ret[i] = aa
 	}
@@ -1045,7 +1045,7 @@ func ToAttrFormType(attrs []Attr) ([]*AttrFormType, error) {
 	for i, a := range attrs {
 		aa, ok := a.(*AttrFormType)
 		if !ok {
-			return nil, errors.New("cannot cast")
+			return nil, errors.New(fmt.Sprintf("cannot cast %T", a))
 		}
 		ret[i] = aa
 	}
@@ -1098,7 +1098,7 @@ func ToAttrCvValue(attrs []Attr) ([]*AttrCvValue, error) {
 	for i, a := range attrs {
 		aa, ok := a.(*AttrCvValue)
 		if !ok {
-			return nil, errors.New("cannot cast")
+			return nil, errors.New(fmt.Sprintf("cannot cast %T", a))
 		}
 		ret[i] = aa
 	}
@@ -1125,7 +1125,7 @@ func ToAttrNurbsCurve(attrs []Attr) ([]*AttrNurbsCurve, error) {
 	for i, a := range attrs {
 		aa, ok := a.(*AttrNurbsCurve)
 		if !ok {
-			return nil, errors.New("cannot cast")
+			return nil, errors.New(fmt.Sprintf("cannot cast %T", a))
 		}
 		ret[i] = aa
 	}
@@ -1164,7 +1164,7 @@ func ToAttrNurbsSurface(attrs []Attr) ([]*AttrNurbsSurface, error) {
 	for i, a := range attrs {
 		aa, ok := a.(*AttrNurbsSurface)
 		if !ok {
-			return nil, errors.New("cannot cast")
+			return nil, errors.New(fmt.Sprintf("cannot cast %T", a))
 		}
 		ret[i] = aa
 	}
@@ -1223,7 +1223,7 @@ func ToAttrNurbsTrimface(attrs []Attr) ([]*AttrNurbsTrimface, error) {
 	for i, a := range attrs {
 		aa, ok := a.(*AttrNurbsTrimface)
 		if !ok {
-			return nil, errors.New("cannot cast")
+			return nil, errors.New(fmt.Sprintf("cannot cast %T", a))
 		}
 		ret[i] = aa
 	}
@@ -1244,7 +1244,7 @@ func ToAttrFaceUV(attrs []Attr) ([]*AttrFaceUV, error) {
 	for i, a := range attrs {
 		aa, ok := a.(*AttrFaceUV)
 		if !ok {
-			return nil, errors.New("cannot cast")
+			return nil, errors.New(fmt.Sprintf("cannot cast %T", a))
 		}
 		ret[i] = aa
 	}
@@ -1270,7 +1270,7 @@ func ToAttrMultiColor(attrs []Attr) ([]*AttrMultiColor, error) {
 	for i, a := range attrs {
 		aa, ok := a.(*AttrMultiColor)
 		if !ok {
-			return nil, errors.New("cannot cast")
+			return nil, errors.New(fmt.Sprintf("cannot cast %T", a))
 		}
 		ret[i] = aa
 	}
@@ -1299,7 +1299,7 @@ func ToAttrPolyFaces(attrs []Attr) ([]*AttrPolyFaces, error) {
 	for i, a := range attrs {
 		aa, ok := a.(*AttrPolyFaces)
 		if !ok {
-			return nil, errors.New("cannot cast")
+			return nil, errors.New(fmt.Sprintf("cannot cast %T", a))
 		}
 		ret[i] = aa
 	}
@@ -1342,7 +1342,7 @@ func ToAttrDPCType(attrs []Attr) ([]*AttrDPCType, error) {
 	for i, a := range attrs {
 		aa, ok := a.(*AttrDPCType)
 		if !ok {
-			return nil, errors.New("cannot cast")
+			return nil, errors.New(fmt.Sprintf("cannot cast %T", a))
 		}
 		ret[i] = aa
 	}
@@ -1381,7 +1381,7 @@ func ToAttrDataPolyComponent(attrs []Attr) ([]*AttrDataPolyComponent, error) {
 	for i, a := range attrs {
 		aa, ok := a.(*AttrDataPolyComponent)
 		if !ok {
-			return nil, errors.New("cannot cast")
+			return nil, errors.New(fmt.Sprintf("cannot cast %T", a))
 		}
 		ret[i] = aa
 	}
@@ -1413,7 +1413,7 @@ func ToAttrLatticePoint(attrs []Attr) ([]*AttrLatticePoint, error) {
 	for i, a := range attrs {
 		aa, ok := a.(*AttrLatticePoint)
 		if !ok {
-			return nil, errors.New("cannot cast")
+			return nil, errors.New(fmt.Sprintf("cannot cast %T", a))
 		}
 		ret[i] = aa
 	}
@@ -1437,7 +1437,7 @@ func ToAttrLattice(attrs []Attr) ([]*AttrLattice, error) {
 	for i, a := range attrs {
 		aa, ok := a.(*AttrLattice)
 		if !ok {
-			return nil, errors.New("cannot cast")
+			return nil, errors.New(fmt.Sprintf("cannot cast %T", a))
 		}
 		ret[i] = aa
 	}
