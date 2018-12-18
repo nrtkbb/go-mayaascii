@@ -9,7 +9,7 @@ import (
 
 	"github.com/nrtkbb/bufscan"
 	"github.com/nrtkbb/go-mayaascii/cmd"
-	mac "github.com/nrtkbb/go-mayaascii/connection"
+	"github.com/nrtkbb/go-mayaascii/connection"
 	"github.com/nrtkbb/go-mayaascii/parser"
 )
 
@@ -19,7 +19,7 @@ type Object struct {
 	Nodes    []*Node
 
 	cmds []*cmd.Cmd
-	Cons mac.Connections
+	Cons connection.Connections
 }
 
 func (o *Object) Unmarshal(reader io.Reader) error {
@@ -150,6 +150,7 @@ type Attr struct {
 	Name   string
 	Node   *Node
 	Values []cmd.Attr
+	Type   cmd.AttrType
 
 	SA        *cmd.SetAttr
 	err       error
@@ -287,6 +288,7 @@ func (p *Parser) parseCreateNode() error {
 			Name:   at.AttrName,
 			Node:   node,
 			Values: at.Attr,
+			Type:   at.AttrType,
 			SA:     at,
 			LineNo: at.LineNo,
 		}

@@ -27,7 +27,7 @@ func main() {
 
 	// requires command parsed data.
 	for _, r := range mo.Requires {
-		fmt.Printf("%s version is %s. %d nodeTypes, %d dataTypes, %d Plugin's nodes.",
+		fmt.Printf("%s version is %s. %d nodeTypes, %d dataTypes, %d Plugin's nodes.\n",
 			r.Name, r.Version, len(r.NodeTypes), len(r.DataTypes), len(r.Nodes))
 	}
 
@@ -37,21 +37,21 @@ func main() {
 	}
 
 	// Specify node name.
-	persp, err := mo.GetNode("persp")
+	persp, err := mo.GetNode("perspShape")
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Get attribute (Must be short name) and cast to string.
-	ow, err := persp.Attr(".ow").String() // or .Int() or .Float() etc..
+	ow, err := persp.Attr(".imn").String() // or .Int() or .Float() etc..
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("%s.ow is %s", persp.Name, ow)
+	fmt.Printf("%s.t is %s", persp.Name, ow)
 
 	// Print Node's all attrs.
 	for _, a := range persp.Attrs {
-		fmt.Printf("%s.%s is %d\n", persp.Name, a.Name, len(a.Values))
+		fmt.Printf("%s%s is %d type is %s\n", persp.Name, a.Name, len(a.Values), a.Type)
 	}
 
 	// Print Node's all children.
