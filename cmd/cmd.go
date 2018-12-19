@@ -55,7 +55,7 @@ func (f *File) Parse() error {
 
 func (f *File) SaveSceneAs(outputPath string) error {
 	if _, err := os.Stat(outputPath); err == nil {
-		return errors.New("file already existed.")
+		return errors.New("file already existed")
 	}
 	fp, err := os.Create(outputPath)
 	if err != nil {
