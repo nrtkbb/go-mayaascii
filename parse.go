@@ -1059,16 +1059,16 @@ func MakeVectorArray(token *[]string, start int) (Attr, int, error) {
 	}
 	var a Attr
 	if numberOfArray != 0 {
-		f, err := ParseFloats((*token)[start+1 : start+1+numberOfArray]...)
+		f, err := ParseFloats((*token)[start+1 : start+1+numberOfArray*3]...)
 		if err != nil {
 			return nil, 0, err
 		}
 		va := make([]AttrVector, numberOfArray)
-		for i := 0; i < numberOfArray; i += 3 {
+		for i := 0; i < numberOfArray; i++ {
 			va[i] = AttrVector{
-				X: f[i],
-				Y: f[i+1],
-				Z: f[i+2],
+				X: f[i*3],
+				Y: f[i*3+1],
+				Z: f[i*3+2],
 			}
 		}
 		vaa := AttrVectorArray(va)
