@@ -30,8 +30,8 @@ func (o *Object) Unmarshal(reader io.Reader) error {
 	err := bufscan.BufScan(br, func(line string) error {
 		cmdBuilder.Append(line)
 		if cmdBuilder.IsCmdEOF() {
-			cmd := cmdBuilder.Parse()
-			cmds = append(cmds, cmd)
+			c := cmdBuilder.Parse()
+			cmds = append(cmds, c)
 			cmdBuilder.Clear()
 		}
 		return nil
