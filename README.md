@@ -35,13 +35,13 @@ func main() {
 
 	// requires command parsed data.
 	for _, r := range mo.Requires {
-		fmt.Printf("%s version is %s. %d nodeTypes, %d dataTypes, %d Plugin's nodes.",
+		fmt.Printf("%s version is %s. %d nodeTypes, %d dataTypes, %d Plugin's nodes.\n",
 			r.Name, r.Version, len(r.NodeTypes), len(r.DataTypes), len(r.Nodes))
 	}
 
 	// Print all nodes.
 	for _, n := range mo.Nodes {
-		fmt.Printf("%d : %s\n", n.Lineno, n.Name)
+		fmt.Printf("%d : %s\n", n.LineNo, n.Name)
 	}
 
 	// Specify node name.
@@ -59,7 +59,7 @@ func main() {
 
 	// Print Node's all attrs.
 	for _, a := range persp.Attrs {
-		fmt.Printf("%s.%s is %s\n", persp.Name, a.Name, a.Value.String())
+		fmt.Printf("%s%s is %d type is %s\n", persp.Name, a.Name, len(a.Values), a.Type)
 	}
 
 	// Print Node's all children.
@@ -80,7 +80,7 @@ func main() {
 
 	// Print transform nodes.
 	for _, t := range transforms {
-		fmt.Printf("%d : %s\n", t.Lineno, t.Name)
+		fmt.Printf("%d : %s\n", t.LineNo, t.Name)
 	}
 
 	// Get specified source connection nodes.
@@ -90,7 +90,53 @@ func main() {
 		Type: "camera",    // (Optional)
 	})
 
+	// Print src nodes.
+	for _, t := range srcNodes {
+		fmt.Printf("%d : %s\n", t.LineNo, t.Name)
+	}
+
 	// Get all destination connection nodes.
-	dstNodes, err := persp.Dst(nil)  // nil will return all connection nodes.
+	dstNodes, err := persp.Dst(nil) // nil will return all connection nodes.
+
+	// Print dst nodes.
+	for _, t := range dstNodes {
+		fmt.Printf("%d : %s\n", t.LineNo, t.Name)
+	}
 }
 ```
+
+
+## TODO
+
+- [x] Get Requires
+- [x] Get Parent Node
+- [x] Get Children Node
+- [x] Get Node
+- [x] Get Nodes
+- [x] Get Attr
+- [x] Get Attrs
+- [ ] Get Src Connection
+- [ ] Get Src Connections
+- [ ] Get History Connections
+- [ ] Get Dst Connection
+- [ ] Get Dst Connections
+- [ ] Get Future Connections
+- [ ] Get Default Node
+- [ ] Get Default Node Attr
+- [ ] Get FileInfo
+- [ ] Get currentUnit
+- [ ] Get LockNode
+- [ ] Get Relationship
+- [ ] Remove Require
+- [ ] Add Require
+- [ ] Remove Node
+- [ ] Add node
+- [ ] Remove AddAttr
+- [ ] Add AddAttr
+- [ ] Remove SetAttr
+- [ ] Add SetAttr
+- [ ] Remove Connection
+- [ ] Add Connection
+- [ ] Save As
+
+done 7 / 30
