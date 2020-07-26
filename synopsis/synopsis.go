@@ -15,7 +15,12 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer fp.Close()
+	defer func() {
+		err := fp.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
 
 	reader := bufio.NewReader(fp)
 
@@ -76,10 +81,10 @@ func main() {
 	}
 
 	// Get specified source connection nodes.
-	srcNodes, err := persp.Src(&ma.ConnectInfo{
-		Name: "topShape", // (Optional)
-		Attr: ".ow",      // (Optional) Must be specified with a short name
-		Type: "camera",   // (Optional)
+	srcNodes := persp.ListConnections(&ma.ConnectionArgs{
+		Source: true,
+		Type: "camera",
+		AttrName: ".ow", // Specific persp's attr name.
 	})
 
 	// Print src nodes.
@@ -88,7 +93,9 @@ func main() {
 	}
 
 	// Get all destination connection nodes.
-	dstNodes, err := persp.Dst(nil) // nil will return all connection nodes.
+	dstNodes := persp.ListConnections(&ma.ConnectionArgs{
+		Destination: true,
+	})
 
 	// Print dst nodes.
 	for _, t := range dstNodes {

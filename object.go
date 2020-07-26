@@ -1,4 +1,4 @@
-package object
+package mayaascii
 
 import (
 	"bufio"
@@ -16,22 +16,22 @@ import (
 // Object ...
 type Object struct {
 	Requires []*Require
-	Nodes    []*Node
+	Nodes    map[string]*Node
 
-	cmds []*cmd.Cmd
-	Cons connection.Connections
+	cmds        []*cmd.Cmd
+	connections connection.Connections
 }
 
 func (o *Object) Unmarshal(reader io.Reader) error {
 	br := bufio.NewReader(reader)
 
-	var cmds []*cmd.Cmd
+	//var cmds []*cmd.Cmd
 	cmdBuilder := &cmd.CmdBuilder{}
 	err := bufscan.BufScan(br, func(line string) error {
 		cmdBuilder.Append(line)
 		if cmdBuilder.IsCmdEOF() {
 			c := cmdBuilder.Parse()
-			cmds = append(cmds, c)
+			o.cmds = append(o.cmds, c)
 			cmdBuilder.Clear()
 		}
 		return nil
@@ -40,8 +40,9 @@ func (o *Object) Unmarshal(reader io.Reader) error {
 		return err
 	}
 
-	p := New(cmds)
-	p.ParseCmds(o)
+	p := New(o.cmds)
+	p.o = o
+	p.ParseCmds()
 	if !p.CheckErrors() {
 		return nil
 	}
@@ -50,23 +51,22 @@ func (o *Object) Unmarshal(reader io.Reader) error {
 }
 
 func (o *Object) GetNode(n string) (*Node, error) {
-	for _, node := range o.Nodes {
-		if node.Name == n {
-			return node, nil
-		}
+	node, ok := o.Nodes[n]
+	if !ok {
+		return nil, errors.New(fmt.Sprintf("%s node was not found", n))
 	}
-	return nil, errors.New(fmt.Sprintf("%s node was not found", n))
+	return node, nil
 }
 
-func (o *Object) GetNodes(tn string) ([]*Node, error) {
+func (o *Object) GetNodes(nodeType string) ([]*Node, error) {
 	var results []*Node
 	for _, node := range o.Nodes {
-		if node.Type == tn {
+		if node.Type == nodeType {
 			results = append(results, node)
 		}
 	}
 	if len(results) == 0 {
-		return nil, errors.New(fmt.Sprintf("%s type was not found", tn))
+		return nil, errors.New(fmt.Sprintf("%s type was not found", nodeType))
 	}
 	return results, nil
 }
@@ -78,10 +78,11 @@ type Require struct {
 	NodeTypes []string
 	DataTypes []string
 	Nodes     []*Node
-	Datas     []*Node // TODO: 何もセットしてない
+	Data      []*Node // TODO: 何もセットしてない
 }
 
 type Node struct {
+	object     *Object
 	LineNo     uint
 	Type       string
 	Name       string
@@ -91,25 +92,11 @@ type Node struct {
 	Parent     *Node
 	Children   []*Node
 
-	isDeleted bool
-	CN        *cmd.CreateNode
-	RN        *cmd.Rename
-	AT        []*cmd.SetAttr
-	AD        []*cmd.AddAttr
-}
-
-type ConnectInfo interface {
-	GetName() string
-	GetAttr() string
-	GetType() string
-}
-
-func (n *Node) Src(ci ConnectInfo) ([]*Node, error) {
-	return nil, nil
-}
-
-func (n *Node) Dst(ci ConnectInfo) ([]*Node, error) {
-	return nil, nil
+	isDeleted  bool
+	CreateNode *cmd.CreateNode
+	Rename     *cmd.Rename
+	SetAttrs   []*cmd.SetAttr
+	AddAttrs   []*cmd.AddAttr
 }
 
 func (n *Node) Attr(name string) *Attr {
@@ -143,6 +130,76 @@ func (n *Node) Remove() error {
 	}
 	n.isDeleted = true
 	return nil
+}
+
+type ConnectionArgs struct {
+	Source      bool
+	Destination bool
+	Type        string
+	AttrName    string
+}
+
+func (n *Node) ListConnections(ca *ConnectionArgs) []*Node {
+	if ca == nil {
+		// default settings.
+		ca = &ConnectionArgs{
+			Source:      true,
+			Destination: true,
+			Type:        "",
+			AttrName:    "",
+		}
+	}
+	var names []string
+	if ca.Source {
+		if ca.AttrName != "" {
+			names = n.object.connections.GetSrcNamesAttr(n.Name, ca.AttrName)
+		} else {
+			names = n.object.connections.GetSrcNames(n.Name)
+		}
+	}
+	if ca.Destination {
+		if ca.AttrName != "" {
+			names = n.object.connections.GetDstNamesAttr(n.Name, ca.AttrName)
+		} else {
+			names = n.object.connections.GetDstNames(n.Name)
+		}
+	}
+	var nodes []*Node
+	for _, name := range names {
+		srcNode, ok := n.object.Nodes[name]
+		if !ok {
+			// name is maybe default node.
+			defaultNode := &Node{
+				object:     n.object,
+				LineNo:     0,
+				Type:       "Unknown",
+				Name:       name,
+				Attrs:      nil,
+				Shared:     true,
+				SkipSelect: false,
+				Parent:     nil,
+				Children:   nil,
+				isDeleted:  false,
+				CreateNode: nil,
+				Rename:     nil,
+				SetAttrs:   nil,
+				AddAttrs:   nil,
+			}
+			nodes = append(nodes, defaultNode)
+		} else {
+			nodes = append(nodes, srcNode)
+		}
+	}
+	if ca.Type == "" {
+		return nodes
+	}
+	var typeFiltered []*Node
+	for _, node := range nodes {
+		if node.Type == ca.Type {
+			typeFiltered = append(typeFiltered, node)
+		}
+	}
+	return typeFiltered
 }
 
 type Attr struct {
@@ -190,8 +247,7 @@ func New(cmds []*cmd.Cmd) *Parser {
 	return p
 }
 
-func (p *Parser) ParseCmds(o *Object) {
-	p.o = o
+func (p *Parser) ParseCmds() {
 	var err error
 	for p.CurCmd != nil {
 		switch p.CurCmd.Type {
@@ -207,7 +263,6 @@ func (p *Parser) ParseCmds(o *Object) {
 		}
 		if err != nil {
 			p.errs = append(p.errs, err.Error())
-			//return err
 		}
 		p.NextCmd()
 	}
@@ -239,51 +294,54 @@ func (p *Parser) parseRequires() error {
 func (p *Parser) parseCreateNode() error {
 	cn := parser.MakeCreateNode(p.CurCmd)
 	node := &Node{
+		object:     p.o,
 		Type:       cn.NodeType,
 		Name:       cn.NodeName,
 		Shared:     cn.Shared,
 		SkipSelect: cn.SkipSelect,
-		CN:         cn,
+		CreateNode: cn,
 		LineNo:     cn.LineNo,
 	}
-	p.o.Nodes = append(p.o.Nodes, node)
+	if _, ok := p.o.Nodes[node.Name]; ok {
+		return errors.New(fmt.Sprintf("Already found node ... %s", node.Name))
+	}
+	p.o.Nodes[node.Name] = node
 
 	if cn.Parent != nil {
 		// reverse loop.
-		for i := len(p.o.Nodes) - 1; i >= 0; i-- {
-			n := p.o.Nodes[i]
-			if n.Name == *cn.Parent {
-				node.Parent = n
-				n.Children = append(n.Children, node)
-				break
-			}
+		parentNode, ok := p.o.Nodes[*cn.Parent]
+		if !ok {
+			return errors.New(fmt.Sprintf("Not found parent %s. node is %s",
+				*cn.Parent, node.Name))
 		}
+		node.Parent = parentNode
+		parentNode.Children = append(parentNode.Children, node)
 	}
 
 	if p.PeekCmdIs(cmd.RENAME) {
 		p.NextCmd()
-		node.RN = parser.MakeRename(p.CurCmd)
+		node.Rename = parser.MakeRename(p.CurCmd)
 	}
 
 	for p.PeekCmdIs(cmd.ADDATTR) {
 		p.NextCmd()
 		ad := parser.MakeAddAttr(p.CurCmd)
-		node.AD = append(node.AD, ad)
+		node.AddAttrs = append(node.AddAttrs, ad)
 	}
 
 	for p.PeekCmdIs(cmd.SETATTR) {
 		p.NextCmd()
 		var at *cmd.SetAttr
 		var err error
-		if len(node.AT) == 0 {
+		if len(node.SetAttrs) == 0 {
 			at, err = parser.MakeSetAttr(p.CurCmd, nil)
 		} else {
-			at, err = parser.MakeSetAttr(p.CurCmd, node.AT[len(node.AT)-1])
+			at, err = parser.MakeSetAttr(p.CurCmd, node.SetAttrs[len(node.SetAttrs)-1])
 		}
 		if err != nil {
 			return err
 		}
-		node.AT = append(node.AT, at)
+		node.SetAttrs = append(node.SetAttrs, at)
 		a := &Attr{
 			Name:   at.AttrName,
 			Node:   node,
@@ -319,7 +377,7 @@ func (p *Parser) parseConnectAttr() error {
 	if err != nil {
 		return err
 	}
-	p.o.Cons.Append(ca)
+	p.o.connections.Append(ca)
 	return nil
 }
 
