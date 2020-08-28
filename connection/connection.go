@@ -8,6 +8,12 @@ type Connections struct {
 	source []*cmd.ConnectAttr
 }
 
+func NewConnections() Connections {
+	return Connections{
+		source: []*cmd.ConnectAttr{},
+	}
+}
+
 func (ci *Connections) Append(ca *cmd.ConnectAttr) {
 	ci.source = append(ci.source, ca)
 }

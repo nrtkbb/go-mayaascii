@@ -24,6 +24,7 @@ const (
 	RENAME      Type = "rename"
 	SETATTR     Type = "setAttr"
 	ADDATTR     Type = "addAttr"
+	SELECT      Type = "select"
 )
 
 type File struct {
@@ -266,6 +267,26 @@ type Rename struct {
 	To          *string `json:"to"`
 	UUID        bool    `json:"uuid" short:"-uid"`
 	IgnoreShape bool    `json:"ignore_shape" short:"-is"`
+}
+
+type Select struct {
+	*Cmd
+	Names              []string `json:"names"`
+	Add                bool     `json:"add" short:"-add"`
+	AddFirst           bool     `json:"add_first" short:"-af"`
+	All                bool     `json:"all" short:"-all"`
+	AllDagObjects      bool     `json:"all_dag_objects" short:"-ado"`
+	AllDependencyNodes bool     `json:"all_dependency_nodes" short:"-adn"`
+	Clear              bool     `json:"clear" short:"-cl"`
+	ContainerCentric   bool     `json:"container_centric" short:"-cc"`
+	Deselect           bool     `json:"deselect" short:"-d"`
+	Hierarchy          bool     `json:"hierarchy" short:"-hi"`
+	NoExpand           bool     `json:"no_expand" short:"-ne"`
+	Replace            bool     `json:"replace" short:"-r"`
+	Symmetry           bool     `json:"symmetry" short:"-sym"`
+	SymmetrySide       bool     `json:"symmetry_side" short:"-sys"`
+	Toggle             bool     `json:"toggle" short:"-tgl"`
+	Visible            bool     `json:"visible" short:"-vis"`
 }
 
 type SetAttr struct {

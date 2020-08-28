@@ -126,6 +126,47 @@ func MakeRename(c *cmd.Cmd) *cmd.Rename {
 	return r
 }
 
+func MakeSelect(c *cmd.Cmd) *cmd.Select {
+	s := &cmd.Select{Cmd: c}
+	for i := 1; i < len(c.Token); i++ {
+		switch s.Token[i] {
+		case "-add":
+			s.Add = true
+		case "-af":
+			s.AddFirst = true
+		case "-all":
+			s.All = true
+		case "-ado":
+			s.AllDagObjects = true
+		case "-adn":
+			s.AllDependencyNodes = true
+		case "-cl":
+			s.Clear = true
+		case "-cc":
+			s.ContainerCentric = true
+		case "-d":
+			s.Deselect = true
+		case "-hi":
+			s.Hierarchy = true
+		case "-ne":
+			s.NoExpand = true
+		case "-r":
+			s.Replace = true
+		case "-sym":
+			s.Symmetry = true
+		case "-sys":
+			s.SymmetrySide = true
+		case "-tgl":
+			s.Toggle = true
+		case "-vis":
+			s.Visible = true
+		default:
+			s.Names = append(s.Names, s.Token[i])
+		}
+	}
+	return s
+}
+
 func getAttrNameFromSetAttr(token *[]string) (int, string) {
 	for i := 1; i < len(*token); i++ {
 		t := (*token)[i]

@@ -4,19 +4,20 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"io"
-	"log"
-
 	"github.com/nrtkbb/bufscan"
 	"github.com/nrtkbb/go-mayaascii/cmd"
 	"github.com/nrtkbb/go-mayaascii/connection"
 	"github.com/nrtkbb/go-mayaascii/parser"
+	"io"
+	"log"
+	"strings"
 )
 
 // Object ...
 type Object struct {
 	Requires []*Require
 	Nodes    map[string]*Node
+	Selects  []*Select
 
 	cmds        []*cmd.Cmd
 	connections connection.Connections
@@ -25,7 +26,6 @@ type Object struct {
 func (o *Object) Unmarshal(reader io.Reader) error {
 	br := bufio.NewReader(reader)
 
-	//var cmds []*cmd.Cmd
 	cmdBuilder := &cmd.CmdBuilder{}
 	err := bufscan.BufScan(br, func(line string) error {
 		cmdBuilder.Append(line)
@@ -97,6 +97,14 @@ type Node struct {
 	Rename     *cmd.Rename
 	SetAttrs   []*cmd.SetAttr
 	AddAttrs   []*cmd.AddAttr
+}
+
+type Select struct {
+	Name string
+
+	Select   *cmd.Select
+	SetAttrs []*cmd.SetAttr
+	AddAttrs []*cmd.AddAttr
 }
 
 func (n *Node) Attr(name string) *Attr {
@@ -248,8 +256,8 @@ func New(cmds []*cmd.Cmd) *Parser {
 }
 
 func (p *Parser) ParseCmds() {
-	var err error
 	for p.CurCmd != nil {
+		var err error
 		switch p.CurCmd.Type {
 		case cmd.REQUIRES:
 			err = p.parseRequires()
@@ -257,9 +265,11 @@ func (p *Parser) ParseCmds() {
 			err = p.parseCreateNode()
 		case cmd.CONNECTATTR:
 			err = p.parseConnectAttr()
+		case cmd.SELECT:
+			err = p.parseSelect()
 		default:
 			err = errors.New(fmt.Sprintf(
-				"%s type parser is not found", p.CurCmd.Type))
+				"%s type parser is not found. %v", p.CurCmd.Type, *p.CurCmd))
 		}
 		if err != nil {
 			p.errs = append(p.errs, err.Error())
@@ -301,6 +311,8 @@ func (p *Parser) parseCreateNode() error {
 		SkipSelect: cn.SkipSelect,
 		CreateNode: cn,
 		LineNo:     cn.LineNo,
+		SetAttrs:   []*cmd.SetAttr{},
+		AddAttrs:   []*cmd.AddAttr{},
 	}
 	if _, ok := p.o.Nodes[node.Name]; ok {
 		return errors.New(fmt.Sprintf("Already found node ... %s", node.Name))
@@ -378,6 +390,46 @@ func (p *Parser) parseConnectAttr() error {
 		return err
 	}
 	p.o.connections.Append(ca)
+	return nil
+}
+
+func (p *Parser) parseSelect() error {
+	s := parser.MakeSelect(p.CurCmd)
+	if len(s.Names) > 1 {
+		return errors.New(fmt.Sprintf("un-support bulk select. [%s], %v", strings.Join(s.Names, ", "), *s))
+	} else if len(s.Names) == 0 {
+		return errors.New(fmt.Sprintf("un-support zero select. %v", *s))
+	}
+	sel := &Select{
+		Name: s.Names[0],
+
+		Select:   s,
+		SetAttrs: []*cmd.SetAttr{},
+		AddAttrs: []*cmd.AddAttr{},
+	}
+	p.o.Selects = append(p.o.Selects, sel)
+
+	for p.PeekCmdIs(cmd.ADDATTR) {
+		p.NextCmd()
+		ad := parser.MakeAddAttr(p.CurCmd)
+		sel.AddAttrs = append(sel.AddAttrs, ad)
+	}
+
+	for p.PeekCmdIs(cmd.SETATTR) {
+		p.NextCmd()
+		var at *cmd.SetAttr
+		var err error
+		if len(sel.SetAttrs) == 0 {
+			at, err = parser.MakeSetAttr(p.CurCmd, nil)
+		} else {
+			at, err = parser.MakeSetAttr(p.CurCmd, sel.SetAttrs[len(sel.SetAttrs)-1])
+		}
+		if err != nil {
+			return err
+		}
+		sel.SetAttrs = append(sel.SetAttrs, at)
+	}
+
 	return nil
 }
 
