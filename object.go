@@ -9,7 +9,6 @@ import (
 	"github.com/nrtkbb/go-mayaascii/connection"
 	"github.com/nrtkbb/go-mayaascii/parser"
 	"io"
-	"log"
 	"strings"
 )
 
@@ -279,12 +278,12 @@ func (p *Parser) ParseCmds() {
 }
 
 func (p *Parser) CheckErrors() bool {
-	if 0 < len(p.errs) {
-		for _, e := range p.errs {
-			log.Println(e)
-		}
-		return false
-	}
+	//if 0 < len(p.errs) {
+	//	for _, e := range p.errs {
+	//		log.Println(e)
+	//	}
+	//	return false
+	//}
 	return true
 }
 
