@@ -1,9 +1,13 @@
-package mayaascii
+package parser
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/nrtkbb/go-mayaascii/cmd"
+)
 
 func TestMakeCreateNode_Min(t *testing.T) {
-	c := &CmdBuilder{}
+	c := &cmd.CmdBuilder{}
 	c.Append(`createNode transform -n "nodeName";`)
 	cn := MakeCreateNode(c.Parse())
 	msg := `got CreateNode %s "%s", wont "%s"`
@@ -25,7 +29,7 @@ func TestMakeCreateNode_Min(t *testing.T) {
 }
 
 func TestMakeCreateNode_Max(t *testing.T) {
-	c := &CmdBuilder{}
+	c := &cmd.CmdBuilder{}
 	c.Append(`createNode camera -s -n "ns:grp|ns:cam|ns:camShape" -p "ns:grp|ns:cam";`)
 	cn := MakeCreateNode(c.Parse())
 	msg := `got CreateNode %s "%s", wont "%s"`

@@ -1,4 +1,4 @@
-package mayaascii
+package cmd
 
 type AttrType int
 

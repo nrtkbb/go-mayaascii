@@ -1,30 +1,26 @@
-# go-mayaascii
-
-[![Build Status](https://travis-ci.org/nrtkbb/go-mayaascii.svg?branch=master)](https://travis-ci.org/nrtkbb/go-mayaascii)
-
-Work in progress.
-
-# For example.
-
-```go
 package main
 
 import (
 	"bufio"
 	"fmt"
+	ma "github.com/nrtkbb/go-mayaascii"
 	"log"
 	"os"
-
-	ma "github.com/nrtkbb/go-mayaascii"
+	"testing"
 )
 
-func main() {
+func TestSynopsis(t *testing.T) {
 	// Read file Maya Ascii.
 	fp, err := os.Open("basic.ma")
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer fp.Close()
+	defer func() {
+		err := fp.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
 
 	reader := bufio.NewReader(fp)
 
@@ -46,17 +42,17 @@ func main() {
 	}
 
 	// Specify node name.
-	persp, err := mo.GetNode("persp")
+	persp, err := mo.GetNode("perspShape")
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Get attribute (Must be short name) and cast to string.
-	ow, err := persp.Attr(".ow").String()  // or .asInt() or .asFloat() etc..
+	ow, err := persp.Attr(".imn").String() // or .Int() or .Float() etc..
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("%s.ow is %s", persp.Name, ow)
+	fmt.Printf("%s.t is %s", persp.Name, ow)
 
 	// Print Node's all attrs.
 	for _, a := range persp.Attrs {
@@ -106,40 +102,3 @@ func main() {
 		fmt.Printf("%d : %s\n", t.LineNo, t.Name)
 	}
 }
-```
-
-
-## TODO
-
-- [x] Get Requires
-- [x] Get Parent Node
-- [x] Get Children Node
-- [x] Get Node
-- [x] Get Nodes
-- [x] Get Attr
-- [x] Get Attrs
-- [x] Get Src Connection
-- [x] Get Src Connections
-- [ ] Get History Connections
-- [x] Get Dst Connection
-- [x] Get Dst Connections
-- [ ] Get Future Connections
-- [ ] Get Default Node
-- [ ] Get Default Node Attr
-- [ ] Get FileInfo
-- [ ] Get currentUnit
-- [ ] Get LockNode
-- [ ] Get Relationship
-- [ ] Remove Require
-- [ ] Add Require
-- [ ] Remove Node
-- [ ] Add node
-- [ ] Remove AddAttr
-- [ ] Add AddAttr
-- [ ] Remove SetAttr
-- [ ] Add SetAttr
-- [ ] Remove Connection
-- [ ] Add Connection
-- [ ] Save As
-
-done 7 / 30

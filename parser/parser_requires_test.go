@@ -1,14 +1,16 @@
-package mayaascii
+package parser
 
 import (
 	"testing"
+
+	"github.com/nrtkbb/go-mayaascii/cmd"
 )
 
 func TestMakeRequires_Min(t *testing.T) {
-	cb := &CmdBuilder{}
+	cb := &cmd.CmdBuilder{}
 	cb.Append(`requires maya "2016";`)
-	cmd := cb.Parse()
-	r := MakeRequires(cmd)
+	c := cb.Parse()
+	r := MakeRequires(c)
 	if r.PluginName != "maya" {
 		t.Fatalf("got %v, wont %v", r.PluginName, "maya")
 	}
@@ -24,11 +26,11 @@ func TestMakeRequires_Min(t *testing.T) {
 }
 
 func TestMakeRequires_Max(t *testing.T) {
-	cb := &CmdBuilder{}
+	cb := &cmd.CmdBuilder{}
 	cb.Append(`requires -nodeType "typeName1"
 		-dataType "typeName2" "pluginName" "version";`)
-	cmd := cb.Parse()
-	r := MakeRequires(cmd)
+	c := cb.Parse()
+	r := MakeRequires(c)
 	if r.PluginName != "pluginName" {
 		t.Fatalf("got %v, wont %v", r.PluginName, "pluginName")
 	}
