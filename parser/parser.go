@@ -402,9 +402,18 @@ func ParseInts(token ...string) ([]int, error) {
 	for _, t := range token {
 		i, err := strconv.ParseInt(t, 10, 64)
 		if err != nil {
-			panic(err)
+			value, err := isOnYesOrOffNo(t)
+			if err != nil {
+				panic(err)
+			}
+			if value {
+				result = append(result, 1)
+			} else {
+				result = append(result, 0)
+			}
+		} else {
+			result = append(result, int(i))
 		}
-		result = append(result, int(i))
 	}
 	return result, nil
 }
