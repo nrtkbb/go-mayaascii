@@ -8,6 +8,7 @@ import (
 
 func Unmarshal(reader io.Reader) (*Object, error) {
 	mo := &Object{
+		Files: []*File{},
 		Requires: []*Require{},
 		Nodes: map[string]*Node{},
 
@@ -15,6 +16,23 @@ func Unmarshal(reader io.Reader) (*Object, error) {
 		connections: connection.NewConnections(),
 	}
 	err := mo.Unmarshal(reader)
+	if err != nil {
+		return nil, err
+	}
+
+	return mo, nil
+}
+
+func UnmarshalFocus(reader io.Reader, focusCommands []cmd.Type) (*Object, error) {
+	mo := &Object{
+		Files: []*File{},
+		Requires: []*Require{},
+		Nodes: map[string]*Node{},
+
+		cmds: []*cmd.Cmd{},
+		connections: connection.NewConnections(),
+	}
+	err := mo.UnmarshalFocus(reader, focusCommands)
 	if err != nil {
 		return nil, err
 	}

@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"log"
 	"os"
 
@@ -31,13 +32,13 @@ func main() {
 
 	// requires command parsed data.
 	for _, r := range mo.Requires {
-		log.Printf("%s version is %s. %d nodeTypes, %d dataTypes, %d Plugin's nodes.\n",
+		fmt.Printf("%s version is %s. %d nodeTypes, %d dataTypes, %d Plugin's nodes.\n",
 			r.Name, r.Version, len(r.NodeTypes), len(r.DataTypes), len(r.Nodes))
 	}
 
 	// Print all nodes.
 	for _, n := range mo.Nodes {
-		log.Printf("%d : %s\n", n.LineNo, n.Name)
+		fmt.Printf("%d : %s\n", n.LineNo, n.Name)
 	}
 
 	// Specify node name.
@@ -51,21 +52,21 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Printf("%s.t is %s", persp.Name, ow)
+	fmt.Printf("%s.t is %s", persp.Name, ow)
 
 	// Print Node's all attrs.
 	for _, a := range persp.Attrs {
-		log.Printf("%s%s is %d type is %s\n", persp.Name, a.Name, len(a.Values), a.Type)
+		fmt.Printf("%s%s is %d type is %s\n", persp.Name, a.Name, len(a.Values), a.Type)
 	}
 
 	// Print Node's all children.
 	for _, c := range persp.Children {
-		log.Printf("%s child is %s\n", persp.Name, c.Name)
+		fmt.Printf("%s child is %s\n", persp.Name, c.Name)
 	}
 
 	// Print Node's parent node.
 	if persp.Parent != nil {
-		log.Printf("%s parent is %s\n", persp.Name, persp.Parent.Name)
+		fmt.Printf("%s parent is %s\n", persp.Name, persp.Parent.Name)
 	}
 
 	// Get nodes by nodeType.
@@ -76,7 +77,7 @@ func main() {
 
 	// Print transform nodes.
 	for _, t := range transforms {
-		log.Printf("%d : %s\n", t.LineNo, t.Name)
+		fmt.Printf("%d : %s\n", t.LineNo, t.Name)
 	}
 
 	// Get specified source connection nodes.
@@ -88,7 +89,7 @@ func main() {
 
 	// Print src nodes.
 	for _, t := range srcNodes {
-		log.Printf("%d : %s\n", t.LineNo, t.Name)
+		fmt.Printf("%d : %s\n", t.LineNo, t.Name)
 	}
 
 	// Get all destination connection nodes.
@@ -98,6 +99,6 @@ func main() {
 
 	// Print dst nodes.
 	for _, t := range dstNodes {
-		log.Printf("%d : %s\n", t.LineNo, t.Name)
+		fmt.Printf("%d : %s\n", t.LineNo, t.Name)
 	}
 }

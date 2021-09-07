@@ -1361,6 +1361,272 @@ func TestMakeDataPolyComponentFace(t *testing.T) {
 	}
 }
 
+func TestMakeDataReferenceEdits(t *testing.T) {
+	c := &cmd.CmdBuilder{}
+	c.Append(`setAttr ".ed" -type "dataReferenceEdits"
+	"namespaceRN"
+	"namespace:childNameSpaceRN" 11
+    0 "nodeNameA" "nodeNameB" "-s -r "
+	1 |namespace:topNode "extraAttr" "ea" " -ci 1 -nn \"ea\" -at \"double\""
+	2 "|namespace:topNode" "ea" " -k 1 0"
+	3 "namespace:nodeNameA.attrNameA" "namespace:nodeNameB.attrNameB" ""
+	4 "|namespace:topNode" "dexAttr" ""
+	5 0 "namespace:childNameSpaceRN" "|namespace:topNode.attrNameA" "|namespace:topNode.attrNameB"
+	"namespace:childNameSpaceRN.placeHolderList[1]" "namespace:childNameSpaceRN.placeHolderList[2]" ""
+	5 3 "namespace:childNameSpaceRN" "|namespace:topNode|namespace:childNode.attrNameA"
+	"namespace:childNameSpaceRN.placeHolderList[3]" ""
+	5 4 "namespace:childNameSpaceRN" "|namespace:topNode|namespace:childNode.attrNameB"
+	"namespace:childNameSpaceRN.placeHolderList[4]" ""
+    7 "fcurve" "|namespace:nodeName_attrName_X" 1
+	"add 396 -4131.291016 18 18 1 0 0 423 -4131.291016 18 18 1 0 0" 0
+    8 "|namespace:topNode" "attrNameA"
+    9 "|namespace:topNode" "attrNameA";`)
+	sa, err := MakeSetAttr(c.Parse(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	msg := `got SetAttr %s %v, wont %v`
+	if sa.AttrType != cmd.TypeDataReferenceEdits {
+		t.Errorf(msg, "AttrType", sa.AttrType, cmd.TypeDataReferenceEdits)
+	}
+	ret, err := cmd.ToAttrDataReferenceEdits(sa.Attr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(ret) != 1 {
+		t.Errorf(msg, "len(ret)", len(ret), 1)
+	}
+	re := ret[0]
+	if re.TopReferenceNode != "namespaceRN" {
+		t.Errorf(msg, "TopReferenceNode", re.TopReferenceNode, "namespaceRN")
+	}
+	if len(re.ReferenceEdits) != 1 {
+		t.Errorf(msg, "len(re.ReferenceEdits)", len(re.ReferenceEdits), 1)
+	}
+	referenceEdit := re.ReferenceEdits[0]
+	if referenceEdit.ReferenceNode != "namespace:childNameSpaceRN" {
+		t.Errorf(msg, "referenceEdit.ReferenceNode",
+			referenceEdit.ReferenceNode, "namespace:childNameSpaceRN")
+	}
+	if referenceEdit.CommandNum != 11 {
+		t.Errorf(msg, "referenceEdit.CommandNum", referenceEdit.CommandNum, 11)
+	}
+
+	// Parent
+	if len(referenceEdit.Parents) != 1 {
+		t.Errorf(msg, "len(referenceEdit.Parents)", len(referenceEdit.Parents), 1)
+	}
+	parent := referenceEdit.Parents[0]
+	if parent.NodeA != "nodeNameA" {
+		t.Errorf(msg, "parent.NodeA", parent.NodeA, "nodeNameA")
+	}
+	if parent.NodeB != "nodeNameB" {
+		t.Errorf(msg, "parent.NodeB", parent.NodeB, "nodeNameB")
+	}
+	if parent.Arguments != "-s -r " {
+		t.Errorf(msg, "parent.Arguments", parent.Arguments, "-s -r ")
+	}
+
+	// AddAttr
+	if len(referenceEdit.AddAttrs) != 1 {
+		t.Errorf(msg, "len(referenceEdit.AddAttrs)", len(referenceEdit.AddAttrs), 1)
+	}
+	addAttr := referenceEdit.AddAttrs[0]
+	if addAttr.Node != "|namespace:topNode" {
+		t.Errorf(msg, "addAttr.Node", addAttr.Node, "|namespace:topNode")
+	}
+	if addAttr.LongAttr != "extraAttr" {
+		t.Errorf(msg, "addAttr.LongAttr", addAttr.LongAttr, "extraAttr")
+	}
+	if addAttr.ShortAttr != "ea" {
+		t.Errorf(msg, "addAttr.ShortAttr", addAttr.ShortAttr, "ea")
+	}
+	if addAttr.Arguments != " -ci 1 -nn \\\"ea\\\" -at \\\"double\\\"" {
+		t.Errorf(msg, "addAttr.Arguments", addAttr.Arguments,
+			" -ci 1 -nn \\\"ea\\\" -at \\\"double\\\"")
+	}
+
+	// SetAttr
+	if len(referenceEdit.SetAttrs) != 1 {
+		t.Errorf(msg, "len(referenceEdit.SetAttrs)", len(referenceEdit.SetAttrs), 1)
+	}
+	setAttr := referenceEdit.SetAttrs[0]
+	if setAttr.Node != "|namespace:topNode" {
+		t.Errorf(msg, "setAttr.Node", setAttr.Node, "|namespace:topNode")
+	}
+	if setAttr.Attr != "ea" {
+		t.Errorf(msg, "setAttr.Attr", setAttr.Attr, "ea")
+	}
+	if setAttr.Arguments != " -k 1 0" {
+		t.Errorf(msg, "setAttr.Arguments", setAttr.Arguments, " -k 1 0")
+	}
+
+	// DisconnectAttr
+	if len(referenceEdit.DisconnectAttrs) != 1 {
+		t.Errorf(msg, "len(referenceEdit.DisconnectAttrs)",
+			len(referenceEdit.DisconnectAttrs), 1)
+	}
+	disconnectAttr := referenceEdit.DisconnectAttrs[0]
+	if disconnectAttr.SourcePlug != "namespace:nodeNameA.attrNameA" {
+		t.Errorf(msg, "disconnectAttr.SourcePlug", disconnectAttr.SourcePlug,
+			"namespace:nodeNameA.attrNameA")
+	}
+	if disconnectAttr.DistPlug != "namespace:nodeNameB.attrNameB" {
+		t.Errorf(msg, "disconnectAttr.DistPlug", disconnectAttr.DistPlug,
+			"namespace:nodeNameB.attrNameB")
+	}
+	if disconnectAttr.Arguments != "" {
+		t.Errorf(msg, "disconnectAttr.Arguments", disconnectAttr.Arguments, "")
+	}
+
+	// DeleteAttr
+	if len(referenceEdit.DeleteAttrs) != 1 {
+		t.Errorf(msg, "referenceEdit.DeleteAttrs", len(referenceEdit.DeleteAttrs), 1)
+	}
+	deleteAttr := referenceEdit.DeleteAttrs[0]
+	if deleteAttr.Node != "|namespace:topNode" {
+		t.Errorf(msg, "deleteAttr.Node", deleteAttr.Node, "|namespace:topNode")
+	}
+	if deleteAttr.Attr != "dexAttr" {
+		t.Errorf(msg, "deleteAttr.Attr", deleteAttr.Attr, "dexAttr")
+	}
+	if deleteAttr.Arguments != "" {
+		t.Errorf(msg, "deleteAttr.Arguments", deleteAttr.Arguments, "")
+	}
+
+	// ConnectAttr
+	if len(referenceEdit.ConnectAttrs) != 3 {
+		t.Errorf(msg, "len(referenceEdit.ConnectAttrs)", len(referenceEdit.ConnectAttrs), 3)
+	}
+	connectAttr1 := referenceEdit.ConnectAttrs[0]
+	if connectAttr1.MagicNumber != 0 {
+		t.Errorf(msg, "connectAttr1.MagicNumber", connectAttr1.MagicNumber, 0)
+	}
+	if connectAttr1.ReferenceNode != "namespace:childNameSpaceRN" {
+		t.Errorf(msg, "connectAttr1.ReferenceNode", connectAttr1.ReferenceNode,
+			"namespace:childNameSpaceRN")
+	}
+	if connectAttr1.SourcePlug != "|namespace:topNode.attrNameA" {
+		t.Errorf(msg, "connectAttr1.SourcePlug", connectAttr1.SourcePlug,
+			"|namespace:topNode.attrNameA")
+	}
+	if connectAttr1.DistPlug != "|namespace:topNode.attrNameB" {
+		t.Errorf(msg, "connectAttr1.DistPlug", connectAttr1.DistPlug,
+			"|namespace:topNode.attrNameB")
+	}
+	if *connectAttr1.SourcePHL != "namespace:childNameSpaceRN.placeHolderList[1]" {
+		t.Errorf(msg, "*connectAttr1.SourcePHL", *connectAttr1.SourcePHL,
+			"namespace:childNameSpaceRN.placeHolderList[1]")
+	}
+	if *connectAttr1.DistPHL != "namespace:childNameSpaceRN.placeHolderList[2]" {
+		t.Errorf(msg, "*connectAttr1.DistPHL", *connectAttr1.DistPHL,
+			"namespace:childNameSpaceRN.placeHolderList[2]")
+	}
+	if connectAttr1.Arguments != "" {
+		t.Errorf(msg, "connectAttr1.Arguments", connectAttr1.Arguments, "")
+	}
+
+	connectAttr2 := referenceEdit.ConnectAttrs[1]
+	if connectAttr2.MagicNumber != 3 {
+		t.Errorf(msg, "connectAttr2.MagicNumber", connectAttr2.MagicNumber, 3)
+	}
+	if connectAttr2.ReferenceNode != "namespace:childNameSpaceRN" {
+		t.Errorf(msg, "connectAttr2.ReferenceNode", connectAttr2.ReferenceNode,
+			"namespace:childNameSpaceRN")
+	}
+	if connectAttr2.SourcePlug != "|namespace:topNode|namespace:childNode.attrNameA" {
+		t.Errorf(msg, "connectAttr2.SourcePlug", connectAttr2.SourcePlug,
+			"|namespace:topNode|namespace:childNode.attrNameA")
+	}
+	if connectAttr2.DistPlug != "namespace:childNameSpaceRN.placeHolderList[3]" {
+		t.Errorf(msg, "connectAttr2.DistPlug", connectAttr2.DistPlug,
+			"namespace:childNameSpaceRN.placeHolderList[3]")
+	}
+	if connectAttr2.SourcePHL != nil {
+		t.Errorf(msg, "connectAttr2.SourcePHL", connectAttr2.SourcePHL, nil)
+	}
+	if connectAttr2.DistPHL != nil {
+		t.Errorf(msg, "connectAttr2.DistPHL", connectAttr2.DistPHL, nil)
+	}
+	if connectAttr2.Arguments != "" {
+		t.Errorf(msg, "connectAttr2.Arguments", connectAttr2.Arguments, "")
+	}
+
+	connectAttr3 := referenceEdit.ConnectAttrs[2]
+	if connectAttr3.MagicNumber != 4 {
+		t.Errorf(msg, "connectAttr3.MagicNumber", connectAttr3.MagicNumber, 4)
+	}
+	if connectAttr3.ReferenceNode != "namespace:childNameSpaceRN" {
+		t.Errorf(msg, "connectAttr2.ReferenceNode", connectAttr3.ReferenceNode,
+			"namespace:childNameSpaceRN")
+	}
+	if connectAttr3.SourcePlug != "|namespace:topNode|namespace:childNode.attrNameB" {
+		t.Errorf(msg, "connectAttr3.SourcePlug", connectAttr3.SourcePlug,
+			"|namespace:topNode|namespace:childNode.attrNameB")
+	}
+	if connectAttr3.DistPlug != "namespace:childNameSpaceRN.placeHolderList[4]" {
+		t.Errorf(msg, "connectAttr3.DistPlug", connectAttr3.DistPlug,
+			"namespace:childNameSpaceRN.placeHolderList[4]")
+	}
+	if connectAttr3.SourcePHL != nil {
+		t.Errorf(msg, "connectAttr3.SourcePHL", connectAttr3.SourcePHL, nil)
+	}
+	if connectAttr3.DistPHL != nil {
+		t.Errorf(msg, "connectAttr3.DistPHL", connectAttr3.DistPHL, nil)
+	}
+	if connectAttr3.Arguments != "" {
+		t.Errorf(msg, "connectAttr3.Arguments", connectAttr3.Arguments, "")
+	}
+
+	// Relationship
+	if len(referenceEdit.Relationships) != 1 {
+		t.Errorf(msg, "len(referenceEdit.Relationship)", len(referenceEdit.Relationships), 1)
+	}
+	relationship := referenceEdit.Relationships[0]
+	if relationship.Type != "fcurve" {
+		t.Errorf(msg, "relationship.Type", relationship.Type, "fcurve")
+	}
+	if relationship.CommandNum != 1 {
+		t.Errorf(msg, "relationship.CommandNum", relationship.CommandNum, 1)
+	}
+	if relationship.NodeName != "|namespace:nodeName_attrName_X" {
+		t.Errorf(msg, "relationship.NodeName", relationship.NodeName,
+			"|namespace:nodeName_attrName_X")
+	}
+	if len(relationship.Commands) != 1 {
+		t.Errorf(msg, "len(relationship.Commands)", len(relationship.Commands), 1)
+	}
+	relationshipCommand := relationship.Commands[0]
+	if relationshipCommand != "add 396 -4131.291016 18 18 1 0 0 423 -4131.291016 18 18 1 0 0" {
+		t.Errorf(msg, "relationshipCommand", relationshipCommand,
+			"add 396 -4131.291016 18 18 1 0 0 423 -4131.291016 18 18 1 0 0")
+	}
+
+	// Lock
+	if len(referenceEdit.Locks) != 1 {
+		t.Errorf(msg, "len(referenceEdit.Locks)", len(referenceEdit.Locks), 1)
+	}
+	lock := referenceEdit.Locks[0]
+	if lock.Node != "|namespace:topNode" {
+		t.Errorf(msg, "lock.Node", lock.Node, "|namespace:topNode")
+	}
+	if lock.Attr != "attrNameA" {
+		t.Errorf(msg, "lock.Attr", lock.Attr, "attrNameA")
+	}
+
+	// Unlock
+	if len(referenceEdit.Unlocks) != 1 {
+		t.Errorf(msg, "len(referenceEdit.Unlocks)", len(referenceEdit.Unlocks), 1)
+	}
+	unlock := referenceEdit.Unlocks[0]
+	if unlock.Node != "|namespace:topNode" {
+		t.Errorf(msg, "unlock.Node", unlock.Node, "|namespace:topNode")
+	}
+	if unlock.Attr != "attrNameA" {
+		t.Errorf(msg, "unlock.Attr", unlock.Attr, "attrNameA")
+	}
+}
+
 func TestMakeAttributeAlias(t *testing.T) {
 	c := &cmd.CmdBuilder{}
 	c.Append(`setAttr ".aal" -type "attributeAlias" {"detonationFrame","borderConnections[0]","incandescence"

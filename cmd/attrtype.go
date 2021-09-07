@@ -1,9 +1,13 @@
 package cmd
 
+import (
+	"strings"
+)
+
+// go:generate stringer -type=AttrType attrtype.go
 type AttrType int
 
 const (
-	// go:generate stringer -type=AttrType attrtype.go
 	// parse error
 	TypeInvalid AttrType = iota
 
@@ -291,6 +295,56 @@ const (
 	// COUNT_OF_INDEX_VALUES {Index Value}
 	TypeDataPolyComponent
 
+	// type: "string"
+	//       "string" int
+	//       0 "string" "string" "string"
+	//       1 string "string" "string" "string"
+	//       2 "string" "string" "string"
+	//       3 "string" "string" "string"
+	//       4 "string" "string" ""
+	//       5 0 "string" "string" "string" "string" "string" ""
+	//       5 3 "string" "string" "string" ""
+	//       5 4 "string" "string" "string" ""
+	//       7 "string" "string" int ["string"...]
+	//       0
+	//       8 "string" "string"
+	//       9 "string" "string"
+	// mean: "topReferenceNodeName"
+	//       "topReferenceName:childReferenceNodeName" {int:number of edit}
+	//       {0:parent} "{nodeNameA}" "{nodeNameB}" "{argument of parent}"
+	//       {1:addAttr} {nodeName} "{longAttrName}" "{shortAttrName}" "{arguments of addAttr}"
+	//       {2:setAttr} "{nodeName}" "{attrName}" "{arguments of setAttr}"
+	//       {3:disconnectAttr} "{sourcePlug}" "{distPlug}" ""
+	//       {4:deleteAttr} "{nodeName}" "{attrName}" ""
+	//       {5:connectAttr1} 0 "{namespace}:{referenceNodeName}" "{sourcePlug}" "{distPlug}"
+	//       "{sourcePlaceHolder}" "{distPlaceHolder}" ""
+	//       {5:connectAttr2} [34] "{namespace}:{referenceNodeName}" "{sourcePlug}" "{distPlug}" ""
+	//       {7:relationship} "{fcurve}" "{namespace}:{node_name}" {int:number of command} "{command}" 0
+	//       {8:lock} "{namespace}:{nodeName}" "{attrName}"
+	//       {9:unLock} "{namespace}:{nodeName}" "{attrName}"
+	//
+	// example:
+	//       setAttr ".ed" -type "dataReferenceEdits"
+	//           "namespaceRN"
+	//           "namespace:childNameSpaceRN" 11
+	//           0 "nodeNameA" "nodeNameB" "-s -r "
+	//           1 |namespace:topNode "extraAttr" "ea" " -ci 1 -nn \"ea\" -at \"double\""
+	//           2 "|namespace:topNode" "ea" " -k 1 0"
+	//           3 "namespace:nodeNameA.attrNameA" "namespace:nodeNameB.attrNameB" ""
+	//           4 "|namespace:topNode" "dexAttr" ""
+	//           5 0 "namespace:childNameSpaceRN" "|namespace:topNode.attrNameA" "|namespace:topNode.attrNameB"
+	//           "namespace:childNameSpaceRN.placeHolderList[1]" "namespace:childNameSpaceRN.placeHolderList[2]" ""
+	//           5 3 "namespace:childNameSpaceRN" "|namespace:topNode|namespace:childNode.attrNameA"
+	//           "namespace:childNameSpaceRN.placeHolderList[3]"
+	//           5 4 "namespace:childNameSpaceRN" "|namespace:topNode|namespace:childNode.attrNameB"
+	//           "namespace:childNameSpaceRN.placeHolderList[4]"
+	//           7 "fcurve" "|namespace:nodeName_attrName_X" 1
+	//           "add 396 -4131.291016 18 18 1 0 0 423 -4131.291016 18 18 1 0 0" 0
+	//           8 "|namespace:topNode" "attrNameA"
+	//           9 "|namespace:topNode" "attrNameA"
+	//           ;
+	TypeDataReferenceEdits
+
 	// type: {string [int {double double double}]}
 	//       {string [int {double double double}]}
 	//       [{string [int {double double}]}]
@@ -328,3 +382,10 @@ const (
 	// 2 0 2 -2 1 2 2 1 2 -2 2 2 2 2 2;
 	TypeLattice
 )
+
+func (at AttrType) Name() string {
+	s := at.String()
+	s = s[4:] // remove Type prefix.
+	return strings.ToLower(s[:1]) + s[1:] // ToLower head one string.
+}
+

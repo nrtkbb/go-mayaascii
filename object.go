@@ -14,6 +14,7 @@ import (
 
 // Object ...
 type Object struct {
+	Files    []*File
 	Requires []*Require
 	Nodes    map[string]*Node
 	Selects  []*Select
@@ -27,6 +28,54 @@ func (o *Object) Unmarshal(reader io.Reader) error {
 
 	cmdBuilder := &cmd.CmdBuilder{}
 	err := bufscan.BufScan(br, func(line string) error {
+		cmdBuilder.Append(line)
+		if cmdBuilder.IsCmdEOF() {
+			c := cmdBuilder.Parse()
+			o.cmds = append(o.cmds, c)
+			cmdBuilder.Clear()
+		}
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
+	p := New(o.cmds)
+	p.o = o
+	p.ParseCmds()
+	if !p.CheckErrors() {
+		return nil
+	}
+
+	return nil
+}
+
+func (o *Object) UnmarshalFocus(reader io.Reader, focusCommands []cmd.Type) error {
+	if 0 == len(focusCommands) {
+		return errors.New("focusCommands must one type")
+	}
+	var focusCommandStrings []string
+	for _, focusCommand := range focusCommands {
+		focusCommandStrings = append(focusCommandStrings, string(focusCommand))
+	}
+
+	br := bufio.NewReader(reader)
+
+	cmdBuilder := &cmd.CmdBuilder{}
+	isFocus := false
+	err := bufscan.BufScan(br, func(line string) error {
+		if cmdBuilder.IsClear() {
+			isFocus = false
+			for _, c := range focusCommandStrings {
+				if strings.HasPrefix(line, c) {
+					isFocus = true
+					break
+				}
+			}
+		}
+		if !isFocus {
+			return nil
+		}
 		cmdBuilder.Append(line)
 		if cmdBuilder.IsCmdEOF() {
 			c := cmdBuilder.Parse()
@@ -68,6 +117,17 @@ func (o *Object) GetNodes(nodeType string) ([]*Node, error) {
 		return nil, errors.New(fmt.Sprintf("%s type was not found", nodeType))
 	}
 	return results, nil
+}
+
+type File struct {
+	Lineno    uint
+	Path      string
+	Namespace string
+
+	Parent   *File
+	Children []*File
+
+	File *cmd.File
 }
 
 type Require struct {
@@ -258,6 +318,8 @@ func (p *Parser) ParseCmds() {
 	for p.CurCmd != nil {
 		var err error
 		switch p.CurCmd.Type {
+		case cmd.FILE:
+			err = p.parseFiles()
 		case cmd.REQUIRES:
 			err = p.parseRequires()
 		case cmd.CREATENODE:
@@ -285,6 +347,40 @@ func (p *Parser) CheckErrors() bool {
 	//	return false
 	//}
 	return true
+}
+
+func (p *Parser) parseFiles() error {
+	f := parser.MakeFile(p.CurCmd)
+	file := &File{
+		Lineno:    f.LineNo,
+		Path:      f.Path,
+		Namespace: f.Namespace,
+		Parent:    nil,
+		Children:  nil,
+		File:      f,
+	}
+	p.o.Files = append(p.o.Files, file)
+
+	if len(p.o.Files) == 1 {
+		return nil
+	}
+
+	if f.ReferenceDepthInfo <= 1 {
+		return nil
+	}
+
+	for i := len(p.o.Files)-2; i >= 0; i-- {
+		prevFile := p.o.Files[i]
+		if prevFile.File.ReferenceDepthInfo < f.ReferenceDepthInfo {
+			if prevFile.Children == nil {
+				prevFile.Children = []*File{}
+			}
+			prevFile.Children = append(prevFile.Children, file)
+			file.Parent = prevFile
+			break
+		}
+	}
+	return nil
 }
 
 func (p *Parser) parseRequires() error {
@@ -447,5 +543,8 @@ func (p *Parser) CurCmdIs(t cmd.Type) bool {
 }
 
 func (p *Parser) PeekCmdIs(t cmd.Type) bool {
+	if p.PeekCmd == nil {
+		return false
+	}
 	return p.PeekCmd.Type == t
 }

@@ -209,7 +209,7 @@ func TestCmdBuilder_Parse(t *testing.T) {
 			`".b"`,
 			"-type",
 			`"string"`,
-			"long text long text",
+			`"long text long text"`,
 		},
 	)
 }

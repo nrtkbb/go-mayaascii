@@ -10,6 +10,47 @@ import (
 	"github.com/nrtkbb/go-mayaascii/cmd"
 )
 
+func MakeFile(c *cmd.Cmd) *cmd.File {
+	// [file, -rdi, 1, -ns, "ns", -rfn, "nsRN", -op, "v=0;", -typ, "mayaAscii", "path/to/file.ma"]
+	// [file, -r, -ns, "namespace", -dr, 1, -rfn, "nsRN", -op, "v=0;", -typ, "mayaAscii", "path/to/file.ma"]
+	f := cmd.File{Cmd: c}
+	f.Path = strings.Trim(f.Token[len(f.Token)-1], "\"")
+	var err error
+	for i := 1; i < len(f.Token)-1; i++ {
+		switch f.Token[i] {
+		case "-rdi":
+			f.ReferenceDepthInfo, err = strconv.Atoi(f.Token[i+1])
+			if err != nil {
+				log.Print(err)
+				return &f
+			}
+			i++
+		case "-ns":
+			f.Namespace = strings.Trim(f.Token[i+1], "\"")
+			i++
+		case "-rfn":
+			f.ReferenceNode = strings.Trim(f.Token[i+1], "\"")
+			i++
+		case "-op":
+			f.Options = strings.Trim(f.Token[i+1], "\"")
+			i++
+		case "-typ":
+			f.Type = strings.Trim(f.Token[i+1], "\"")
+			i++
+		case "-r":
+			f.Reference = true
+		case "-dr":
+			var dr int
+			dr, err = strconv.Atoi(f.Token[i+1])
+			if dr == 1 {
+				f.DeferReference = true
+			}
+			i++
+		}
+	}
+	return &f
+}
+
 func MakeWorkspace(c *cmd.Cmd) *cmd.Workspace {
 	w := cmd.Workspace{Cmd: c}
 	for i := 1; i < len(w.Token); i++ {
@@ -205,6 +246,12 @@ func isSameAttr(name1, name2 string) bool {
 		return false
 	}
 	if name1[:openIdx1] == name2[:openIdx2] {
+		if name2[:openIdx2] == ".phl" {
+			// setAttr ".phl[1476]" -type "matrix" 0.35087719298245618 0 0 0 0 0.35087719298245618 0 0
+			//     0 0 0.35087719298245618 0 0 0 0 1;
+			// setAttr ".phl[1504]" 0;
+			return false
+		}
 		// .attrName[1] == .attrName[0]
 		// .attrName[500:999] == .attrName[0:499]
 		// .attrName[0].subName[500:999] == .attrName[0].subName[0:499]
@@ -738,10 +785,20 @@ func MakeVectorArray(token *[]string, start int) ([]cmd.Attr, int, error) {
 		}
 		va := make([]cmd.AttrVector, numberOfArray)
 		for i := 0; i < numberOfArray; i += 3 {
+			//log.Printf("numberOfArray: %d, size: %d, indeces:[%d, %d, %d]", numberOfArray, len(f), i, i+1, i+2)
+			// Ornatrix ClumpNode は 3 で割り切れない数の vectorArray を扱う...
+			add1 := i+1
+			if add1 >= numberOfArray {
+				add1 = i
+			}
+			add2 := i+2
+			if add2 >= numberOfArray {
+				add2 = add1
+			}
 			va[i] = cmd.AttrVector{
 				X: f[i],
-				Y: f[i+1],
-				Z: f[i+2],
+				Y: f[add1],
+				Z: f[add2],
 			}
 		}
 		vaa := cmd.AttrVectorArray(va)
@@ -1234,6 +1291,8 @@ func MakeAttr(token *[]string, start int, size *uint, attrType cmd.AttrType) ([]
 		return MakePolyFace(token, start, size)
 	case cmd.TypeDataPolyComponent:
 		return MakeDataPolyComponent(token, start)
+	case cmd.TypeDataReferenceEdits:
+		return MakeDataReferenceEdits(token, start)
 	case cmd.TypeMesh:
 		return MakeMesh(token, start)
 	case cmd.TypeLattice:
@@ -1302,6 +1361,8 @@ func MakeAttrType(token *[]string, start int) (cmd.AttrType, error) {
 		return cmd.TypePolyFaces, nil
 	case "dataPolyComponent":
 		return cmd.TypeDataPolyComponent, nil
+	case "dataReferenceEdits":
+		return cmd.TypeDataReferenceEdits, nil
 	case "mesh":
 		return cmd.TypeMesh, nil
 	case "lattice":
