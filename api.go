@@ -1,14 +1,16 @@
 package mayaascii
 
 import (
+	"io"
+
 	"github.com/nrtkbb/go-mayaascii/cmd"
 	"github.com/nrtkbb/go-mayaascii/connection"
-	"io"
 )
 
 func Unmarshal(reader io.Reader) (*Object, error) {
 	mo := &Object{
 		Files: []*File{},
+		FileInfos: []*FileInfo{},
 		Requires: []*Require{},
 		Nodes: map[string]*Node{},
 
@@ -26,6 +28,7 @@ func Unmarshal(reader io.Reader) (*Object, error) {
 func UnmarshalFocus(reader io.Reader, focusCommands []cmd.Type) (*Object, error) {
 	mo := &Object{
 		Files: []*File{},
+		FileInfos: []*FileInfo{},
 		Requires: []*Require{},
 		Nodes: map[string]*Node{},
 

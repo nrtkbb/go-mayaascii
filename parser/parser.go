@@ -51,6 +51,13 @@ func MakeFile(c *cmd.Cmd) *cmd.File {
 	return &f
 }
 
+func MakeFileInfo(c *cmd.Cmd) *cmd.FileInfo {
+	fi := &cmd.FileInfo{Cmd: c}
+	fi.Name = strings.Trim(fi.Token[1], "\"")
+	fi.Value = strings.Trim(fi.Token[2], "\"")
+	return fi
+}
+
 func MakeWorkspace(c *cmd.Cmd) *cmd.Workspace {
 	w := cmd.Workspace{Cmd: c}
 	for i := 1; i < len(w.Token); i++ {

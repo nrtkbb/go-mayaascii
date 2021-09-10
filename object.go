@@ -4,20 +4,22 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"io"
+	"strings"
+
 	"github.com/nrtkbb/bufscan"
 	"github.com/nrtkbb/go-mayaascii/cmd"
 	"github.com/nrtkbb/go-mayaascii/connection"
 	"github.com/nrtkbb/go-mayaascii/parser"
-	"io"
-	"strings"
 )
 
 // Object ...
 type Object struct {
-	Files    []*File
-	Requires []*Require
-	Nodes    map[string]*Node
-	Selects  []*Select
+	Files     []*File
+	FileInfos []*FileInfo
+	Requires  []*Require
+	Nodes     map[string]*Node
+	Selects   []*Select
 
 	cmds        []*cmd.Cmd
 	connections connection.Connections
@@ -56,7 +58,7 @@ func (o *Object) UnmarshalFocus(reader io.Reader, focusCommands []cmd.Type) erro
 	}
 	var focusCommandStrings []string
 	for _, focusCommand := range focusCommands {
-		focusCommandStrings = append(focusCommandStrings, string(focusCommand))
+		focusCommandStrings = append(focusCommandStrings, string(focusCommand)+" ")
 	}
 
 	br := bufio.NewReader(reader)
@@ -128,6 +130,14 @@ type File struct {
 	Children []*File
 
 	File *cmd.File
+}
+
+type FileInfo struct {
+	Lineno uint
+	Name   string
+	Value  string
+
+	FileInfo *cmd.FileInfo
 }
 
 type Require struct {
@@ -318,15 +328,17 @@ func (p *Parser) ParseCmds() {
 	for p.CurCmd != nil {
 		var err error
 		switch p.CurCmd.Type {
-		case cmd.FILE:
+		case cmd.FileType:
 			err = p.parseFiles()
-		case cmd.REQUIRES:
+		case cmd.FileInfoType:
+			err = p.parseFileInfos()
+		case cmd.RequiresType:
 			err = p.parseRequires()
-		case cmd.CREATENODE:
+		case cmd.CreateNodeType:
 			err = p.parseCreateNode()
-		case cmd.CONNECTATTR:
+		case cmd.ConnectAttrType:
 			err = p.parseConnectAttr()
-		case cmd.SELECT:
+		case cmd.SelectType:
 			err = p.parseSelect()
 		default:
 			err = errors.New(fmt.Sprintf(
@@ -340,12 +352,12 @@ func (p *Parser) ParseCmds() {
 }
 
 func (p *Parser) CheckErrors() bool {
-	//if 0 < len(p.errs) {
+	// if 0 < len(p.errs) {
 	//	for _, e := range p.errs {
 	//		log.Println(e)
 	//	}
 	//	return false
-	//}
+	// }
 	return true
 }
 
@@ -369,7 +381,7 @@ func (p *Parser) parseFiles() error {
 		return nil
 	}
 
-	for i := len(p.o.Files)-2; i >= 0; i-- {
+	for i := len(p.o.Files) - 2; i >= 0; i-- {
 		prevFile := p.o.Files[i]
 		if prevFile.File.ReferenceDepthInfo < f.ReferenceDepthInfo {
 			if prevFile.Children == nil {
@@ -380,6 +392,18 @@ func (p *Parser) parseFiles() error {
 			break
 		}
 	}
+	return nil
+}
+
+func (p *Parser) parseFileInfos() error {
+	fi := parser.MakeFileInfo(p.CurCmd)
+	fileInfo := &FileInfo{
+		Lineno: fi.LineNo,
+		Name: fi.Name,
+		Value: fi.Value,
+		FileInfo: fi,
+	}
+	p.o.FileInfos = append(p.o.FileInfos, fileInfo)
 	return nil
 }
 
@@ -425,18 +449,18 @@ func (p *Parser) parseCreateNode() error {
 		parentNode.Children = append(parentNode.Children, node)
 	}
 
-	if p.PeekCmdIs(cmd.RENAME) {
+	if p.PeekCmdIs(cmd.RenameType) {
 		p.NextCmd()
 		node.Rename = parser.MakeRename(p.CurCmd)
 	}
 
-	for p.PeekCmdIs(cmd.ADDATTR) {
+	for p.PeekCmdIs(cmd.AddAttrType) {
 		p.NextCmd()
 		ad := parser.MakeAddAttr(p.CurCmd)
 		node.AddAttrs = append(node.AddAttrs, ad)
 	}
 
-	for p.PeekCmdIs(cmd.SETATTR) {
+	for p.PeekCmdIs(cmd.SetAttrType) {
 		p.NextCmd()
 		var at *cmd.SetAttr
 		var err error
@@ -504,13 +528,13 @@ func (p *Parser) parseSelect() error {
 	}
 	p.o.Selects = append(p.o.Selects, sel)
 
-	for p.PeekCmdIs(cmd.ADDATTR) {
+	for p.PeekCmdIs(cmd.AddAttrType) {
 		p.NextCmd()
 		ad := parser.MakeAddAttr(p.CurCmd)
 		sel.AddAttrs = append(sel.AddAttrs, ad)
 	}
 
-	for p.PeekCmdIs(cmd.SETATTR) {
+	for p.PeekCmdIs(cmd.SetAttrType) {
 		p.NextCmd()
 		var at *cmd.SetAttr
 		var err error

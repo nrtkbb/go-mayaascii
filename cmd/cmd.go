@@ -17,15 +17,16 @@ import (
 type Type string
 
 const (
-	FILE        Type = "file"
-	WORKSPACE   Type = "workspace"
-	REQUIRES    Type = "requires"
-	CONNECTATTR Type = "connectAttr"
-	CREATENODE  Type = "createNode"
-	RENAME      Type = "rename"
-	SETATTR     Type = "setAttr"
-	ADDATTR     Type = "addAttr"
-	SELECT      Type = "select"
+	FileType        Type = "file"
+	FileInfoType	Type = "fileInfo"
+	WorkspaceType   Type = "workspace"
+	RequiresType    Type = "requires"
+	ConnectAttrType Type = "connectAttr"
+	CreateNodeType  Type = "createNode"
+	RenameType      Type = "rename"
+	SetAttrType     Type = "setAttr"
+	AddAttrType     Type = "addAttr"
+	SelectType      Type = "select"
 )
 
 type ParseFile struct {
@@ -33,12 +34,14 @@ type ParseFile struct {
 	Cmds []*Cmd
 }
 
-func (f *ParseFile) Parse() error {
+func (f *ParseFile) Parse() (err error) {
 	fp, err := os.Open(f.Path)
 	if err != nil {
-		return err
+		return
 	}
-	defer fp.Close()
+	defer func(fp *os.File) {
+		err = fp.Close()
+	}(fp)
 
 	reader := bufio.NewReader(fp)
 	f.Cmds = []*Cmd{}
@@ -52,7 +55,7 @@ func (f *ParseFile) Parse() error {
 		}
 		return nil
 	})
-	return nil
+	return
 }
 
 func (f *ParseFile) SaveSceneAs(outputPath string) error {
@@ -277,6 +280,49 @@ func (f *File) String() string {
 	buf.WriteString(f.Path)
 	buf.WriteString("\";")
 	return buf.String()
+}
+
+type FileInfo struct {
+	*Cmd
+	Name  string `json:"name" tag:"-fileInfo"`
+	Value string `json:"value" tag:"-value"`
+}
+
+func (fi *FileInfo) StringWrite(writer io.StringWriter) (int, error) {
+	n, err := writer.WriteString("fileInfo \"")
+	if err != nil {
+		return 0, err
+	}
+	na, err := writer.WriteString(fi.Name)
+	if err != nil {
+		return 0, err
+	}
+	n += na
+	na, err = writer.WriteString("\" \"")
+	if err != nil {
+		return 0, err
+	}
+	n += na
+	na, err = writer.WriteString(fi.Value)
+	if err != nil {
+		return 0, err
+	}
+	n += na
+	na, err = writer.WriteString("\";\n")
+	if err != nil {
+		return 0, err
+	}
+	n += na
+	return n, err
+}
+
+func (fi *FileInfo) String() string {
+	return strings.Join([]string{"fileInfo \"",
+		fi.Name,
+		"\" \"",
+		fi.Value,
+		"\";"},
+		"")
 }
 
 type Workspace struct {
