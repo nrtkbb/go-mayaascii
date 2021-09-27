@@ -184,9 +184,7 @@ func (n *Node) Attr(name string) *Attr {
 	}
 
 	// not found.
-	a := &Attr{err: errors.New(
-		fmt.Sprintf("%s attr is not found", name))}
-	return a
+	return nil
 }
 
 func (n *Node) Remove() error {
