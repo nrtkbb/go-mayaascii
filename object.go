@@ -52,13 +52,9 @@ func (o *Object) Unmarshal(reader io.Reader) error {
 	return nil
 }
 
-func (o *Object) UnmarshalFocus(reader io.Reader, focusCommands []cmd.Type) error {
+func (o *Object) UnmarshalFocus(reader io.Reader, focusCommands CommandTypes) error {
 	if 0 == len(focusCommands) {
 		return errors.New("focusCommands must one type")
-	}
-	var focusCommandStrings []string
-	for _, focusCommand := range focusCommands {
-		focusCommandStrings = append(focusCommandStrings, string(focusCommand)+" ")
 	}
 
 	br := bufio.NewReader(reader)
@@ -67,13 +63,7 @@ func (o *Object) UnmarshalFocus(reader io.Reader, focusCommands []cmd.Type) erro
 	isFocus := false
 	err := bufscan.BufScan(br, func(line string) error {
 		if cmdBuilder.IsClear() {
-			isFocus = false
-			for _, c := range focusCommandStrings {
-				if strings.HasPrefix(line, c) {
-					isFocus = true
-					break
-				}
-			}
+			isFocus = focusCommands.InHasPrefix(&line)
 		}
 		if !isFocus {
 			return nil
