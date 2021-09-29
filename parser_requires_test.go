@@ -1,13 +1,11 @@
-package parser
+package mayaascii
 
 import (
 	"testing"
-
-	"github.com/nrtkbb/go-mayaascii/cmd"
 )
 
 func TestMakeRequires_Min(t *testing.T) {
-	cb := &cmd.CmdBuilder{}
+	cb := &CmdBuilder{}
 	cb.Append(`requires maya "2016";`)
 	c := cb.Parse()
 	r := MakeRequires(c)
@@ -26,7 +24,7 @@ func TestMakeRequires_Min(t *testing.T) {
 }
 
 func TestMakeRequires_Max(t *testing.T) {
-	cb := &cmd.CmdBuilder{}
+	cb := &CmdBuilder{}
 	cb.Append(`requires -nodeType "typeName1"
 		-dataType "typeName2" "pluginName" "version";`)
 	c := cb.Parse()

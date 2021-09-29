@@ -1,8 +1,6 @@
 package mayaascii
 
 import (
-	"github.com/nrtkbb/go-mayaascii/cmd"
-	"github.com/nrtkbb/go-mayaascii/connection"
 	"io"
 	"strings"
 )
@@ -33,13 +31,13 @@ func (ct *CommandTypes) InHasPrefix(line *string) bool {
 
 func Unmarshal(reader io.Reader) (*Object, error) {
 	mo := &Object{
-		Files:     []*File{},
-		FileInfos: []*FileInfo{},
+		Files:     []*FileObject{},
+		FileInfos: []*FileInfoObject{},
 		Requires:  []*Require{},
 		Nodes:     map[string]*Node{},
 
-		cmds:        []*cmd.Cmd{},
-		connections: connection.NewConnections(),
+		cmds:        []*Cmd{},
+		connections: NewConnections(),
 	}
 	err := mo.Unmarshal(reader)
 	if err != nil {
@@ -51,13 +49,13 @@ func Unmarshal(reader io.Reader) (*Object, error) {
 
 func UnmarshalFocus(reader io.Reader, focusCommands CommandTypes) (*Object, error) {
 	mo := &Object{
-		Files:     []*File{},
-		FileInfos: []*FileInfo{},
+		Files:     []*FileObject{},
+		FileInfos: []*FileInfoObject{},
 		Requires:  []*Require{},
 		Nodes:     map[string]*Node{},
 
-		cmds:        []*cmd.Cmd{},
-		connections: connection.NewConnections(),
+		cmds:        []*Cmd{},
+		connections: NewConnections(),
 	}
 	err := mo.UnmarshalFocus(reader, focusCommands)
 	if err != nil {

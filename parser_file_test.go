@@ -1,13 +1,11 @@
-package parser
+package mayaascii
 
 import (
 	"testing"
-
-	"github.com/nrtkbb/go-mayaascii/cmd"
 )
 
 func TestMakeFile_ReferenceDepthInfo(t *testing.T) {
-	c := &cmd.CmdBuilder{}
+	c := &CmdBuilder{}
 	fileLine := `file -rdi 1 -ns "baseA" -rfn "baseARN" -op "v=0;" -typ "mayaAscii" "C:/baseA.ma";`
 	c.Append(fileLine)
 	f := MakeFile(c.Parse())
@@ -36,7 +34,7 @@ func TestMakeFile_ReferenceDepthInfo(t *testing.T) {
 }
 
 func TestMakeFile_Reference(t *testing.T) {
-	c := &cmd.CmdBuilder{}
+	c := &CmdBuilder{}
 	fileLine := `file -r -ns "baseA" -dr 1 -rfn "baseARN" -op "v=0;" -typ "mayaAscii" "C:/baseA.ma";`
 	c.Append(fileLine)
 	f := MakeFile(c.Parse())

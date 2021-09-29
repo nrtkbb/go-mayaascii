@@ -8,27 +8,24 @@ import (
 	"strings"
 
 	"github.com/nrtkbb/bufscan"
-	"github.com/nrtkbb/go-mayaascii/cmd"
-	"github.com/nrtkbb/go-mayaascii/connection"
-	"github.com/nrtkbb/go-mayaascii/parser"
 )
 
 // Object ...
 type Object struct {
-	Files     []*File
-	FileInfos []*FileInfo
+	Files     []*FileObject
+	FileInfos []*FileInfoObject
 	Requires  []*Require
 	Nodes     map[string]*Node
-	Selects   []*Select
+	Selects   []*SelectObject
 
-	cmds        []*cmd.Cmd
-	connections connection.Connections
+	cmds        []*Cmd
+	connections Connections
 }
 
 func (o *Object) Unmarshal(reader io.Reader) error {
 	br := bufio.NewReader(reader)
 
-	cmdBuilder := &cmd.CmdBuilder{}
+	cmdBuilder := &CmdBuilder{}
 	err := bufscan.BufScan(br, func(line string) error {
 		cmdBuilder.Append(line)
 		if cmdBuilder.IsCmdEOF() {
@@ -59,7 +56,7 @@ func (o *Object) UnmarshalFocus(reader io.Reader, focusCommands CommandTypes) er
 
 	br := bufio.NewReader(reader)
 
-	cmdBuilder := &cmd.CmdBuilder{}
+	cmdBuilder := &CmdBuilder{}
 	isFocus := false
 	err := bufscan.BufScan(br, func(line string) error {
 		if cmdBuilder.IsClear() {
@@ -111,23 +108,23 @@ func (o *Object) GetNodes(nodeType string) ([]*Node, error) {
 	return results, nil
 }
 
-type File struct {
+type FileObject struct {
 	Lineno    uint
 	Path      string
 	Namespace string
 
-	Parent   *File
-	Children []*File
+	Parent   *FileObject
+	Children []*FileObject
 
-	File *cmd.File
+	File *File
 }
 
-type FileInfo struct {
+type FileInfoObject struct {
 	Lineno uint
 	Name   string
 	Value  string
 
-	FileInfo *cmd.FileInfo
+	FileInfo *FileInfo
 }
 
 type Require struct {
@@ -145,28 +142,20 @@ type Node struct {
 	LineNo     uint
 	Type       string
 	Name       string
-	Attrs      []*Attr
+	Attrs      []*AttrObject
 	Shared     bool
 	SkipSelect bool
 	Parent     *Node
 	Children   []*Node
 
 	isDeleted  bool
-	CreateNode *cmd.CreateNode
-	Rename     *cmd.Rename
-	SetAttrs   []*cmd.SetAttr
-	AddAttrs   []*cmd.AddAttr
+	CreateNode *CreateNode
+	Rename     *Rename
+	SetAttrs   []*SetAttr
+	AddAttrs   []*AddAttr
 }
 
-type Select struct {
-	Name string
-
-	Select   *cmd.Select
-	SetAttrs []*cmd.SetAttr
-	AddAttrs []*cmd.AddAttr
-}
-
-func (n *Node) Attr(name string) *Attr {
+func (n *Node) Attr(name string) *AttrObject {
 	for _, a := range n.Attrs {
 		if a.Name == name {
 			return a
@@ -195,6 +184,14 @@ func (n *Node) Remove() error {
 	}
 	n.isDeleted = true
 	return nil
+}
+
+type SelectObject struct {
+	Name string
+
+	Select   *Select
+	SetAttrs []*SetAttr
+	AddAttrs []*AddAttr
 }
 
 type ConnectionArgs struct {
@@ -267,19 +264,19 @@ func (n *Node) ListConnections(ca *ConnectionArgs) []*Node {
 	return typeFiltered
 }
 
-type Attr struct {
+type AttrObject struct {
 	LineNo uint
 	Name   string
 	Node   *Node
-	Values []cmd.Attr
-	Type   cmd.AttrType
+	Values []Attr
+	Type   AttrType
 
-	SA        *cmd.SetAttr
+	SA        *SetAttr
 	err       error
 	isDeleted bool
 }
 
-func (a *Attr) Remove() error {
+func (a *AttrObject) Remove() error {
 	if a.isDeleted {
 		return errors.New(fmt.Sprintf("%s.%s was already deleted",
 			a.Node.Name, a.Name))
@@ -288,21 +285,21 @@ func (a *Attr) Remove() error {
 	return nil
 }
 
-func (a *Attr) String() (string, error) {
+func (a *AttrObject) String() (string, error) {
 	return a.Name, a.err
 }
 
 type Parser struct {
 	o    *Object
 	errs []string
-	cmds []*cmd.Cmd
+	cmds []*Cmd
 	cur  int
 
-	CurCmd  *cmd.Cmd
-	PeekCmd *cmd.Cmd
+	CurCmd  *Cmd
+	PeekCmd *Cmd
 }
 
-func New(cmds []*cmd.Cmd) *Parser {
+func New(cmds []*Cmd) *Parser {
 	p := &Parser{
 		cmds: cmds,
 		cur:  0,
@@ -316,17 +313,17 @@ func (p *Parser) ParseCmds() {
 	for p.CurCmd != nil {
 		var err error
 		switch p.CurCmd.Type {
-		case cmd.FileType:
+		case FileType:
 			err = p.parseFiles()
-		case cmd.FileInfoType:
+		case FileInfoType:
 			err = p.parseFileInfos()
-		case cmd.RequiresType:
+		case RequiresType:
 			err = p.parseRequires()
-		case cmd.CreateNodeType:
+		case CreateNodeType:
 			err = p.parseCreateNode()
-		case cmd.ConnectAttrType:
+		case ConnectAttrType:
 			err = p.parseConnectAttr()
-		case cmd.SelectType:
+		case SelectType:
 			err = p.parseSelect()
 		default:
 			err = errors.New(fmt.Sprintf(
@@ -350,8 +347,8 @@ func (p *Parser) CheckErrors() bool {
 }
 
 func (p *Parser) parseFiles() error {
-	f := parser.MakeFile(p.CurCmd)
-	file := &File{
+	f := MakeFile(p.CurCmd)
+	file := &FileObject{
 		Lineno:    f.LineNo,
 		Path:      f.Path,
 		Namespace: f.Namespace,
@@ -373,7 +370,7 @@ func (p *Parser) parseFiles() error {
 		prevFile := p.o.Files[i]
 		if prevFile.File.ReferenceDepthInfo < f.ReferenceDepthInfo {
 			if prevFile.Children == nil {
-				prevFile.Children = []*File{}
+				prevFile.Children = []*FileObject{}
 			}
 			prevFile.Children = append(prevFile.Children, file)
 			file.Parent = prevFile
@@ -384,8 +381,8 @@ func (p *Parser) parseFiles() error {
 }
 
 func (p *Parser) parseFileInfos() error {
-	fi := parser.MakeFileInfo(p.CurCmd)
-	fileInfo := &FileInfo{
+	fi := MakeFileInfo(p.CurCmd)
+	fileInfo := &FileInfoObject{
 		Lineno: fi.LineNo,
 		Name: fi.Name,
 		Value: fi.Value,
@@ -396,7 +393,7 @@ func (p *Parser) parseFileInfos() error {
 }
 
 func (p *Parser) parseRequires() error {
-	rq := parser.MakeRequires(p.CurCmd)
+	rq := MakeRequires(p.CurCmd)
 	requires := &Require{
 		Name:      rq.PluginName,
 		Version:   rq.Version,
@@ -409,7 +406,7 @@ func (p *Parser) parseRequires() error {
 }
 
 func (p *Parser) parseCreateNode() error {
-	cn := parser.MakeCreateNode(p.CurCmd)
+	cn := MakeCreateNode(p.CurCmd)
 	node := &Node{
 		object:     p.o,
 		Type:       cn.NodeType,
@@ -418,8 +415,8 @@ func (p *Parser) parseCreateNode() error {
 		SkipSelect: cn.SkipSelect,
 		CreateNode: cn,
 		LineNo:     cn.LineNo,
-		SetAttrs:   []*cmd.SetAttr{},
-		AddAttrs:   []*cmd.AddAttr{},
+		SetAttrs:   []*SetAttr{},
+		AddAttrs:   []*AddAttr{},
 	}
 	if _, ok := p.o.Nodes[node.Name]; ok {
 		return errors.New(fmt.Sprintf("Already found node ... %s", node.Name))
@@ -437,31 +434,31 @@ func (p *Parser) parseCreateNode() error {
 		parentNode.Children = append(parentNode.Children, node)
 	}
 
-	if p.PeekCmdIs(cmd.RenameType) {
+	if p.PeekCmdIs(RenameType) {
 		p.NextCmd()
-		node.Rename = parser.MakeRename(p.CurCmd)
+		node.Rename = MakeRename(p.CurCmd)
 	}
 
-	for p.PeekCmdIs(cmd.AddAttrType) {
+	for p.PeekCmdIs(AddAttrType) {
 		p.NextCmd()
-		ad := parser.MakeAddAttr(p.CurCmd)
+		ad := MakeAddAttr(p.CurCmd)
 		node.AddAttrs = append(node.AddAttrs, ad)
 	}
 
-	for p.PeekCmdIs(cmd.SetAttrType) {
+	for p.PeekCmdIs(SetAttrType) {
 		p.NextCmd()
-		var at *cmd.SetAttr
+		var at *SetAttr
 		var err error
 		if len(node.SetAttrs) == 0 {
-			at, err = parser.MakeSetAttr(p.CurCmd, nil)
+			at, err = MakeSetAttr(p.CurCmd, nil)
 		} else {
-			at, err = parser.MakeSetAttr(p.CurCmd, node.SetAttrs[len(node.SetAttrs)-1])
+			at, err = MakeSetAttr(p.CurCmd, node.SetAttrs[len(node.SetAttrs)-1])
 		}
 		if err != nil {
 			return err
 		}
 		node.SetAttrs = append(node.SetAttrs, at)
-		a := &Attr{
+		a := &AttrObject{
 			Name:   at.AttrName,
 			Node:   node,
 			Values: at.Attr,
@@ -492,7 +489,7 @@ func (p *Parser) parseCreateNode() error {
 }
 
 func (p *Parser) parseConnectAttr() error {
-	ca, err := parser.MakeConnectAttr(p.CurCmd)
+	ca, err := MakeConnectAttr(p.CurCmd)
 	if err != nil {
 		return err
 	}
@@ -501,35 +498,35 @@ func (p *Parser) parseConnectAttr() error {
 }
 
 func (p *Parser) parseSelect() error {
-	s := parser.MakeSelect(p.CurCmd)
+	s := MakeSelect(p.CurCmd)
 	if len(s.Names) > 1 {
 		return errors.New(fmt.Sprintf("un-support bulk select. [%s], %v", strings.Join(s.Names, ", "), *s))
 	} else if len(s.Names) == 0 {
 		return errors.New(fmt.Sprintf("un-support zero select. %v", *s))
 	}
-	sel := &Select{
+	sel := &SelectObject{
 		Name: s.Names[0],
 
 		Select:   s,
-		SetAttrs: []*cmd.SetAttr{},
-		AddAttrs: []*cmd.AddAttr{},
+		SetAttrs: []*SetAttr{},
+		AddAttrs: []*AddAttr{},
 	}
 	p.o.Selects = append(p.o.Selects, sel)
 
-	for p.PeekCmdIs(cmd.AddAttrType) {
+	for p.PeekCmdIs(AddAttrType) {
 		p.NextCmd()
-		ad := parser.MakeAddAttr(p.CurCmd)
+		ad := MakeAddAttr(p.CurCmd)
 		sel.AddAttrs = append(sel.AddAttrs, ad)
 	}
 
-	for p.PeekCmdIs(cmd.SetAttrType) {
+	for p.PeekCmdIs(SetAttrType) {
 		p.NextCmd()
-		var at *cmd.SetAttr
+		var at *SetAttr
 		var err error
 		if len(sel.SetAttrs) == 0 {
-			at, err = parser.MakeSetAttr(p.CurCmd, nil)
+			at, err = MakeSetAttr(p.CurCmd, nil)
 		} else {
-			at, err = parser.MakeSetAttr(p.CurCmd, sel.SetAttrs[len(sel.SetAttrs)-1])
+			at, err = MakeSetAttr(p.CurCmd, sel.SetAttrs[len(sel.SetAttrs)-1])
 		}
 		if err != nil {
 			return err
@@ -550,11 +547,11 @@ func (p *Parser) NextCmd() {
 	}
 }
 
-func (p *Parser) CurCmdIs(t cmd.Type) bool {
+func (p *Parser) CurCmdIs(t Type) bool {
 	return p.CurCmd.Type == t
 }
 
-func (p *Parser) PeekCmdIs(t cmd.Type) bool {
+func (p *Parser) PeekCmdIs(t Type) bool {
 	if p.PeekCmd == nil {
 		return false
 	}

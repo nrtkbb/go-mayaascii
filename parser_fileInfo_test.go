@@ -1,13 +1,11 @@
-package parser
+package mayaascii
 
 import (
 	"testing"
-
-	"github.com/nrtkbb/go-mayaascii/cmd"
 )
 
 func TestMakeFileInfo(t *testing.T) {
-	c := &cmd.CmdBuilder{}
+	c := &CmdBuilder{}
 	fileInfoLine := `fileInfo "fileInfoName" "fileInfoValue";`
 	c.Append(fileInfoLine)
 	fi := MakeFileInfo(c.Parse())

@@ -1,9 +1,8 @@
-package parser
+package mayaascii
 
 import (
 	"errors"
 	"fmt"
-	cmd "github.com/nrtkbb/go-mayaascii/cmd"
 	"strconv"
 	"strings"
 )
@@ -17,8 +16,8 @@ type DataReferenceEditsParser struct {
 	PeekToken *string
 }
 
-func (p *DataReferenceEditsParser) parseReferenceEdit() (*cmd.ReferenceEdit, error) {
-	re := &cmd.ReferenceEdit{
+func (p *DataReferenceEditsParser) parseReferenceEdit() (*ReferenceEdit, error) {
+	re := &ReferenceEdit{
 		ReferenceNode: strings.Trim(*p.CurToken, "\""),
 	}
 	if !p.PeekTokenIsNumber() {
@@ -29,9 +28,9 @@ func (p *DataReferenceEditsParser) parseReferenceEdit() (*cmd.ReferenceEdit, err
 	return re, nil
 }
 
-func (p *DataReferenceEditsParser) parseParent() (*cmd.RECmdParent, error) {
+func (p *DataReferenceEditsParser) parseParent() (*RECmdParent, error) {
 	p.NextToken() // skip 0
-	prt := &cmd.RECmdParent{
+	prt := &RECmdParent{
 		NodeA: strings.Trim(*p.CurToken, "\""),
 	}
 	if p.PeekToken == nil {
@@ -47,9 +46,9 @@ func (p *DataReferenceEditsParser) parseParent() (*cmd.RECmdParent, error) {
 	return prt, nil
 }
 
-func (p *DataReferenceEditsParser) parseAddAttr() (*cmd.RECmdAddAttr, error) {
+func (p *DataReferenceEditsParser) parseAddAttr() (*RECmdAddAttr, error) {
 	p.NextToken() // skip 1
-	aa := &cmd.RECmdAddAttr{
+	aa := &RECmdAddAttr{
 		Node: *p.CurToken,
 	}
 	if p.PeekToken == nil {
@@ -70,11 +69,11 @@ func (p *DataReferenceEditsParser) parseAddAttr() (*cmd.RECmdAddAttr, error) {
 	return aa, nil
 }
 
-func (p *DataReferenceEditsParser) parseSetAttr() (*cmd.RECmdSetAttr, error) {
+func (p *DataReferenceEditsParser) parseSetAttr() (*RECmdSetAttr, error) {
 	//fmt.Println("setAttr 2 ", *p.CurToken)
 	p.NextToken() // skip 2
 	//fmt.Println("setAttr Node ", *p.CurToken)
-	sa := &cmd.RECmdSetAttr{
+	sa := &RECmdSetAttr{
 		Node: strings.Trim(*p.CurToken, "\""),
 	}
 	if p.PeekToken == nil {
@@ -92,9 +91,9 @@ func (p *DataReferenceEditsParser) parseSetAttr() (*cmd.RECmdSetAttr, error) {
 	return sa, nil
 }
 
-func (p *DataReferenceEditsParser) parseDisconnectAttr() (*cmd.RECmdDisconnectAttr, error) {
+func (p *DataReferenceEditsParser) parseDisconnectAttr() (*RECmdDisconnectAttr, error) {
 	p.NextToken() // skip 3
-	da := &cmd.RECmdDisconnectAttr{
+	da := &RECmdDisconnectAttr{
 		SourcePlug: strings.Trim(*p.CurToken, "\""),
 	}
 	if p.PeekToken == nil {
@@ -110,9 +109,9 @@ func (p *DataReferenceEditsParser) parseDisconnectAttr() (*cmd.RECmdDisconnectAt
 	return da, nil
 }
 
-func (p *DataReferenceEditsParser) parseDeleteAttr() (*cmd.RECmdDeleteAttr, error) {
+func (p *DataReferenceEditsParser) parseDeleteAttr() (*RECmdDeleteAttr, error) {
 	p.NextToken() // skip 4
-	da := &cmd.RECmdDeleteAttr{
+	da := &RECmdDeleteAttr{
 		Node: strings.Trim(*p.CurToken, "\""),
 	}
 	if p.PeekToken == nil {
@@ -128,13 +127,13 @@ func (p *DataReferenceEditsParser) parseDeleteAttr() (*cmd.RECmdDeleteAttr, erro
 	return da, nil
 }
 
-func (p *DataReferenceEditsParser) parseConnectAttr() (*cmd.RECmdConnectAttr, error) {
+func (p *DataReferenceEditsParser) parseConnectAttr() (*RECmdConnectAttr, error) {
 	p.NextToken() // skip 5
 	magic, err := strconv.Atoi(*p.CurToken)
 	if err != nil {
 		return nil, err
 	}
-	ca := &cmd.RECmdConnectAttr{
+	ca := &RECmdConnectAttr{
 		MagicNumber: magic,
 	}
 	if p.PeekToken == nil {
@@ -174,9 +173,9 @@ func (p *DataReferenceEditsParser) parseConnectAttr() (*cmd.RECmdConnectAttr, er
 	return ca, nil
 }
 
-func (p *DataReferenceEditsParser) parseRelationship() (*cmd.RECmdRelationship, error) {
+func (p *DataReferenceEditsParser) parseRelationship() (*RECmdRelationship, error) {
 	p.NextToken() // skip 7
-	rs := &cmd.RECmdRelationship{
+	rs := &RECmdRelationship{
 		Type: strings.Trim(*p.CurToken, "\""),
 	}
 	if p.PeekToken == nil {
@@ -211,9 +210,9 @@ func (p *DataReferenceEditsParser) parseRelationship() (*cmd.RECmdRelationship, 
 	return rs, nil
 }
 
-func (p *DataReferenceEditsParser) parseLock() (*cmd.RECmdLock, error) {
+func (p *DataReferenceEditsParser) parseLock() (*RECmdLock, error) {
 	p.NextToken() // skip 8
-	ulk := &cmd.RECmdLock{
+	ulk := &RECmdLock{
 		Node: strings.Trim(*p.CurToken, "\""),
 	}
 	if p.PeekToken == nil {
@@ -224,9 +223,9 @@ func (p *DataReferenceEditsParser) parseLock() (*cmd.RECmdLock, error) {
 	return ulk, nil
 }
 
-func (p *DataReferenceEditsParser) parseUnlock() (*cmd.RECmdUnlock, error) {
+func (p *DataReferenceEditsParser) parseUnlock() (*RECmdUnlock, error) {
 	p.NextToken() // skip 9
-	ulk := &cmd.RECmdUnlock{
+	ulk := &RECmdUnlock{
 		Node: strings.Trim(*p.CurToken, "\""),
 	}
 	if p.PeekToken == nil {
@@ -237,16 +236,16 @@ func (p *DataReferenceEditsParser) parseUnlock() (*cmd.RECmdUnlock, error) {
 	return ulk, nil
 }
 
-func (p *DataReferenceEditsParser) ParseToken() []*cmd.ReferenceEdit {
-	var res []*cmd.ReferenceEdit
+func (p *DataReferenceEditsParser) ParseToken() []*ReferenceEdit {
+	var res []*ReferenceEdit
 	commandNum := 0
 	for p.CurToken != nil {
 		var err error
 		if commandNum == 0 {
-			var re *cmd.ReferenceEdit
+			var re *ReferenceEdit
 			re, err = p.parseReferenceEdit()
 			if res == nil {
-				res = []*cmd.ReferenceEdit{}
+				res = []*ReferenceEdit{}
 			}
 			res = append(res, re)
 			if re != nil {
@@ -255,120 +254,120 @@ func (p *DataReferenceEditsParser) ParseToken() []*cmd.ReferenceEdit {
 				fmt.Printf("commandNum == 0, referenceEdit is nil... %s %d %s %s %s %s\n",
 					*p.CurToken, p.cur, (*p.token)[p.cur-2], (*p.token)[p.cur-1], (*p.token)[p.cur], (*p.token)[p.cur+1])
 			}
-		} else if p.CurTokenIs(string(cmd.RETypePArent)) {
+		} else if p.CurTokenIs(string(RETypePArent)) {
 			if res == nil {
 				p.errs = append(p.errs, "res is nil...", *p.CurToken)
 				continue
 			}
 			re := res[len(res)-1] // last re
-			var prt *cmd.RECmdParent
+			var prt *RECmdParent
 			prt, err = p.parseParent()
 			if re.Parents == nil {
-				re.Parents = []*cmd.RECmdParent{}
+				re.Parents = []*RECmdParent{}
 			}
 			re.Parents = append(re.Parents, prt)
 			commandNum--
-		} else if p.CurTokenIs(string(cmd.RETypeAddAttr)) {
+		} else if p.CurTokenIs(string(RETypeAddAttr)) {
 			if res == nil {
 				p.errs = append(p.errs, "res is nil...", *p.CurToken)
 				continue
 			}
 			re := res[len(res)-1] // last re
-			var add *cmd.RECmdAddAttr
+			var add *RECmdAddAttr
 			add, err = p.parseAddAttr()
 			if re.AddAttrs == nil {
-				re.AddAttrs = []*cmd.RECmdAddAttr{}
+				re.AddAttrs = []*RECmdAddAttr{}
 			}
 			re.AddAttrs = append(re.AddAttrs, add)
 			commandNum--
-		} else if p.CurTokenIs(string(cmd.RETypeSetAttr)) {
+		} else if p.CurTokenIs(string(RETypeSetAttr)) {
 			if res == nil {
 				p.errs = append(p.errs, "res is nil...", *p.CurToken)
 				continue
 			}
 			re := res[len(res)-1] // last re
-			var set *cmd.RECmdSetAttr
+			var set *RECmdSetAttr
 			set, err = p.parseSetAttr()
 			if re.SetAttrs == nil {
-				re.SetAttrs = []*cmd.RECmdSetAttr{}
+				re.SetAttrs = []*RECmdSetAttr{}
 			}
 			re.SetAttrs = append(re.SetAttrs, set)
 			commandNum--
-		} else if p.CurTokenIs(string(cmd.RETypeDisconnectAttr)) {
+		} else if p.CurTokenIs(string(RETypeDisconnectAttr)) {
 			if res == nil {
 				p.errs = append(p.errs, "res is nil...", *p.CurToken)
 				continue
 			}
 			re := res[len(res)-1] // last re
-			var dis *cmd.RECmdDisconnectAttr
+			var dis *RECmdDisconnectAttr
 			dis, err = p.parseDisconnectAttr()
 			if re.DisconnectAttrs == nil {
-				re.DisconnectAttrs = []*cmd.RECmdDisconnectAttr{}
+				re.DisconnectAttrs = []*RECmdDisconnectAttr{}
 			}
 			re.DisconnectAttrs = append(re.DisconnectAttrs, dis)
 			commandNum--
-		} else if p.CurTokenIs(string(cmd.RETypeDeleteAttr)) {
+		} else if p.CurTokenIs(string(RETypeDeleteAttr)) {
 			if res == nil {
 				p.errs = append(p.errs, "res is nil...", *p.CurToken)
 				continue
 			}
 			re := res[len(res)-1] // last re
-			var del *cmd.RECmdDeleteAttr
+			var del *RECmdDeleteAttr
 			del, err = p.parseDeleteAttr()
 			if re.DeleteAttrs == nil {
-				re.DeleteAttrs = []*cmd.RECmdDeleteAttr{}
+				re.DeleteAttrs = []*RECmdDeleteAttr{}
 			}
 			re.DeleteAttrs = append(re.DeleteAttrs, del)
 			commandNum--
-		} else if p.CurTokenIs(string(cmd.RETypeConnectAttr)) && p.PeekTokenIsNumber() {
+		} else if p.CurTokenIs(string(RETypeConnectAttr)) && p.PeekTokenIsNumber() {
 			if res == nil {
 				p.errs = append(p.errs, "res is nil...", *p.CurToken)
 				continue
 			}
 			re := res[len(res)-1] // last re
-			var con *cmd.RECmdConnectAttr
+			var con *RECmdConnectAttr
 			con, err = p.parseConnectAttr()
 			if re.ConnectAttrs == nil {
-				re.ConnectAttrs = []*cmd.RECmdConnectAttr{}
+				re.ConnectAttrs = []*RECmdConnectAttr{}
 			}
 			re.ConnectAttrs = append(re.ConnectAttrs, con)
 			commandNum--
-		} else if p.CurTokenIs(string(cmd.RETypeRelationship)) {
+		} else if p.CurTokenIs(string(RETypeRelationship)) {
 			if res == nil {
 				p.errs = append(p.errs, "res is nil...", *p.CurToken)
 				continue
 			}
 			re := res[len(res)-1] // last re
-			var rs *cmd.RECmdRelationship
+			var rs *RECmdRelationship
 			rs, err = p.parseRelationship()
 			if re.Relationships == nil {
-				re.Relationships = []*cmd.RECmdRelationship{}
+				re.Relationships = []*RECmdRelationship{}
 			}
 			re.Relationships = append(re.Relationships, rs)
 			commandNum--
-		} else if p.CurTokenIs(string(cmd.RETypeLock)) {
+		} else if p.CurTokenIs(string(RETypeLock)) {
 			if res == nil {
 				p.errs = append(p.errs, "res is nil...", *p.CurToken)
 				continue
 			}
 			re := res[len(res)-1] // last re
-			var lk *cmd.RECmdLock
+			var lk *RECmdLock
 			lk, err = p.parseLock()
 			if re.Locks == nil {
-				re.Locks = []*cmd.RECmdLock{}
+				re.Locks = []*RECmdLock{}
 			}
 			re.Locks = append(re.Locks, lk)
 			commandNum--
-		} else if p.CurTokenIs(string(cmd.RETypeUnlock)) {
+		} else if p.CurTokenIs(string(RETypeUnlock)) {
 			if res == nil {
 				p.errs = append(p.errs, "res is nil...", *p.CurToken)
 				continue
 			}
 			re := res[len(res)-1] // last re
-			var ulk *cmd.RECmdUnlock
+			var ulk *RECmdUnlock
 			ulk, err = p.parseUnlock()
 			if re.Unlocks == nil {
-				re.Unlocks = []*cmd.RECmdUnlock{}
+				re.Unlocks = []*RECmdUnlock{}
 			}
 			re.Unlocks = append(re.Unlocks, ulk)
 			commandNum--
@@ -428,16 +427,16 @@ func NewDataReferenceEditsParser(token *[]string, start int) *DataReferenceEdits
 	return p
 }
 
-func MakeDataReferenceEdits(token *[]string, start int) ([]cmd.Attr, int, error) {
+func MakeDataReferenceEdits(token *[]string, start int) ([]Attr, int, error) {
 	referenceNode := (*token)[start]
-	re := cmd.AttrDataReferenceEdits{
+	re := AttrDataReferenceEdits{
 		TopReferenceNode: strings.Trim(referenceNode, "\""),
-		ReferenceEdits:   []*cmd.ReferenceEdit{},
+		ReferenceEdits:   []*ReferenceEdit{},
 	}
 	p := NewDataReferenceEditsParser(token, start)
 	p.ErrorCheck()
 	re.ReferenceEdits = p.ParseToken()
 
-	a := []cmd.Attr{&re}
+	a := []Attr{&re}
 	return a, len(*token) - start, nil
 }

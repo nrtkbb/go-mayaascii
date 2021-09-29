@@ -1,4 +1,4 @@
-package cmd
+package mayaascii
 
 import (
 	"bufio"
@@ -18,7 +18,7 @@ type Type string
 
 const (
 	FileType        Type = "file"
-	FileInfoType	Type = "fileInfo"
+	FileInfoType    Type = "fileInfo"
 	WorkspaceType   Type = "workspace"
 	RequiresType    Type = "requires"
 	ConnectAttrType Type = "connectAttr"
@@ -124,8 +124,8 @@ const (
 )
 
 type Cmd struct {
-	Type   Type     `json:"cmd"`
-	Raw    string   `json:"raw"`
+	Type Type   `json:"cmd"`
+	Raw  string `json:"raw"`
 	Token  []string `json:"token"`
 	LineNo uint
 }
@@ -390,7 +390,7 @@ type Select struct {
 
 type SetAttr struct {
 	*Cmd
-	AttrName     string   `json:"attr_name"`
+	AttrName string   `json:"attr_name"`
 	AlteredValue bool     `json:"altered_value" short:"-av"`
 	Caching      *bool    `json:"caching,omitempty" short:"-ca"`
 	CapacityHint *uint    `json:"capacity_hint,omitempty" short:"-ch"`
@@ -398,9 +398,9 @@ type SetAttr struct {
 	Clamp        bool     `json:"clamp" short:"-c"`
 	Keyable      *bool    `json:"keyable,omitempty" short:"-k"`
 	Lock         *bool    `json:"lock,omitempty" short:"-l"`
-	Size         *uint    `json:"size,omitempty" short:"-s"`
-	AttrType     AttrType `json:"attr_type" short:"-typ"`
-	Attr         []Attr   `json:"attr"`
+	Size     *uint    `json:"size,omitempty" short:"-s"`
+	AttrType AttrType `json:"attr_type" short:"-typ"`
+	Attr     []Attr   `json:"attr"`
 }
 
 func (sa *SetAttr) StringWrite(writer io.StringWriter) (int, error) {
@@ -1794,14 +1794,14 @@ func (anc *AttrNurbsCurve) StringWrite(writer io.StringWriter) (int, error) {
 
 type AttrNurbsSurface struct {
 	UDegree     int           `json:"u_degree"`
-	VDegree     int           `json:"v_degree"`
-	UForm       AttrFormType  `json:"u_form"`
-	VForm       AttrFormType  `json:"v_form"`
-	IsRational  bool          `json:"is_rational"`
+	VDegree    int           `json:"v_degree"`
+	UForm      AttrFormType  `json:"u_form"`
+	VForm      AttrFormType  `json:"v_form"`
+	IsRational bool          `json:"is_rational"`
 	UKnotValues []float64     `json:"u_knot_values"`
 	VKnotValues []float64     `json:"v_knot_values"`
-	IsTrim      *bool         `json:"is_trim,omitempty"`
-	CvValues    []AttrCvValue `json:"cv_values"`
+	IsTrim     *bool         `json:"is_trim,omitempty"`
+	CvValues   []AttrCvValue `json:"cv_values"`
 }
 
 func ToAttrNurbsSurface(attrs []Attr) ([]*AttrNurbsSurface, error) {

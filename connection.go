@@ -1,20 +1,16 @@
-package connection
-
-import (
-	"github.com/nrtkbb/go-mayaascii/cmd"
-)
+package mayaascii
 
 type Connections struct {
-	source []*cmd.ConnectAttr
+	source []*ConnectAttr
 }
 
 func NewConnections() Connections {
 	return Connections{
-		source: []*cmd.ConnectAttr{},
+		source: []*ConnectAttr{},
 	}
 }
 
-func (ci *Connections) Append(ca *cmd.ConnectAttr) {
+func (ci *Connections) Append(ca *ConnectAttr) {
 	ci.source = append(ci.source, ca)
 }
 

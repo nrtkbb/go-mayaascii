@@ -1,13 +1,11 @@
-package parser
+package mayaascii
 
 import (
 	"testing"
-
-	"github.com/nrtkbb/go-mayaascii/cmd"
 )
 
 func TestMakeConnectAttr_Min(t *testing.T) {
-	cb := &cmd.CmdBuilder{}
+	cb := &CmdBuilder{}
 	cb.Append(`connectAttr "tmp_file11.msg" ":defaultTextureList1.tx" -na;`)
 	c := cb.Parse()
 	ca, err := MakeConnectAttr(c)
@@ -42,7 +40,7 @@ func TestMakeConnectAttr_Min(t *testing.T) {
 }
 
 func TestMakeConnectAttr_Max(t *testing.T) {
-	cb := &cmd.CmdBuilder{}
+	cb := &CmdBuilder{}
 	cb.Append(`connectAttr -f -l on -rd "test" "tmp_file11.msg" ":defaultTextureList1.tx" -na;`)
 	c := cb.Parse()
 	ca, err := MakeConnectAttr(c)

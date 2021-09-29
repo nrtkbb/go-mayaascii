@@ -1,7 +1,6 @@
 package mayaascii
 
 import (
-	"github.com/nrtkbb/go-mayaascii/cmd"
 	"strings"
 	"testing"
 )
@@ -304,14 +303,14 @@ func TestNodes(t *testing.T) {
 	for _, setAttr := range (*perspShape).SetAttrs {
 		switch setAttr.AttrName {
 		case ".v":
-			if setAttr.AttrType != cmd.TypeBool {
+			if setAttr.AttrType != TypeBool {
 				t.Errorf("got %v, wont cmd.TypeBool", setAttr.AttrType)
 			}
 			if len(setAttr.Attr) != 1 {
 				t.Errorf("got %d, wont 1", len(setAttr.Attr))
 			}
 
-			attrBools, err := cmd.ToAttrBool(setAttr.Attr)
+			attrBools, err := ToAttrBool(setAttr.Attr)
 			if err != nil {
 				t.Error("AttrBool convert NG! " + err.Error())
 			}

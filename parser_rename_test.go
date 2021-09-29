@@ -1,13 +1,11 @@
-package parser
+package mayaascii
 
 import (
 	"testing"
-
-	"github.com/nrtkbb/go-mayaascii/cmd"
 )
 
 func TestMakeRename_Min(t *testing.T) {
-	c := &cmd.CmdBuilder{}
+	c := &CmdBuilder{}
 	c.Append(`rename -uid "B0F0F886-4CD8-DA88-AC80-C1B83173300D";`)
 	r := MakeRename(c.Parse())
 	msg := `got Rename %s "%s", wont "%s"`
@@ -29,7 +27,7 @@ func TestMakeRename_Min(t *testing.T) {
 }
 
 func TestMakeRename_Max(t *testing.T) {
-	c := &cmd.CmdBuilder{}
+	c := &CmdBuilder{}
 	c.Append(`rename -is "from" "to";`)
 	r := MakeRename(c.Parse())
 	msg := `got Rename %s "%s", wont "%s"`

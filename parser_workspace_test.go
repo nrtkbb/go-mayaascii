@@ -1,13 +1,11 @@
-package parser
+package mayaascii
 
 import (
 	"testing"
-
-	"github.com/nrtkbb/go-mayaascii/cmd"
 )
 
 func TestMakeWorkspace(t *testing.T) {
-	cb := &cmd.CmdBuilder{}
+	cb := &CmdBuilder{}
 	cb.Append(`workspace -fr "sourceImages" "sourceimages";`)
 	c := cb.Parse()
 	w := MakeWorkspace(c)
