@@ -212,7 +212,7 @@ func TestRequires(t *testing.T) {
 	}
 
 	if len(mo.Requires) != 1 {
-		t.Errorf("got len(mo.Requires) %d, wont 1", len(mo.Requires))
+		t.Errorf("got len(mo.RequiresCmd) %d, wont 1", len(mo.Requires))
 	}
 
 	require := mo.Requires[0]
@@ -251,7 +251,7 @@ func TestRequires(t *testing.T) {
 	}
 
 	if nearestPointOnMeshNode.Rename == nil {
-		t.Errorf("got nil, wont *Rename")
+		t.Errorf("got nil, wont *RenameCmd")
 	}
 
 	if nearestPointOnMeshNode.Rename.UUID != true {

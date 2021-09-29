@@ -12,7 +12,7 @@ func TestMakeConnectAttr_Min(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	msg := "got ConnectAttr %s %v, wont %v"
+	msg := "got ConnectAttrCmd %s %v, wont %v"
 	if ca.SrcNode != "tmp_file11" {
 		t.Errorf(msg, "SrcNode", ca.SrcNode, "tmp_file11")
 	}
@@ -47,7 +47,7 @@ func TestMakeConnectAttr_Max(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	msg := "got ConnectAttr %s %s, wont %s"
+	msg := "got ConnectAttrCmd %s %s, wont %s"
 	if ca.SrcNode != "tmp_file11" {
 		t.Errorf(msg, "SrcNode", ca.SrcNode, "tmp_file11")
 	}

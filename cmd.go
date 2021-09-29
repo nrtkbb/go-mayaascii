@@ -239,7 +239,7 @@ func (c *CmdBuilder) Parse() *Cmd {
 	return &cmd
 }
 
-type File struct {
+type FileCmd struct {
 	*Cmd
 	Path               string `json:"path"`
 	ReferenceDepthInfo int    `json:"reference_depth_info" type:"-referenceDepthInfo"`
@@ -251,7 +251,7 @@ type File struct {
 	DeferReference     bool   `json:"defer_reference" type:"-deferReference"`
 }
 
-func (f *File) String() string {
+func (f *FileCmd) String() string {
 	var buf bytes.Buffer
 	buf.WriteString("file ")
 	if f.Reference {
@@ -282,13 +282,13 @@ func (f *File) String() string {
 	return buf.String()
 }
 
-type FileInfo struct {
+type FileInfoCmd struct {
 	*Cmd
 	Name  string `json:"name" tag:"-fileInfo"`
 	Value string `json:"value" tag:"-value"`
 }
 
-func (fi *FileInfo) StringWrite(writer io.StringWriter) (int, error) {
+func (fi *FileInfoCmd) StringWrite(writer io.StringWriter) (int, error) {
 	n, err := writer.WriteString("fileInfo \"")
 	if err != nil {
 		return 0, err
@@ -316,7 +316,7 @@ func (fi *FileInfo) StringWrite(writer io.StringWriter) (int, error) {
 	return n, err
 }
 
-func (fi *FileInfo) String() string {
+func (fi *FileInfoCmd) String() string {
 	return strings.Join([]string{"fileInfo \"",
 		fi.Name,
 		"\" \"",
@@ -325,13 +325,13 @@ func (fi *FileInfo) String() string {
 		"")
 }
 
-type Workspace struct {
+type WorkspaceCmd struct {
 	*Cmd
 	FileRule string `json:"file_rule" tag:"-fileRule"`
 	Place    string `json:"place"`
 }
 
-type Requires struct {
+type RequiresCmd struct {
 	*Cmd
 	PluginName string   `json:"plugin_name"`
 	Version    string   `json:"version"`
@@ -339,7 +339,7 @@ type Requires struct {
 	DataTypes  []string `json:"data_types" tag:"-dataType"`
 }
 
-type ConnectAttr struct {
+type ConnectAttrCmd struct {
 	*Cmd
 	SrcNode       string  `json:"src_node"`
 	SrcAttr       string  `json:"src_attr"`
@@ -351,7 +351,7 @@ type ConnectAttr struct {
 	ReferenceDest *string `json:"reference_dest,omitempty" tag:"-rd"`
 }
 
-type CreateNode struct {
+type CreateNodeCmd struct {
 	*Cmd
 	NodeType   string  `json:"node_type"`
 	NodeName   string  `json:"node_name" short:"-n"`
@@ -360,7 +360,7 @@ type CreateNode struct {
 	SkipSelect bool    `json:"skip_select" short:"-ss"`
 }
 
-type Rename struct {
+type RenameCmd struct {
 	*Cmd
 	From        *string `json:"from,omitempty"`
 	To          *string `json:"to"`
@@ -368,7 +368,7 @@ type Rename struct {
 	IgnoreShape bool    `json:"ignore_shape" short:"-is"`
 }
 
-type Select struct {
+type SelectCmd struct {
 	*Cmd
 	Names              []string `json:"names"`
 	Add                bool     `json:"add" short:"-add"`
@@ -388,7 +388,7 @@ type Select struct {
 	Visible            bool     `json:"visible" short:"-vis"`
 }
 
-type SetAttr struct {
+type SetAttrCmd struct {
 	*Cmd
 	AttrName string   `json:"attr_name"`
 	AlteredValue bool     `json:"altered_value" short:"-av"`
@@ -399,11 +399,11 @@ type SetAttr struct {
 	Keyable      *bool    `json:"keyable,omitempty" short:"-k"`
 	Lock         *bool    `json:"lock,omitempty" short:"-l"`
 	Size     *uint    `json:"size,omitempty" short:"-s"`
-	AttrType AttrType `json:"attr_type" short:"-typ"`
-	Attr     []Attr   `json:"attr"`
+	AttrType AttrType    `json:"attr_type" short:"-typ"`
+	Attr     []AttrValue `json:"attr"`
 }
 
-func (sa *SetAttr) StringWrite(writer io.StringWriter) (int, error) {
+func (sa *SetAttrCmd) StringWrite(writer io.StringWriter) (int, error) {
 	n, err := writer.WriteString("\tsetAttr ")
 	if err != nil {
 		return 0, err
@@ -560,7 +560,7 @@ func (sa *SetAttr) StringWrite(writer io.StringWriter) (int, error) {
 	return n, nil
 }
 
-func (sa *SetAttr) String() string {
+func (sa *SetAttrCmd) String() string {
 	var buf bytes.Buffer
 	buf.WriteString("\tsetAttr ")
 	if sa.AlteredValue {
@@ -617,7 +617,7 @@ func (sa *SetAttr) String() string {
 
 type DisconnectBehaviour uint
 
-type AddAttr struct {
+type AddAttrCmd struct {
 	*Cmd
 	AttributeType       *string              `json:"attribute_type,omitempty" short:"-at"`
 	CachedInternally    *bool                `json:"cached_internally,omitempty" short:"-ci"`
@@ -627,14 +627,14 @@ type AddAttr struct {
 	DisconnectBehaviour *DisconnectBehaviour `json:"disconnect_behaviour,omitempty" short:"-dcb"`
 }
 
-type Attr interface {
+type AttrValue interface {
 	String() string
 	StringWrite(writer io.StringWriter) (int, error)
 }
 
 type AttrBool bool
 
-func ToAttrBool(attrs []Attr) ([]*AttrBool, error) {
+func ToAttrBool(attrs []AttrValue) ([]*AttrBool, error) {
 	ret := make([]*AttrBool, len(attrs))
 	for i, a := range attrs {
 		aa, ok := a.(*AttrBool)
@@ -660,7 +660,7 @@ func (ab *AttrBool) Bool() bool {
 
 type AttrInt int
 
-func ToAttrInt(attrs []Attr) ([]*AttrInt, error) {
+func ToAttrInt(attrs []AttrValue) ([]*AttrInt, error) {
 	ret := make([]*AttrInt, len(attrs))
 	for i, a := range attrs {
 		aa, ok := a.(*AttrInt)
@@ -686,7 +686,7 @@ func (ai *AttrInt) Int() int {
 
 type AttrFloat float64
 
-func ToAttrFloat(attrs []Attr) ([]*AttrFloat, error) {
+func ToAttrFloat(attrs []AttrValue) ([]*AttrFloat, error) {
 	ret := make([]*AttrFloat, len(attrs))
 	for i, a := range attrs {
 		aa, ok := a.(*AttrFloat)
@@ -712,7 +712,7 @@ func (af *AttrFloat) Float() float64 {
 
 type AttrShort2 [2]int
 
-func ToAttrShort2(attrs []Attr) ([]*AttrShort2, error) {
+func ToAttrShort2(attrs []AttrValue) ([]*AttrShort2, error) {
 	ret := make([]*AttrShort2, len(attrs))
 	for i, a := range attrs {
 		aa, ok := a.(*AttrShort2)
@@ -754,7 +754,7 @@ func (as2 *AttrShort2) StringWrite(writer io.StringWriter) (int, error) {
 
 type AttrShort3 [3]int
 
-func ToAttrShort3(attrs []Attr) ([]*AttrShort3, error) {
+func ToAttrShort3(attrs []AttrValue) ([]*AttrShort3, error) {
 	ret := make([]*AttrShort3, len(attrs))
 	for i, a := range attrs {
 		aa, ok := a.(*AttrShort3)
@@ -808,7 +808,7 @@ func (as3 *AttrShort3) StringWrite(writer io.StringWriter) (int, error) {
 
 type AttrLong2 [2]int
 
-func ToAttrLong2(attrs []Attr) ([]*AttrLong2, error) {
+func ToAttrLong2(attrs []AttrValue) ([]*AttrLong2, error) {
 	ret := make([]*AttrLong2, len(attrs))
 	for i, a := range attrs {
 		aa, ok := a.(*AttrLong2)
@@ -849,7 +849,7 @@ func (al2 *AttrLong2) StringWrite(writer io.StringWriter) (int, error) {
 
 type AttrLong3 [3]int
 
-func ToAttrLong3(attrs []Attr) ([]*AttrLong3, error) {
+func ToAttrLong3(attrs []AttrValue) ([]*AttrLong3, error) {
 	ret := make([]*AttrLong3, len(attrs))
 	for i, a := range attrs {
 		aa, ok := a.(*AttrLong3)
@@ -903,7 +903,7 @@ func (al3 *AttrLong3) StringWrite(writer io.StringWriter) (int, error) {
 
 type AttrInt32Array []int
 
-func ToAttrInt32Array(attrs []Attr) ([]*AttrInt32Array, error) {
+func ToAttrInt32Array(attrs []AttrValue) ([]*AttrInt32Array, error) {
 	ret := make([]*AttrInt32Array, len(attrs))
 	for i, a := range attrs {
 		aa, ok := a.(*AttrInt32Array)
@@ -944,7 +944,7 @@ func (ai32a *AttrInt32Array) StringWrite(writer io.StringWriter) (int, error) {
 
 type AttrFloat2 [2]float64
 
-func ToAttrFloat2(attrs []Attr) ([]*AttrFloat2, error) {
+func ToAttrFloat2(attrs []AttrValue) ([]*AttrFloat2, error) {
 	ret := make([]*AttrFloat2, len(attrs))
 	for i, a := range attrs {
 		aa, ok := a.(*AttrFloat2)
@@ -966,7 +966,7 @@ func (af2 *AttrFloat2) StringWrite(writer io.StringWriter) (int, error) {
 
 type AttrFloat3 [3]float64
 
-func ToAttrFloat3(attrs []Attr) ([]*AttrFloat3, error) {
+func ToAttrFloat3(attrs []AttrValue) ([]*AttrFloat3, error) {
 	ret := make([]*AttrFloat3, len(attrs))
 	for i, a := range attrs {
 		aa, ok := a.(*AttrFloat3)
@@ -988,7 +988,7 @@ func (af3 *AttrFloat3) StringWrite(writer io.StringWriter) (int, error) {
 
 type AttrDouble2 [2]float64
 
-func ToAttrDouble2(attrs []Attr) ([]*AttrDouble2, error) {
+func ToAttrDouble2(attrs []AttrValue) ([]*AttrDouble2, error) {
 	ret := make([]*AttrDouble2, len(attrs))
 	for i, a := range attrs {
 		aa, ok := a.(*AttrDouble2)
@@ -1010,7 +1010,7 @@ func (ad2 *AttrDouble2) StringWrite(writer io.StringWriter) (int, error) {
 
 type AttrDouble3 [3]float64
 
-func ToAttrDouble3(attrs []Attr) ([]*AttrDouble3, error) {
+func ToAttrDouble3(attrs []AttrValue) ([]*AttrDouble3, error) {
 	ret := make([]*AttrDouble3, len(attrs))
 	for i, a := range attrs {
 		aa, ok := a.(*AttrDouble3)
@@ -1032,7 +1032,7 @@ func (ad3 *AttrDouble3) StringWrite(writer io.StringWriter) (int, error) {
 
 type AttrDoubleArray []float64
 
-func ToAttrDoubleArray(attrs []Attr) ([]*AttrDoubleArray, error) {
+func ToAttrDoubleArray(attrs []AttrValue) ([]*AttrDoubleArray, error) {
 	ret := make([]*AttrDoubleArray, len(attrs))
 	for i, a := range attrs {
 		aa, ok := a.(*AttrDoubleArray)
@@ -1104,7 +1104,7 @@ func (ao *AttrOrient) StringWrite(writer io.StringWriter) (int, error) {
 
 type AttrRotateOrder int
 
-func ToAttrRotateOrder(attrs []Attr) ([]*AttrRotateOrder, error) {
+func ToAttrRotateOrder(attrs []AttrValue) ([]*AttrRotateOrder, error) {
 	ret := make([]*AttrRotateOrder, len(attrs))
 	for i, a := range attrs {
 		aa, ok := a.(*AttrRotateOrder)
@@ -1169,7 +1169,7 @@ func ConvertAttrRotateOrder(i int) (AttrRotateOrder, error) {
 
 type AttrMatrix [16]float64 // mat4x4
 
-func ToAttrMatrix(attrs []Attr) ([]*AttrMatrix, error) {
+func ToAttrMatrix(attrs []AttrValue) ([]*AttrMatrix, error) {
 	ret := make([]*AttrMatrix, len(attrs))
 	for i, a := range attrs {
 		aa, ok := a.(*AttrMatrix)
@@ -1224,7 +1224,7 @@ type AttrMatrixXform struct {
 	CompensateForParentScale bool            `json:"compensate_for_parent_scale"`
 }
 
-func ToAttrMatrixXform(attrs []Attr) ([]*AttrMatrixXform, error) {
+func ToAttrMatrixXform(attrs []AttrValue) ([]*AttrMatrixXform, error) {
 	ret := make([]*AttrMatrixXform, len(attrs))
 	for i, a := range attrs {
 		aa, ok := a.(*AttrMatrixXform)
@@ -1280,7 +1280,7 @@ type AttrPoint struct {
 	W float64 `json:"w"`
 }
 
-func ToAttrPoint(attrs []Attr) ([]*AttrPoint, error) {
+func ToAttrPoint(attrs []AttrValue) ([]*AttrPoint, error) {
 	ret := make([]*AttrPoint, len(attrs))
 	for i, a := range attrs {
 		aa, ok := a.(*AttrPoint)
@@ -1303,7 +1303,7 @@ func (ap *AttrPoint) StringWrite(writer io.StringWriter) (int, error) {
 
 type AttrPointArray []AttrPoint
 
-func ToAttrPointArray(attrs []Attr) ([]*AttrPointArray, error) {
+func ToAttrPointArray(attrs []AttrValue) ([]*AttrPointArray, error) {
 	ret := make([]*AttrPointArray, len(attrs))
 	for i, a := range attrs {
 		aa, ok := a.(*AttrPointArray)
@@ -1349,7 +1349,7 @@ type AttrVector struct {
 	Z float64 `json:"z"`
 }
 
-func ToAttrVector(attrs []Attr) ([]*AttrVector, error) {
+func ToAttrVector(attrs []AttrValue) ([]*AttrVector, error) {
 	ret := make([]*AttrVector, len(attrs))
 	for i, a := range attrs {
 		aa, ok := a.(*AttrVector)
@@ -1372,7 +1372,7 @@ func (av *AttrVector) StringWrite(writer io.StringWriter) (int, error) {
 
 type AttrVectorArray []AttrVector
 
-func ToAttrVectorArray(attrs []Attr) ([]*AttrVectorArray, error) {
+func ToAttrVectorArray(attrs []AttrValue) ([]*AttrVectorArray, error) {
 	ret := make([]*AttrVectorArray, len(attrs))
 	for i, a := range attrs {
 		aa, ok := a.(*AttrVectorArray)
@@ -1413,7 +1413,7 @@ func (ava *AttrVectorArray) StringWrite(writer io.StringWriter) (int, error) {
 
 type AttrString string
 
-func ToAttrString(attrs []Attr) ([]*AttrString, error) {
+func ToAttrString(attrs []AttrValue) ([]*AttrString, error) {
 	ret := make([]*AttrString, len(attrs))
 	for i, a := range attrs {
 		aa, ok := a.(*AttrString)
@@ -1435,7 +1435,7 @@ func (as *AttrString) StringWrite(writer io.StringWriter) (int, error) {
 
 type AttrStringArray []string
 
-func ToAttrStringArray(attrs []Attr) ([]*AttrStringArray, error) {
+func ToAttrStringArray(attrs []AttrValue) ([]*AttrStringArray, error) {
 	ret := make([]*AttrStringArray, len(attrs))
 	for i, a := range attrs {
 		aa, ok := a.(*AttrStringArray)
@@ -1476,7 +1476,7 @@ func (asa *AttrStringArray) StringWrite(writer io.StringWriter) (int, error) {
 
 type AttrSphere float64
 
-func ToAttrSphere(attrs []Attr) ([]*AttrSphere, error) {
+func ToAttrSphere(attrs []AttrValue) ([]*AttrSphere, error) {
 	ret := make([]*AttrSphere, len(attrs))
 	for i, a := range attrs {
 		aa, ok := a.(*AttrSphere)
@@ -1501,7 +1501,7 @@ type AttrCone struct {
 	ConeCap   float64 `json:"cone_cap"`
 }
 
-func ToAttrCone(attrs []Attr) ([]*AttrCone, error) {
+func ToAttrCone(attrs []AttrValue) ([]*AttrCone, error) {
 	ret := make([]*AttrCone, len(attrs))
 	for i, a := range attrs {
 		aa, ok := a.(*AttrCone)
@@ -1534,7 +1534,7 @@ type AttrReflectanceRGB struct {
 	BlueReflect  float64 `json:"blue_reflect"`
 }
 
-func ToAttrReflectanceRGB(attrs []Attr) ([]*AttrReflectanceRGB, error) {
+func ToAttrReflectanceRGB(attrs []AttrValue) ([]*AttrReflectanceRGB, error) {
 	ret := make([]*AttrReflectanceRGB, len(attrs))
 	for i, a := range attrs {
 		aa, ok := a.(*AttrReflectanceRGB)
@@ -1569,7 +1569,7 @@ type AttrSpectrumRGB struct {
 	BlueSpectrum  float64 `json:"blue_spectrum"`
 }
 
-func ToAttrSpectrumRGB(attrs []Attr) ([]*AttrSpectrumRGB, error) {
+func ToAttrSpectrumRGB(attrs []AttrValue) ([]*AttrSpectrumRGB, error) {
 	ret := make([]*AttrSpectrumRGB, len(attrs))
 	for i, a := range attrs {
 		aa, ok := a.(*AttrSpectrumRGB)
@@ -1600,7 +1600,7 @@ func (as *AttrSpectrumRGB) StringWrite(writer io.StringWriter) (int, error) {
 
 type AttrComponentList []string
 
-func ToAttrComponentList(attrs []Attr) ([]*AttrComponentList, error) {
+func ToAttrComponentList(attrs []AttrValue) ([]*AttrComponentList, error) {
 	ret := make([]*AttrComponentList, len(attrs))
 	for i, a := range attrs {
 		aa, ok := a.(*AttrComponentList)
@@ -1644,7 +1644,7 @@ type AttrAttributeAlias struct {
 	CurrentName string `json:"current_name"`
 }
 
-func ToAttrAttributeAlias(attrs []Attr) ([]*AttrAttributeAlias, error) {
+func ToAttrAttributeAlias(attrs []AttrValue) ([]*AttrAttributeAlias, error) {
 	ret := make([]*AttrAttributeAlias, len(attrs))
 	for i, a := range attrs {
 		aa, ok := a.(*AttrAttributeAlias)
@@ -1673,7 +1673,7 @@ func (aaa *AttrAttributeAlias) StringWrite(writer io.StringWriter) (int, error) 
 
 type AttrFormType int
 
-func ToAttrFormType(attrs []Attr) ([]*AttrFormType, error) {
+func ToAttrFormType(attrs []AttrValue) ([]*AttrFormType, error) {
 	ret := make([]*AttrFormType, len(attrs))
 	for i, a := range attrs {
 		aa, ok := a.(*AttrFormType)
@@ -1730,7 +1730,7 @@ type AttrCvValue struct {
 	W *float64 `json:"w,omitempty"`
 }
 
-func ToAttrCvValue(attrs []Attr) ([]*AttrCvValue, error) {
+func ToAttrCvValue(attrs []AttrValue) ([]*AttrCvValue, error) {
 	ret := make([]*AttrCvValue, len(attrs))
 	for i, a := range attrs {
 		aa, ok := a.(*AttrCvValue)
@@ -1761,7 +1761,7 @@ type AttrNurbsCurve struct {
 	CvValues   []AttrCvValue `json:"cv_values"`
 }
 
-func ToAttrNurbsCurve(attrs []Attr) ([]*AttrNurbsCurve, error) {
+func ToAttrNurbsCurve(attrs []AttrValue) ([]*AttrNurbsCurve, error) {
 	ret := make([]*AttrNurbsCurve, len(attrs))
 	for i, a := range attrs {
 		aa, ok := a.(*AttrNurbsCurve)
@@ -1804,7 +1804,7 @@ type AttrNurbsSurface struct {
 	CvValues   []AttrCvValue `json:"cv_values"`
 }
 
-func ToAttrNurbsSurface(attrs []Attr) ([]*AttrNurbsSurface, error) {
+func ToAttrNurbsSurface(attrs []AttrValue) ([]*AttrNurbsSurface, error) {
 	ret := make([]*AttrNurbsSurface, len(attrs))
 	for i, a := range attrs {
 		aa, ok := a.(*AttrNurbsSurface)
@@ -1867,7 +1867,7 @@ func (ans *AttrNurbsSurface) StringWrite(writer io.StringWriter) (int, error) {
 
 type AttrNurbsTrimface struct{}
 
-func ToAttrNurbsTrimface(attrs []Attr) ([]*AttrNurbsTrimface, error) {
+func ToAttrNurbsTrimface(attrs []AttrValue) ([]*AttrNurbsTrimface, error) {
 	ret := make([]*AttrNurbsTrimface, len(attrs))
 	for i, a := range attrs {
 		aa, ok := a.(*AttrNurbsTrimface)
@@ -1892,7 +1892,7 @@ type AttrFaceUV struct {
 	FaceUV []int `json:"face_uv"`
 }
 
-func ToAttrFaceUV(attrs []Attr) ([]*AttrFaceUV, error) {
+func ToAttrFaceUV(attrs []AttrValue) ([]*AttrFaceUV, error) {
 	ret := make([]*AttrFaceUV, len(attrs))
 	for i, a := range attrs {
 		aa, ok := a.(*AttrFaceUV)
@@ -1950,7 +1950,7 @@ type AttrMultiColor struct {
 	ColorIDs   []int `json:"color_ids"`
 }
 
-func ToAttrMultiColor(attrs []Attr) ([]*AttrMultiColor, error) {
+func ToAttrMultiColor(attrs []AttrValue) ([]*AttrMultiColor, error) {
 	ret := make([]*AttrMultiColor, len(attrs))
 	for i, a := range attrs {
 		aa, ok := a.(*AttrMultiColor)
@@ -2012,7 +2012,7 @@ type AttrPolyFaces struct {
 	MultiColor []AttrMultiColor `json:"multi_color"`
 }
 
-func ToAttrPolyFaces(attrs []Attr) ([]*AttrPolyFaces, error) {
+func ToAttrPolyFaces(attrs []AttrValue) ([]*AttrPolyFaces, error) {
 	ret := make([]*AttrPolyFaces, len(attrs))
 	for i, a := range attrs {
 		aa, ok := a.(*AttrPolyFaces)
@@ -2131,7 +2131,7 @@ func (apf *AttrPolyFaces) StringWrite(writer io.StringWriter) (int, error) {
 
 type AttrDPCType int
 
-func ToAttrDPCType(attrs []Attr) ([]*AttrDPCType, error) {
+func ToAttrDPCType(attrs []AttrValue) ([]*AttrDPCType, error) {
 	ret := make([]*AttrDPCType, len(attrs))
 	for i, a := range attrs {
 		aa, ok := a.(*AttrDPCType)
@@ -2174,7 +2174,7 @@ type AttrDataPolyComponent struct {
 	IndexValue        map[int]float64 `json:"index_value"`
 }
 
-func ToAttrDataPolyComponent(attrs []Attr) ([]*AttrDataPolyComponent, error) {
+func ToAttrDataPolyComponent(attrs []AttrValue) ([]*AttrDataPolyComponent, error) {
 	ret := make([]*AttrDataPolyComponent, len(attrs))
 	for i, a := range attrs {
 		aa, ok := a.(*AttrDataPolyComponent)
@@ -2575,7 +2575,7 @@ type AttrDataReferenceEdits struct {
 	ReferenceEdits   []*ReferenceEdit `json:"reference_edits"`
 }
 
-func ToAttrDataReferenceEdits(attrs []Attr) ([]*AttrDataReferenceEdits, error) {
+func ToAttrDataReferenceEdits(attrs []AttrValue) ([]*AttrDataReferenceEdits, error) {
 	ret := make([]*AttrDataReferenceEdits, len(attrs))
 	for i, a := range attrs {
 		aa, ok := a.(*AttrDataReferenceEdits)
@@ -2617,7 +2617,7 @@ type AttrLatticePoint struct {
 	U float64 `json:"u"`
 }
 
-func ToAttrLatticePoint(attrs []Attr) ([]*AttrLatticePoint, error) {
+func ToAttrLatticePoint(attrs []AttrValue) ([]*AttrLatticePoint, error) {
 	ret := make([]*AttrLatticePoint, len(attrs))
 	for i, a := range attrs {
 		aa, ok := a.(*AttrLatticePoint)
@@ -2645,7 +2645,7 @@ type AttrLattice struct {
 	Points    []AttrLatticePoint `json:"points"`
 }
 
-func ToAttrLattice(attrs []Attr) ([]*AttrLattice, error) {
+func ToAttrLattice(attrs []AttrValue) ([]*AttrLattice, error) {
 	ret := make([]*AttrLattice, len(attrs))
 	for i, a := range attrs {
 		aa, ok := a.(*AttrLattice)

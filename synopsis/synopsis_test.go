@@ -23,7 +23,7 @@ func TestSynopsis(t *testing.T) {
 
 	reader := bufio.NewReader(fp)
 
-	// Unmarshal Maya Ascii File to 'mo' (Maya Ascii Object).
+	// Unmarshal Maya Ascii FileCmd to 'mo' (Maya Ascii Object).
 	mo, err := ma.Unmarshal(reader)
 	if err != nil {
 		log.Fatal(err)

@@ -54,7 +54,7 @@ func TestMakeSetAttr_Size(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	msg := `got SetAttr %s %s, wont %s`
+	msg := `got SetAttrCmd %s %s, wont %s`
 	if beforeSetAttr.AttrType != TypeInvalid {
 		t.Errorf(msg, "AttrType", beforeSetAttr.AttrType, TypeInvalid)
 	}
@@ -70,7 +70,7 @@ func TestMakeSetAttr_int(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	msg := `got SetAttr %s %s, wont %s`
+	msg := `got SetAttrCmd %s %s, wont %s`
 	if sa.AttrType != TypeInt {
 		t.Errorf(msg, "AttrType", sa.AttrType, TypeInt)
 	}
@@ -79,10 +79,10 @@ func TestMakeSetAttr_int(t *testing.T) {
 		t.Fatal(err)
 	}
 	if ret[0].Int() != 1 || ret[1].Int() != 2 {
-		t.Errorf(msg, "Attr", sa.Attr, []int{1, 2})
+		t.Errorf(msg, "AttrValue", sa.Attr, []int{1, 2})
 	}
 	if len(sa.Attr) != 2 {
-		t.Errorf(msg, "len(Attr)", len(sa.Attr), 2)
+		t.Errorf(msg, "len(AttrValue)", len(sa.Attr), 2)
 	}
 	c.Clear()
 	c.Append(`setAttr ".attrName" 3 4;`)
@@ -98,11 +98,11 @@ func TestMakeSetAttr_int(t *testing.T) {
 		t.Fatal(err)
 	}
 	if len(sa.Attr) != 4 {
-		t.Errorf(msg, "len(Attr)", len(sa.Attr), 4)
+		t.Errorf(msg, "len(AttrValue)", len(sa.Attr), 4)
 	}
 	if ret[0].Int() != 1 || ret[1].Int() != 2 ||
 		ret[2].Int() != 3 || ret[3].Int() != 4 {
-		t.Errorf(msg, "Attr", sa.Attr, []int{1, 2, 3, 4})
+		t.Errorf(msg, "AttrValue", sa.Attr, []int{1, 2, 3, 4})
 	}
 }
 
@@ -113,12 +113,12 @@ func TestMakeSetAttr_int_toDouble_toInt(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	msg := `got SetAttr %s %s, wont %s`
+	msg := `got SetAttrCmd %s %s, wont %s`
 	if sa.AttrType != TypeInt {
 		t.Errorf(msg, "AttrType", sa.AttrType, TypeInt)
 	}
 	if len(sa.Attr) != 2 {
-		t.Errorf(msg, "len(Attr)", len(sa.Attr), 2)
+		t.Errorf(msg, "len(AttrValue)", len(sa.Attr), 2)
 	}
 	ret, err := ToAttrInt(sa.Attr)
 	if err != nil {
@@ -127,7 +127,7 @@ func TestMakeSetAttr_int_toDouble_toInt(t *testing.T) {
 	if ret[0].Int() != 1 || ret[1].Int() != 2 {
 		var ai0 AttrInt = 1
 		var ai1 AttrInt = 2
-		t.Errorf(msg, "Attr", sa.Attr, [2]*AttrInt{&ai0, &ai1})
+		t.Errorf(msg, "AttrValue", sa.Attr, [2]*AttrInt{&ai0, &ai1})
 	}
 	c.Clear()
 	c.Append(`setAttr ".attrName" 3.3 4e+020 5e-020;`)
@@ -143,7 +143,7 @@ func TestMakeSetAttr_int_toDouble_toInt(t *testing.T) {
 		t.Fatal(err)
 	}
 	if len(af) != 5 {
-		t.Errorf(msg, "len(Attr)", len(af), 5)
+		t.Errorf(msg, "len(AttrValue)", len(af), 5)
 	}
 	if af[0].Float() != 1 ||
 		af[1].Float() != 2 ||
@@ -155,7 +155,7 @@ func TestMakeSetAttr_int_toDouble_toInt(t *testing.T) {
 		var af2 AttrFloat = 3.3
 		var af3 AttrFloat = 4E+020
 		var af4 AttrFloat = 5E-020
-		t.Errorf(msg, "Attr", sa.Attr, []*AttrFloat{
+		t.Errorf(msg, "AttrValue", sa.Attr, []*AttrFloat{
 			&af0, &af1, &af2, &af3, &af4})
 	}
 	c.Clear()
@@ -172,7 +172,7 @@ func TestMakeSetAttr_int_toDouble_toInt(t *testing.T) {
 		t.Fatal(err)
 	}
 	if len(af) != 7 {
-		t.Errorf(msg, "len(Attr)", len(af), 7)
+		t.Errorf(msg, "len(AttrValue)", len(af), 7)
 	}
 	if af[0].Float() != 1 ||
 		af[1].Float() != 2 ||
@@ -188,7 +188,7 @@ func TestMakeSetAttr_int_toDouble_toInt(t *testing.T) {
 		var af4 AttrFloat = 5E-020
 		var af5 AttrFloat = 5
 		var af6 AttrFloat = 6
-		t.Errorf(msg, "Attr", sa.Attr, []*AttrFloat{
+		t.Errorf(msg, "AttrValue", sa.Attr, []*AttrFloat{
 			&af0, &af1, &af2, &af3, &af4, &af5, &af6})
 	}
 }
@@ -200,19 +200,19 @@ func TestMakeSetAttr_string(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	msg := `got SetAttr %s %s, wont %s`
+	msg := `got SetAttrCmd %s %s, wont %s`
 	if sa.AttrType != TypeString {
 		t.Errorf(msg, "AttrType", sa.AttrType, TypeString)
 	}
 	if len(sa.Attr) != 1 {
-		t.Errorf(msg, "len(Attr)", len(sa.Attr), 1)
+		t.Errorf(msg, "len(AttrValue)", len(sa.Attr), 1)
 	}
 	ret, err := ToAttrString(sa.Attr)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if ret[0].String() != "//network/folder/texture.jpg" {
-		t.Errorf(msg, "Attr", ret[0].String(),
+		t.Errorf(msg, "AttrValue", ret[0].String(),
 			"//network/folder/texture.jpg")
 	}
 }
@@ -224,12 +224,12 @@ func TestMakeSetAttr_stringArray(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	msg := `got SetAttr %s %s, wont %s`
+	msg := `got SetAttrCmd %s %s, wont %s`
 	if sa.AttrType != TypeStringArray {
 		t.Errorf(msg, "AttrType", sa.AttrType, TypeStringArray)
 	}
 	if len(sa.Attr) != 1 {
-		t.Errorf(msg, "len(Attr)", len(sa.Attr), 1)
+		t.Errorf(msg, "len(AttrValue)", len(sa.Attr), 1)
 	}
 	ret, err := ToAttrStringArray(sa.Attr)
 	if err != nil {
@@ -237,7 +237,7 @@ func TestMakeSetAttr_stringArray(t *testing.T) {
 	}
 	if (*ret[0])[0] != "//network/folder/texture.jpg" &&
 		(*ret[0])[1] != "//network/folder/texture.jpg" {
-		t.Errorf(msg, "Attr", *ret[0], AttrStringArray{
+		t.Errorf(msg, "AttrValue", *ret[0], AttrStringArray{
 			"//network/folder/texture.jpg",
 			"//network/folder/texture.jpg",
 		})
@@ -251,12 +251,12 @@ func TestMakeSetAttr_doubleWithExponent(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	msg := `got SetAttr %s %s, wont %s`
+	msg := `got SetAttrCmd %s %s, wont %s`
 	if sa.AttrType != TypeDouble {
 		t.Errorf(msg, "AttrType", sa.AttrType, TypeDouble)
 	}
 	if len(sa.Attr) != 2 {
-		t.Errorf(msg, "len(Attr)", len(sa.Attr), 2)
+		t.Errorf(msg, "len(AttrValue)", len(sa.Attr), 2)
 	}
 	ret, err := ToAttrFloat(sa.Attr)
 	if err != nil {
@@ -264,7 +264,7 @@ func TestMakeSetAttr_doubleWithExponent(t *testing.T) {
 	}
 	if ret[0].Float() != 1E+020 ||
 		ret[1].Float() != 2 {
-		t.Errorf(msg, "Attr", sa.Attr, []float64{1E+020, 2})
+		t.Errorf(msg, "AttrValue", sa.Attr, []float64{1E+020, 2})
 	}
 }
 
@@ -275,12 +275,12 @@ func TestMakeSetAttr_double(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	msg := `got SetAttr %s %s, wont %s`
+	msg := `got SetAttrCmd %s %s, wont %s`
 	if sa.AttrType != TypeDouble {
 		t.Errorf(msg, "AttrType", sa.AttrType, TypeDouble)
 	}
 	if len(sa.Attr) != 2 {
-		t.Errorf(msg, "len(Attr)", len(sa.Attr), 2)
+		t.Errorf(msg, "len(AttrValue)", len(sa.Attr), 2)
 	}
 	ret, err := ToAttrFloat(sa.Attr)
 	if err != nil {
@@ -290,7 +290,7 @@ func TestMakeSetAttr_double(t *testing.T) {
 		ret[1].Float() != 2.2 {
 		var af0 AttrFloat = 1.1
 		var af1 AttrFloat = 2.2
-		t.Errorf(msg, "Attr", sa.Attr, []*AttrFloat{
+		t.Errorf(msg, "AttrValue", sa.Attr, []*AttrFloat{
 			&af0, &af1,
 		})
 	}
@@ -305,7 +305,7 @@ func TestMakeSetAttr_double(t *testing.T) {
 		t.Fatal(err)
 	}
 	if len(ret) != 4 {
-		t.Errorf(msg, "len(Attr)", len(ret), 4)
+		t.Errorf(msg, "len(AttrValue)", len(ret), 4)
 	}
 	if ret[0].Float() != 1.1 ||
 		ret[1].Float() != 2.2 ||
@@ -315,7 +315,7 @@ func TestMakeSetAttr_double(t *testing.T) {
 		var af1 AttrFloat = 2.2
 		var af2 AttrFloat = 3.3
 		var af3 AttrFloat = 4.4
-		t.Errorf(msg, "Attr", sa.Attr, []*AttrFloat{
+		t.Errorf(msg, "AttrValue", sa.Attr, []*AttrFloat{
 			&af0, &af1, &af2, &af3,
 		})
 	}
@@ -328,15 +328,15 @@ func testBool(t *testing.T, boolString string, wont bool) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	msg := `got SetAttr %s %s, wont %s`
+	msg := `got SetAttrCmd %s %s, wont %s`
 	if sa.AttrType != TypeBool {
 		t.Errorf(msg, "AttrType", sa.AttrType, TypeBool)
 	}
 	if len(sa.Attr) != 1 {
-		t.Errorf(msg, "len(Attr)", len(sa.Attr), 1)
+		t.Errorf(msg, "len(AttrValue)", len(sa.Attr), 1)
 	}
 	if b, ok := sa.Attr[0].(*AttrBool); !ok || b.Bool() != wont {
-		t.Errorf(msg, "Attr", sa.Attr[0], wont)
+		t.Errorf(msg, "AttrValue", sa.Attr[0], wont)
 	}
 }
 
@@ -356,16 +356,16 @@ func TestMakeSetAttr_short2(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	msg := `got SetAttr %s %s, wont %s`
+	msg := `got SetAttrCmd %s %s, wont %s`
 	if sa.AttrType != TypeShort2 {
 		t.Errorf(msg, "AttrType", sa.AttrType, TypeShort2)
 	}
 	if len(sa.Attr) != 1 {
-		t.Errorf(msg, "len(Attr)", len(sa.Attr), 1)
+		t.Errorf(msg, "len(AttrValue)", len(sa.Attr), 1)
 	}
 	s2, ok := sa.Attr[0].(*AttrShort2)
 	if !ok || s2[0] != 1 || s2[1] != 2 {
-		t.Errorf(msg, "Attr", sa.Attr, []AttrShort2{
+		t.Errorf(msg, "AttrValue", sa.Attr, []AttrShort2{
 			{1, 2},
 		})
 	}
@@ -380,20 +380,20 @@ func TestMakeSetAttr_short2_add(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	msg := `got SetAttr %s %s, wont %s`
+	msg := `got SetAttrCmd %s %s, wont %s`
 	if len(sa.Attr) != 2 {
-		t.Errorf(msg, "len(Attr)", len(sa.Attr), 2)
+		t.Errorf(msg, "len(AttrValue)", len(sa.Attr), 2)
 	}
 	ret, err := ToAttrShort2(sa.Attr)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if len(ret) != 2 {
-		t.Errorf(msg, "len(Attr)", len(ret), 2)
+		t.Errorf(msg, "len(AttrValue)", len(ret), 2)
 	}
 	if ret[0][0] != 1 || ret[0][1] != 2 ||
 		ret[1][0] != 3 || ret[1][1] != 4 {
-		t.Errorf(msg, "Attr", sa.Attr, []AttrShort2{
+		t.Errorf(msg, "AttrValue", sa.Attr, []AttrShort2{
 			{1, 2},
 			{3, 4},
 		})
@@ -407,7 +407,7 @@ func TestMakeSetAttr_short2_size(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	msg := `got SetAttr %s %s, wont %s`
+	msg := `got SetAttrCmd %s %s, wont %s`
 	if sa.AttrType != TypeShort2 {
 		t.Errorf(msg, "AttrType", sa.AttrType, TypeShort2)
 	}
@@ -416,11 +416,11 @@ func TestMakeSetAttr_short2_size(t *testing.T) {
 		t.Fatal(err)
 	}
 	if len(ret) != 2 {
-		t.Errorf(msg, "len(Attr)", len(ret), 2)
+		t.Errorf(msg, "len(AttrValue)", len(ret), 2)
 	}
 	if ret[0][0] != 1 || ret[0][1] != 2 ||
 		ret[1][0] != 1 || ret[1][1] != 2 {
-		t.Errorf(msg, "Attr", sa.Attr, []AttrShort2{
+		t.Errorf(msg, "AttrValue", sa.Attr, []AttrShort2{
 			{1, 2},
 			{1, 2},
 		})
@@ -438,7 +438,7 @@ func TestMakeSetAttr_short2_sizeOver(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	msg := `got SetAttr %s %s, wont %s`
+	msg := `got SetAttrCmd %s %s, wont %s`
 	if sa.AttrType != TypeShort2 {
 		t.Errorf(msg, "AttrType", sa.AttrType, TypeShort2)
 	}
@@ -447,7 +447,7 @@ func TestMakeSetAttr_short2_sizeOver(t *testing.T) {
 		t.Fatal(err)
 	}
 	if len(ret) != 4 {
-		t.Errorf(msg, "len(Attr)", len(ret), 4)
+		t.Errorf(msg, "len(AttrValue)", len(ret), 4)
 	}
 	if ret[0][0] != 1 ||
 		ret[0][1] != 2 ||
@@ -457,7 +457,7 @@ func TestMakeSetAttr_short2_sizeOver(t *testing.T) {
 		ret[2][1] != 2 ||
 		ret[3][0] != 1 ||
 		ret[3][1] != 2 {
-		t.Errorf(msg, "Attr", sa.Attr, []AttrShort2{
+		t.Errorf(msg, "AttrValue", sa.Attr, []AttrShort2{
 			{1, 2},
 			{1, 2},
 			{1, 2},
@@ -473,7 +473,7 @@ func TestMakeSetAttr_long2(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	msg := `got SetAttr %s %s, wont %s`
+	msg := `got SetAttrCmd %s %s, wont %s`
 	if sa.AttrType != TypeLong2 {
 		t.Errorf(msg, "AttrType", sa.AttrType, TypeLong2)
 	}
@@ -483,12 +483,12 @@ func TestMakeSetAttr_long2(t *testing.T) {
 	}
 	if ret[0][0] != 1 || ret[0][1] != 2 {
 		var l20 AttrLong2 = [2]int{1, 2}
-		t.Errorf(msg, "Attr", sa.Attr, []*AttrLong2{
+		t.Errorf(msg, "AttrValue", sa.Attr, []*AttrLong2{
 			&l20,
 		})
 	}
 	if len(ret) != 1 {
-		t.Errorf(msg, "len(Attr)", len(ret), 1)
+		t.Errorf(msg, "len(AttrValue)", len(ret), 1)
 	}
 	c.Clear()
 	c.Append(`setAttr -s 2 ".attrName" -type "long2" 1 2 1 2;`)
@@ -509,12 +509,12 @@ func TestMakeSetAttr_long2(t *testing.T) {
 		ret[1][1] != 2 {
 		var l20 AttrLong2 = [2]int{1, 2}
 		var l21 AttrLong2 = [2]int{1, 2}
-		t.Errorf(msg, "Attr", sa.Attr, []*AttrLong2{
+		t.Errorf(msg, "AttrValue", sa.Attr, []*AttrLong2{
 			&l20, &l21,
 		})
 	}
 	if len(ret) != 2 {
-		t.Errorf(msg, "len(Attr)", len(ret), 2)
+		t.Errorf(msg, "len(AttrValue)", len(ret), 2)
 	}
 }
 
@@ -525,7 +525,7 @@ func TestMakeSetAttr_short3(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	msg := `got SetAttr %s %s, wont %s`
+	msg := `got SetAttrCmd %s %s, wont %s`
 	if sa.AttrType != TypeShort3 {
 		t.Errorf(msg, "AttrType", sa.AttrType, TypeShort3)
 	}
@@ -534,12 +534,12 @@ func TestMakeSetAttr_short3(t *testing.T) {
 		t.Fatal(err)
 	}
 	if ret[0][0] != 1 || ret[0][1] != 2 || ret[0][2] != 3 {
-		t.Errorf(msg, "Attr", sa.Attr, []*AttrShort3{
+		t.Errorf(msg, "AttrValue", sa.Attr, []*AttrShort3{
 			{1, 2, 3},
 		})
 	}
 	if len(ret) != 1 {
-		t.Errorf(msg, "len(Attr)", len(ret), 1)
+		t.Errorf(msg, "len(AttrValue)", len(ret), 1)
 	}
 	c.Append(`setAttr -s 2 ".attrName" -type "short3" 1 2 3 1 2 3;`)
 	sa, err = MakeSetAttr(c.Parse(), nil)
@@ -559,13 +559,13 @@ func TestMakeSetAttr_short3(t *testing.T) {
 		ret[1][0] != 1 ||
 		ret[1][1] != 2 ||
 		ret[1][2] != 3 {
-		t.Errorf(msg, "Attr", sa.Attr, []*AttrShort3{
+		t.Errorf(msg, "AttrValue", sa.Attr, []*AttrShort3{
 			{1, 2, 3},
 			{1, 2, 3},
 		})
 	}
 	if len(ret) != 2 {
-		t.Errorf(msg, "len(Attr)", len(ret), 2)
+		t.Errorf(msg, "len(AttrValue)", len(ret), 2)
 	}
 }
 
@@ -576,7 +576,7 @@ func TestMakeSetAttr_long3(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	msg := `got SetAttr %s %s, wont %s`
+	msg := `got SetAttrCmd %s %s, wont %s`
 	if sa.AttrType != TypeLong3 {
 		t.Errorf(msg, "AttrType", sa.AttrType, TypeLong3)
 	}
@@ -585,12 +585,12 @@ func TestMakeSetAttr_long3(t *testing.T) {
 		t.Fatal(err)
 	}
 	if ret[0][0] != 1 || ret[0][1] != 2 || ret[0][2] != 3 {
-		t.Errorf(msg, "Attr", sa.Attr, []*AttrLong3{
+		t.Errorf(msg, "AttrValue", sa.Attr, []*AttrLong3{
 			{1, 2, 3},
 		})
 	}
 	if len(ret) != 1 {
-		t.Errorf(msg, "len(Attr)", len(ret), 1)
+		t.Errorf(msg, "len(AttrValue)", len(ret), 1)
 	}
 	c.Clear()
 	c.Append(`setAttr -s 2 ".attrName" -type "long3" 1 2 3 1 2 3;`)
@@ -611,13 +611,13 @@ func TestMakeSetAttr_long3(t *testing.T) {
 		ret[1][0] != 1 ||
 		ret[1][1] != 2 ||
 		ret[1][2] != 3 {
-		t.Errorf(msg, "Attr", sa.Attr, [][3]int{
+		t.Errorf(msg, "AttrValue", sa.Attr, [][3]int{
 			{1, 2, 3},
 			{1, 2, 3},
 		})
 	}
 	if len(ret) != 2 {
-		t.Errorf(msg, "len(Attr)", len(ret), 2)
+		t.Errorf(msg, "len(AttrValue)", len(ret), 2)
 	}
 }
 
@@ -628,7 +628,7 @@ func TestMakeSetAttr_Int32Array(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	msg := `got SetAttr %s %s, wont %s`
+	msg := `got SetAttrCmd %s %s, wont %s`
 	if sa.AttrType != TypeInt32Array {
 		t.Errorf(msg, "AttrType", sa.AttrType, TypeInt32Array)
 	}
@@ -637,10 +637,10 @@ func TestMakeSetAttr_Int32Array(t *testing.T) {
 		t.Fatal(err)
 	}
 	if (*ret[0])[0] != 1 || (*ret[0])[1] != 2 {
-		t.Errorf(msg, "Attr", sa.Attr, [][]int{{1, 2}})
+		t.Errorf(msg, "AttrValue", sa.Attr, [][]int{{1, 2}})
 	}
 	if len(*ret[0]) != 2 {
-		t.Errorf(msg, "len(Attr)", len(*ret[0]), 2)
+		t.Errorf(msg, "len(AttrValue)", len(*ret[0]), 2)
 	}
 }
 
@@ -651,7 +651,7 @@ func TestMakeSetAttr_float2(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	msg := `got SetAttr %s %s, wont %s`
+	msg := `got SetAttrCmd %s %s, wont %s`
 	if sa.AttrType != TypeFloat2 {
 		t.Errorf(msg, "AttrType", sa.AttrType, TypeFloat2)
 	}
@@ -660,12 +660,12 @@ func TestMakeSetAttr_float2(t *testing.T) {
 		t.Fatal(err)
 	}
 	if ret[0][0] != 1.0 || ret[0][1] != 2.2 {
-		t.Errorf(msg, "Attr", sa.Attr, []*AttrFloat2{
+		t.Errorf(msg, "AttrValue", sa.Attr, []*AttrFloat2{
 			{1, 2.2},
 		})
 	}
 	if len(ret) != 1 {
-		t.Errorf(msg, "len(Attr)", len(ret), 1)
+		t.Errorf(msg, "len(AttrValue)", len(ret), 1)
 	}
 	c.Clear()
 	c.Append(`setAttr -s 2 ".attrName" -type "float2" 1 2.2 1 2.2;`)
@@ -684,13 +684,13 @@ func TestMakeSetAttr_float2(t *testing.T) {
 		ret[0][1] != 2.2 ||
 		ret[1][0] != 1.0 ||
 		ret[1][1] != 2.2 {
-		t.Errorf(msg, "Attr", sa.Attr, []*AttrFloat2{
+		t.Errorf(msg, "AttrValue", sa.Attr, []*AttrFloat2{
 			{1, 2.2},
 			{1, 2.2},
 		})
 	}
 	if len(ret) != 2 {
-		t.Errorf(msg, "len(Attr)", len(ret), 2)
+		t.Errorf(msg, "len(AttrValue)", len(ret), 2)
 	}
 }
 
@@ -701,7 +701,7 @@ func TestMakeSetAttr_float3(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	msg := `got SetAttr %s %s, wont %s`
+	msg := `got SetAttrCmd %s %s, wont %s`
 	if sa.AttrType != TypeFloat3 {
 		t.Errorf(msg, "AttrType", sa.AttrType, TypeFloat3)
 	}
@@ -710,12 +710,12 @@ func TestMakeSetAttr_float3(t *testing.T) {
 		t.Fatal(err)
 	}
 	if ret[0][0] != 1.0 || ret[0][1] != 2.2 || ret[0][2] != 3.3 {
-		t.Errorf(msg, "Attr", sa.Attr, []*AttrFloat3{
+		t.Errorf(msg, "AttrValue", sa.Attr, []*AttrFloat3{
 			{1, 2.2, 3.3},
 		})
 	}
 	if len(ret) != 1 {
-		t.Errorf(msg, "len(Attr)", len(ret), 1)
+		t.Errorf(msg, "len(AttrValue)", len(ret), 1)
 	}
 	c.Clear()
 	c.Append(`setAttr -s 2 ".attrName" -type "float3" 1 2.2 3.3 1 2.2 3.3;`)
@@ -736,13 +736,13 @@ func TestMakeSetAttr_float3(t *testing.T) {
 		ret[1][0] != 1.0 ||
 		ret[1][1] != 2.2 ||
 		ret[1][2] != 3.3 {
-		t.Errorf(msg, "Attr", sa.Attr, []*AttrFloat3{
+		t.Errorf(msg, "AttrValue", sa.Attr, []*AttrFloat3{
 			{1, 2.2, 3.3},
 			{1, 2.2, 3.3},
 		})
 	}
 	if len(ret) != 2 {
-		t.Errorf(msg, "len(Attr)", len(ret), 2)
+		t.Errorf(msg, "len(AttrValue)", len(ret), 2)
 	}
 }
 
@@ -753,7 +753,7 @@ func TestMakeSetAttr_double2(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	msg := `got SetAttr %s %s, wont %s`
+	msg := `got SetAttrCmd %s %s, wont %s`
 	if sa.AttrType != TypeDouble2 {
 		t.Errorf(msg, "AttrType", sa.AttrType, TypeDouble2)
 	}
@@ -762,12 +762,12 @@ func TestMakeSetAttr_double2(t *testing.T) {
 		t.Fatal(err)
 	}
 	if ret[0][0] != 1.0 || ret[0][1] != 2.2 {
-		t.Errorf(msg, "Attr", sa.Attr, []*AttrDouble2{
+		t.Errorf(msg, "AttrValue", sa.Attr, []*AttrDouble2{
 			{1, 2.2},
 		})
 	}
 	if len(ret) != 1 {
-		t.Errorf(msg, "len(Attr)", len(ret), 1)
+		t.Errorf(msg, "len(AttrValue)", len(ret), 1)
 	}
 	c.Clear()
 	c.Append(`setAttr -s 2 ".attrName" -type "double2" 1 2.2 1 2.2;`)
@@ -786,13 +786,13 @@ func TestMakeSetAttr_double2(t *testing.T) {
 		ret[0][1] != 2.2 ||
 		ret[1][0] != 1.0 ||
 		ret[1][1] != 2.2 {
-		t.Errorf(msg, "Attr", sa.Attr, [][2]float64{
+		t.Errorf(msg, "AttrValue", sa.Attr, [][2]float64{
 			{1, 2.2},
 			{1, 2.2},
 		})
 	}
 	if len(ret) != 2 {
-		t.Errorf(msg, "len(Attr)", len(ret), 2)
+		t.Errorf(msg, "len(AttrValue)", len(ret), 2)
 	}
 }
 
@@ -803,7 +803,7 @@ func TestMakeSetAttr_double3(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	msg := `got SetAttr %s %s, wont %s`
+	msg := `got SetAttrCmd %s %s, wont %s`
 	if sa.AttrType != TypeDouble3 {
 		t.Errorf(msg, "AttrType", sa.AttrType, TypeDouble3)
 	}
@@ -812,10 +812,10 @@ func TestMakeSetAttr_double3(t *testing.T) {
 		t.Fatal(err)
 	}
 	if ret[0][0] != 1.0 || ret[0][1] != 2.2 || ret[0][2] != 3.3 {
-		t.Errorf(msg, "Attr", sa.Attr, []float64{1, 2.2, 3.3})
+		t.Errorf(msg, "AttrValue", sa.Attr, []float64{1, 2.2, 3.3})
 	}
 	if len(ret) != 1 {
-		t.Errorf(msg, "len(Attr)", len(ret), 1)
+		t.Errorf(msg, "len(AttrValue)", len(ret), 1)
 	}
 	c.Clear()
 	c.Append(`setAttr -s 2 ".attrName" -type "double3" 1 2.2 3.3 1 2.2 3.3;`)
@@ -836,13 +836,13 @@ func TestMakeSetAttr_double3(t *testing.T) {
 		ret[1][0] != 1.0 ||
 		ret[1][1] != 2.2 ||
 		ret[1][2] != 3.3 {
-		t.Errorf(msg, "Attr", sa.Attr, [][3]float64{
+		t.Errorf(msg, "AttrValue", sa.Attr, [][3]float64{
 			{1, 2.2, 3.3},
 			{1, 2.2, 3.3},
 		})
 	}
 	if len(ret) != 2 {
-		t.Errorf(msg, "len(Attr)", len(ret), 2)
+		t.Errorf(msg, "len(AttrValue)", len(ret), 2)
 	}
 }
 
@@ -853,7 +853,7 @@ func TestMakeSetAttr_doubleArray(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	msg := `got SetAttr %s %s, wont %s`
+	msg := `got SetAttrCmd %s %s, wont %s`
 	if sa.AttrType != TypeDoubleArray {
 		t.Errorf(msg, "AttrType", sa.AttrType, TypeDoubleArray)
 	}
@@ -862,10 +862,10 @@ func TestMakeSetAttr_doubleArray(t *testing.T) {
 		t.Fatal(err)
 	}
 	if (*ret[0])[0] != 1.1 || (*ret[0])[1] != 2.2 {
-		t.Errorf(msg, "Attr", sa.Attr, []float64{1, 2.2, 3.3})
+		t.Errorf(msg, "AttrValue", sa.Attr, []float64{1, 2.2, 3.3})
 	}
 	if len(*ret[0]) != 2 {
-		t.Errorf(msg, "len(Attr)", len(*ret[0]), 2)
+		t.Errorf(msg, "len(AttrValue)", len(*ret[0]), 2)
 	}
 	c.Clear()
 	c.Append(`setAttr ".attrName" -type "doubleArray" 0;`)
@@ -881,7 +881,7 @@ func TestMakeSetAttr_doubleArray(t *testing.T) {
 		t.Fatal(err)
 	}
 	if len(*ret[0]) != 0 {
-		t.Errorf(msg, "len(Attr)", len(*ret[0]), 0)
+		t.Errorf(msg, "len(AttrValue)", len(*ret[0]), 0)
 	}
 }
 
@@ -892,7 +892,7 @@ func TestMakeSetAttr_matrix(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	msg := `got SetAttr %s %s, wont %s`
+	msg := `got SetAttrCmd %s %s, wont %s`
 	if sa.AttrType != TypeMatrix {
 		t.Errorf(msg, "AttrType", sa.AttrType, TypeMatrix)
 	}
@@ -914,10 +914,10 @@ func TestMakeSetAttr_matrix(t *testing.T) {
 		}
 	}
 	if !allOk {
-		t.Errorf(msg, "Attr", sa.Attr, wontMt)
+		t.Errorf(msg, "AttrValue", sa.Attr, wontMt)
 	}
 	if len(*ret[0]) != 16 {
-		t.Errorf(msg, "len(Attr)", len(*ret[0]), 16)
+		t.Errorf(msg, "len(AttrValue)", len(*ret[0]), 16)
 	}
 }
 
@@ -929,7 +929,7 @@ func TestMakeSetAttr_matrix_xform(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	msg := `got SetAttr %s %s, wont %s`
+	msg := `got SetAttrCmd %s %s, wont %s`
 	if sa.AttrType != TypeMatrixXform {
 		t.Errorf(msg, "AttrType", sa.AttrType, TypeMatrixXform)
 	}
@@ -950,7 +950,7 @@ func TestMakeSetAttr_matrix_xform(t *testing.T) {
 		ret[0].JointOrient.W != 0 || ret[0].JointOrient.X != 0 || ret[0].JointOrient.Y != 0 || ret[0].JointOrient.Z != 1 ||
 		ret[0].InverseParentScale.X != 1 || ret[0].InverseParentScale.Y != 1 || ret[0].InverseParentScale.Z != 1 ||
 		ret[0].CompensateForParentScale == false {
-		t.Errorf(msg, "Attr", sa.Attr, nil)
+		t.Errorf(msg, "AttrValue", sa.Attr, nil)
 	}
 }
 
@@ -961,7 +961,7 @@ func TestMakeSetAttr_pointArray(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	msg := `got SetAttr %s %s, wont %s`
+	msg := `got SetAttrCmd %s %s, wont %s`
 	if sa.AttrType != TypePointArray {
 		t.Errorf(msg, "AttrType", sa.AttrType, TypePointArray)
 	}
@@ -971,12 +971,12 @@ func TestMakeSetAttr_pointArray(t *testing.T) {
 	}
 	pa := *ret[0]
 	if pa[0].X != 1.1 || pa[0].Y != 2.2 || pa[0].Z != 3.3 || pa[0].W != 4.4 {
-		t.Errorf(msg, "Attr", sa.Attr, AttrPointArray{
+		t.Errorf(msg, "AttrValue", sa.Attr, AttrPointArray{
 			{X: 1.1, Y: 2.2, Z: 3.3, W: 4.4},
 		})
 	}
 	if len(*ret[0]) != 1 {
-		t.Errorf(msg, "len(Attr)", len(*ret[0]), 1)
+		t.Errorf(msg, "len(AttrValue)", len(*ret[0]), 1)
 	}
 	c.Clear()
 	c.Append(`setAttr ".attrName" -type "pointArray" 2 1.1 2.2 3.3 4.4 1.1 2.2 3.3 4.4;`)
@@ -997,13 +997,13 @@ func TestMakeSetAttr_pointArray(t *testing.T) {
 		pa[1].Y != 2.2 ||
 		pa[1].Z != 3.3 ||
 		pa[1].W != 4.4 {
-		t.Errorf(msg, "Attr", sa.Attr, AttrPointArray{
+		t.Errorf(msg, "AttrValue", sa.Attr, AttrPointArray{
 			{X: 1.1, Y: 2.2, Z: 3.3, W: 4.4},
 			{X: 1.1, Y: 2.2, Z: 3.3, W: 4.4},
 		})
 	}
 	if len(pa) != 2 {
-		t.Errorf(msg, "len(Attr)", len(pa), 2)
+		t.Errorf(msg, "len(AttrValue)", len(pa), 2)
 	}
 }
 
@@ -1018,7 +1018,7 @@ mc 2 3 2 3 4;`)
 	if err != nil {
 		t.Fatal(err)
 	}
-	msg := `got SetAttr %s %s, wont %s`
+	msg := `got SetAttrCmd %s %s, wont %s`
 	if sa.AttrType != TypePolyFaces {
 		t.Errorf(msg, "AttrType", sa.AttrType, TypePolyFaces)
 	}
@@ -1040,7 +1040,7 @@ mc 2 3 2 3 4;`)
 		(*ret[1]).MultiColor[0].ColorIDs[0] != 2 ||
 		(*ret[1]).MultiColor[0].ColorIDs[1] != 3 ||
 		(*ret[1]).MultiColor[0].ColorIDs[2] != 4 {
-		t.Errorf(msg, "Attr", sa.Attr, []AttrPolyFaces{
+		t.Errorf(msg, "AttrValue", sa.Attr, []AttrPolyFaces{
 			{
 				FaceEdge: []int{1, 2, 3},
 				MultiColor: []AttrMultiColor{
@@ -1062,7 +1062,7 @@ mc 2 3 2 3 4;`)
 		})
 	}
 	if len(ret) != 2 {
-		t.Errorf(msg, "len(Attr)", len(ret), 2)
+		t.Errorf(msg, "len(AttrValue)", len(ret), 2)
 	}
 }
 
@@ -1082,7 +1082,7 @@ func TestMakeSetAttr_polyFacesMax(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	msg := `got SetAttr %s %s, wont %s`
+	msg := `got SetAttrCmd %s %s, wont %s`
 	if sa.AttrType != TypePolyFaces {
 		t.Errorf(msg, "AttrType", sa.AttrType, TypePolyFaces)
 	}
@@ -1123,7 +1123,7 @@ func TestMakeSetAttr_polyFacesMax(t *testing.T) {
 		(*ret[1]).MultiColor[0].ColorIDs[0] != 2 ||
 		(*ret[1]).MultiColor[0].ColorIDs[1] != 3 ||
 		(*ret[1]).MultiColor[0].ColorIDs[2] != 4 {
-		t.Errorf(msg, "Attr", sa.Attr, []AttrPolyFaces{
+		t.Errorf(msg, "AttrValue", sa.Attr, []AttrPolyFaces{
 			{
 				FaceEdge: []int{1, 2, 3},
 				HoleEdge: []int{5, 6, 7},
@@ -1166,7 +1166,7 @@ func TestMakeSetAttr_polyFacesMax(t *testing.T) {
 		})
 	}
 	if len(ret) != 2 {
-		t.Errorf(msg, "len(Attr)", len(ret), 2)
+		t.Errorf(msg, "len(AttrValue)", len(ret), 2)
 	}
 }
 
@@ -1201,7 +1201,7 @@ func TestMakeDataPolyComponent(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	msg := `got SetAttr %s %s, wont %s`
+	msg := `got SetAttrCmd %s %s, wont %s`
 	if sa.AttrType != TypeDataPolyComponent {
 		t.Errorf(msg, "AttrType", sa.AttrType, TypeDataPolyComponent)
 	}
@@ -1234,7 +1234,7 @@ func TestMakeDataPolyComponent(t *testing.T) {
 		(*ret[0]).IndexValue[32] != 4.6099758148193359 ||
 		(*ret[0]).IndexValue[34] != 4.6099758148193359 ||
 		(*ret[0]).IndexValue[35] != 4.6099758148193359 {
-		t.Errorf(msg, "Attr", sa.Attr, []AttrDataPolyComponent{
+		t.Errorf(msg, "AttrValue", sa.Attr, []AttrDataPolyComponent{
 			{
 				PolyComponentType: DPCedge,
 				IndexValue: map[int]float64{
@@ -1267,18 +1267,18 @@ func TestMakeDataPolyComponent(t *testing.T) {
 		})
 	}
 	if len(ret) != 1 {
-		t.Errorf(msg, "len(Attr)", len(ret), 1)
+		t.Errorf(msg, "len(AttrValue)", len(ret), 1)
 	}
 	if len((*ret[0]).IndexValue) != 24 {
-		t.Errorf(msg, "len(Attr.IndexValue)", len((*ret[0]).IndexValue), 24)
+		t.Errorf(msg, "len(AttrValue.IndexValue)", len((*ret[0]).IndexValue), 24)
 	}
 }
 
 func sameDPC(t *testing.T, dpc []*AttrDataPolyComponent, dpcType AttrDPCType) {
 	d := *dpc[0]
 	if d.PolyComponentType != dpcType {
-		msg := `got SetAttr %s %s, wont %s`
-		t.Errorf(msg, "Attr", dpc, []AttrDataPolyComponent{
+		msg := `got SetAttrCmd %s %s, wont %s`
+		t.Errorf(msg, "AttrValue", dpc, []AttrDataPolyComponent{
 			{
 				PolyComponentType: dpcType,
 				IndexValue:        map[int]float64{},
@@ -1294,7 +1294,7 @@ func TestMakeDataPolyComponentVertex(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	msg := `got SetAttr %s %s, wont %s`
+	msg := `got SetAttrCmd %s %s, wont %s`
 	if sa.AttrType != TypeDataPolyComponent {
 		t.Errorf(msg, "AttrType", sa.AttrType, TypeDataPolyComponent)
 	}
@@ -1304,10 +1304,10 @@ func TestMakeDataPolyComponentVertex(t *testing.T) {
 	}
 	sameDPC(t, ret, DPCvertex)
 	if len(ret) != 1 {
-		t.Errorf(msg, "len(Attr)", len(ret), 1)
+		t.Errorf(msg, "len(AttrValue)", len(ret), 1)
 	}
 	if len((*ret[0]).IndexValue) != 0 {
-		t.Errorf(msg, "len(Attr.IndexValue)", len((*ret[0]).IndexValue), 0)
+		t.Errorf(msg, "len(AttrValue.IndexValue)", len((*ret[0]).IndexValue), 0)
 	}
 }
 
@@ -1318,7 +1318,7 @@ func TestMakeDataPolyComponentUV(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	msg := `got SetAttr %s %s, wont %s`
+	msg := `got SetAttrCmd %s %s, wont %s`
 	if sa.AttrType != TypeDataPolyComponent {
 		t.Errorf(msg, "AttrType", sa.AttrType, TypeDataPolyComponent)
 	}
@@ -1328,10 +1328,10 @@ func TestMakeDataPolyComponentUV(t *testing.T) {
 	}
 	sameDPC(t, ret, DPCuv)
 	if len(ret) != 1 {
-		t.Errorf(msg, "len(Attr)", len(ret), 1)
+		t.Errorf(msg, "len(AttrValue)", len(ret), 1)
 	}
 	if len((*ret[0]).IndexValue) != 0 {
-		t.Errorf(msg, "len(Attr.IndexValue)", len((*ret[0]).IndexValue), 0)
+		t.Errorf(msg, "len(AttrValue.IndexValue)", len((*ret[0]).IndexValue), 0)
 	}
 }
 
@@ -1342,7 +1342,7 @@ func TestMakeDataPolyComponentFace(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	msg := `got SetAttr %s %s, wont %s`
+	msg := `got SetAttrCmd %s %s, wont %s`
 	if sa.AttrType != TypeDataPolyComponent {
 		t.Errorf(msg, "AttrType", sa.AttrType, TypeDataPolyComponent)
 	}
@@ -1352,10 +1352,10 @@ func TestMakeDataPolyComponentFace(t *testing.T) {
 	}
 	sameDPC(t, ret, DPCface)
 	if len(ret) != 1 {
-		t.Errorf(msg, "len(Attr)", len(ret), 1)
+		t.Errorf(msg, "len(AttrValue)", len(ret), 1)
 	}
 	if len((*ret[0]).IndexValue) != 0 {
-		t.Errorf(msg, "len(Attr.IndexValue)", len((*ret[0]).IndexValue), 0)
+		t.Errorf(msg, "len(AttrValue.IndexValue)", len((*ret[0]).IndexValue), 0)
 	}
 }
 
@@ -1383,7 +1383,7 @@ func TestMakeDataReferenceEdits(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	msg := `got SetAttr %s %v, wont %v`
+	msg := `got SetAttrCmd %s %v, wont %v`
 	if sa.AttrType != TypeDataReferenceEdits {
 		t.Errorf(msg, "AttrType", sa.AttrType, TypeDataReferenceEdits)
 	}
@@ -1425,7 +1425,7 @@ func TestMakeDataReferenceEdits(t *testing.T) {
 		t.Errorf(msg, "parent.Arguments", parent.Arguments, "-s -r ")
 	}
 
-	// AddAttr
+	// AddAttrCmd
 	if len(referenceEdit.AddAttrs) != 1 {
 		t.Errorf(msg, "len(referenceEdit.AddAttrs)", len(referenceEdit.AddAttrs), 1)
 	}
@@ -1444,7 +1444,7 @@ func TestMakeDataReferenceEdits(t *testing.T) {
 			" -ci 1 -nn \\\"ea\\\" -at \\\"double\\\"")
 	}
 
-	// SetAttr
+	// SetAttrCmd
 	if len(referenceEdit.SetAttrs) != 1 {
 		t.Errorf(msg, "len(referenceEdit.SetAttrs)", len(referenceEdit.SetAttrs), 1)
 	}
@@ -1453,7 +1453,7 @@ func TestMakeDataReferenceEdits(t *testing.T) {
 		t.Errorf(msg, "setAttr.Node", setAttr.Node, "|namespace:topNode")
 	}
 	if setAttr.Attr != "ea" {
-		t.Errorf(msg, "setAttr.Attr", setAttr.Attr, "ea")
+		t.Errorf(msg, "setAttr.AttrValue", setAttr.Attr, "ea")
 	}
 	if setAttr.Arguments != " -k 1 0" {
 		t.Errorf(msg, "setAttr.Arguments", setAttr.Arguments, " -k 1 0")
@@ -1486,13 +1486,13 @@ func TestMakeDataReferenceEdits(t *testing.T) {
 		t.Errorf(msg, "deleteAttr.Node", deleteAttr.Node, "|namespace:topNode")
 	}
 	if deleteAttr.Attr != "dexAttr" {
-		t.Errorf(msg, "deleteAttr.Attr", deleteAttr.Attr, "dexAttr")
+		t.Errorf(msg, "deleteAttr.AttrValue", deleteAttr.Attr, "dexAttr")
 	}
 	if deleteAttr.Arguments != "" {
 		t.Errorf(msg, "deleteAttr.Arguments", deleteAttr.Arguments, "")
 	}
 
-	// ConnectAttr
+	// ConnectAttrCmd
 	if len(referenceEdit.ConnectAttrs) != 3 {
 		t.Errorf(msg, "len(referenceEdit.ConnectAttrs)", len(referenceEdit.ConnectAttrs), 3)
 	}
@@ -1609,7 +1609,7 @@ func TestMakeDataReferenceEdits(t *testing.T) {
 		t.Errorf(msg, "lock.Node", lock.Node, "|namespace:topNode")
 	}
 	if lock.Attr != "attrNameA" {
-		t.Errorf(msg, "lock.Attr", lock.Attr, "attrNameA")
+		t.Errorf(msg, "lock.AttrValue", lock.Attr, "attrNameA")
 	}
 
 	// Unlock
@@ -1621,7 +1621,7 @@ func TestMakeDataReferenceEdits(t *testing.T) {
 		t.Errorf(msg, "unlock.Node", unlock.Node, "|namespace:topNode")
 	}
 	if unlock.Attr != "attrNameA" {
-		t.Errorf(msg, "unlock.Attr", unlock.Attr, "attrNameA")
+		t.Errorf(msg, "unlock.AttrValue", unlock.Attr, "attrNameA")
 	}
 }
 
@@ -1634,7 +1634,7 @@ func TestMakeAttributeAlias(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	msg := `got SetAttr %s %s, wont %s`
+	msg := `got SetAttrCmd %s %s, wont %s`
 	if sa.AttrType != TypeAttributeAlias {
 		t.Errorf(msg, "AttrType", sa.AttrType, TypeAttributeAlias)
 	}
@@ -1650,8 +1650,8 @@ func TestMakeAttributeAlias(t *testing.T) {
 		(*ret[2]).CurrentName != "borderConnections[2]" ||
 		(*ret[3]).NewAlias != "nucleusSolver" ||
 		(*ret[3]).CurrentName != "publishedNodeInfo[0]" {
-		msg := `got SetAttr %s %s, wont %s`
-		t.Errorf(msg, "Attr", ret, &[]AttrAttributeAlias{
+		msg := `got SetAttrCmd %s %s, wont %s`
+		t.Errorf(msg, "AttrValue", ret, &[]AttrAttributeAlias{
 			{
 				NewAlias:    "detonationFrame",
 				CurrentName: "borderConnections[0]",
@@ -1671,7 +1671,7 @@ func TestMakeAttributeAlias(t *testing.T) {
 		})
 	}
 	if len(ret) != 4 {
-		t.Errorf(msg, "len(Attr)", len(ret), 4)
+		t.Errorf(msg, "len(AttrValue)", len(ret), 4)
 	}
 }
 
@@ -1682,7 +1682,7 @@ func TestMakeComponentList(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	msg := `got SetAttr %s %s, wont %s`
+	msg := `got SetAttrCmd %s %s, wont %s`
 	if sa.AttrType != TypeComponentList {
 		t.Errorf(msg, "AttrType", sa.AttrType, TypeComponentList)
 	}
@@ -1692,14 +1692,14 @@ func TestMakeComponentList(t *testing.T) {
 	}
 	if (*ret[0])[0] != "vtx[130]" ||
 		(*ret[0])[1] != "vtx[147]" {
-		msg := `got SetAttr %s %s, wont %s`
-		t.Errorf(msg, "Attr", ret, &AttrComponentList{
+		msg := `got SetAttrCmd %s %s, wont %s`
+		t.Errorf(msg, "AttrValue", ret, &AttrComponentList{
 			"vtx[130]",
 			"vtx[147]",
 		})
 	}
 	if len(*ret[0]) != 2 {
-		t.Errorf(msg, "len(Attr)", len(*ret[0]), 2)
+		t.Errorf(msg, "len(AttrValue)", len(*ret[0]), 2)
 	}
 }
 
@@ -1710,7 +1710,7 @@ func TestMakeCone(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	msg := `got SetAttr %s %s, wont %s`
+	msg := `got SetAttrCmd %s %s, wont %s`
 	if sa.AttrType != TypeCone {
 		t.Errorf(msg, "AttrType", sa.AttrType, TypeCone)
 	}
@@ -1720,8 +1720,8 @@ func TestMakeCone(t *testing.T) {
 	}
 	if (*ret[0]).ConeAngle != 45.0 ||
 		(*ret[0]).ConeCap != 5.0 {
-		msg := `got SetAttr %s %s, wont %s`
-		t.Errorf(msg, "Attr", sa.Attr, &[]AttrCone{
+		msg := `got SetAttrCmd %s %s, wont %s`
+		t.Errorf(msg, "AttrValue", sa.Attr, &[]AttrCone{
 			{
 				ConeAngle: 45.0,
 				ConeCap:   5.0,
@@ -1729,7 +1729,7 @@ func TestMakeCone(t *testing.T) {
 		})
 	}
 	if len(ret) != 1 {
-		t.Errorf(msg, "len(Attr)", len(ret), 1)
+		t.Errorf(msg, "len(AttrValue)", len(ret), 1)
 	}
 }
 
@@ -1740,7 +1740,7 @@ func TestMakeDoubleArray(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	msg := `got SetAttr %s %s, wont %s`
+	msg := `got SetAttrCmd %s %s, wont %s`
 	if sa.AttrType != TypeDoubleArray {
 		t.Errorf(msg, "AttrType", sa.AttrType, TypeDoubleArray)
 	}
@@ -1755,13 +1755,13 @@ func TestMakeDoubleArray(t *testing.T) {
 		(*ret[0])[4] != 0.5 ||
 		(*ret[0])[5] != 1 ||
 		(*ret[0])[6] != -0.11000000000000004 {
-		msg := `got SetAttr %s %s, wont %s`
-		t.Errorf(msg, "Attr", sa.Attr, &AttrDoubleArray{
+		msg := `got SetAttrCmd %s %s, wont %s`
+		t.Errorf(msg, "AttrValue", sa.Attr, &AttrDoubleArray{
 			-1, 1, 0, 0, 0.5, 1, -0.11000000000000004,
 		})
 	}
 	if len(*ret[0]) != 7 {
-		t.Errorf(msg, "len(Attr)", len(*ret[0]), 7)
+		t.Errorf(msg, "len(AttrValue)", len(*ret[0]), 7)
 	}
 }
 
@@ -1780,7 +1780,7 @@ func TestMakeLattice(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	msg := `got SetAttr %s %s, wont %s`
+	msg := `got SetAttrCmd %s %s, wont %s`
 	if sa.AttrType != TypeLattice {
 		t.Errorf(msg, "AttrType", sa.AttrType, TypeLattice)
 	}
@@ -1815,8 +1815,8 @@ func TestMakeLattice(t *testing.T) {
 		(*ret[0]).Points[7].S != 0.5 ||
 		(*ret[0]).Points[7].T != 0.5 ||
 		(*ret[0]).Points[7].U != 0.5 {
-		msg := `got SetAttr %s %s, wont %s`
-		t.Errorf(msg, "Attr", sa.Attr, &[]AttrLattice{
+		msg := `got SetAttrCmd %s %s, wont %s`
+		t.Errorf(msg, "AttrValue", sa.Attr, &[]AttrLattice{
 			{
 				DivisionS: 2,
 				DivisionT: 2,
@@ -1835,7 +1835,7 @@ func TestMakeLattice(t *testing.T) {
 		})
 	}
 	if len(ret) != 1 {
-		t.Errorf(msg, "len(Attr)", len(ret), 1)
+		t.Errorf(msg, "len(AttrValue)", len(ret), 1)
 	}
 }
 
@@ -1854,7 +1854,7 @@ func TestMakeNurbsCurve(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	msg := `got SetAttr %s %s, wont %s`
+	msg := `got SetAttrCmd %s %s, wont %s`
 	if sa.AttrType != TypeNurbsCurve {
 		t.Errorf(msg, "AttrType", sa.AttrType, TypeNurbsCurve)
 	}
@@ -1889,12 +1889,12 @@ func TestMakeNurbsCurve(t *testing.T) {
 		(*ret[0]).CvValues[3].Y != 0 ||
 		*(*ret[0]).CvValues[3].Z != -1 ||
 		(*ret[0]).CvValues[3].W != nil {
-		msg := `got SetAttr %s %s, wont %s`
+		msg := `got SetAttrCmd %s %s, wont %s`
 		zero := 0.0
 		minus03 := -0.33333333333333326
 		minus06 := -0.66666666666666663
 		minus1 := -1.0
-		t.Errorf(msg, "Attr", sa.Attr, &[]AttrNurbsCurve{
+		t.Errorf(msg, "AttrValue", sa.Attr, &[]AttrNurbsCurve{
 			{
 				Degree:     3,
 				Spans:      1,
@@ -1934,7 +1934,7 @@ func TestMakeNurbsCurve(t *testing.T) {
 		})
 	}
 	if len(ret) != 1 {
-		t.Errorf(msg, "len(Attr)", len(ret), 1)
+		t.Errorf(msg, "len(AttrValue)", len(ret), 1)
 	}
 }
 
@@ -1965,7 +1965,7 @@ func TestMakeNurbsSurface(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	msg := `got SetAttr %s %s, wont %s`
+	msg := `got SetAttrCmd %s %s, wont %s`
 	if sa.AttrType != TypeNurbsSurface {
 		t.Errorf(msg, "AttrType", sa.AttrType, TypeNurbsSurface)
 	}
@@ -2074,12 +2074,12 @@ func TestMakeNurbsSurface(t *testing.T) {
 		(*ret[0]).CvValues[15].Z == nil ||
 		*(*ret[0]).CvValues[15].Z != -0.5 ||
 		(*ret[0]).CvValues[15].W != nil {
-		msg := `got SetAttr %s %s, wont %s`
+		msg := `got SetAttrCmd %s %s, wont %s`
 		plus05 := 0.5
 		plus016 := 0.16666666666666669
 		minus016 := -0.16666666666666663
 		minus05 := -0.5
-		t.Errorf(msg, "Attr", sa.Attr, &[]AttrNurbsSurface{
+		t.Errorf(msg, "AttrValue", sa.Attr, &[]AttrNurbsSurface{
 			{
 				UDegree:    3,
 				VDegree:    3,
@@ -2115,7 +2115,7 @@ func TestMakeNurbsSurface(t *testing.T) {
 		})
 	}
 	if len(ret) != 1 {
-		t.Errorf(msg, "len(Attr)", len(ret), 1)
+		t.Errorf(msg, "len(AttrValue)", len(ret), 1)
 	}
 }
 

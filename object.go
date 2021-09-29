@@ -12,11 +12,11 @@ import (
 
 // Object ...
 type Object struct {
-	Files     []*FileObject
-	FileInfos []*FileInfoObject
+	Files     []*File
+	FileInfos []*FileInfo
 	Requires  []*Require
 	Nodes     map[string]*Node
-	Selects   []*SelectObject
+	Selects   []*Select
 
 	cmds        []*Cmd
 	connections Connections
@@ -108,23 +108,23 @@ func (o *Object) GetNodes(nodeType string) ([]*Node, error) {
 	return results, nil
 }
 
-type FileObject struct {
+type File struct {
 	Lineno    uint
 	Path      string
 	Namespace string
 
-	Parent   *FileObject
-	Children []*FileObject
+	Parent   *File
+	Children []*File
 
-	File *File
+	File *FileCmd
 }
 
-type FileInfoObject struct {
+type FileInfo struct {
 	Lineno uint
 	Name   string
 	Value  string
 
-	FileInfo *FileInfo
+	FileInfo *FileInfoCmd
 }
 
 type Require struct {
@@ -142,20 +142,20 @@ type Node struct {
 	LineNo     uint
 	Type       string
 	Name       string
-	Attrs      []*AttrObject
+	Attrs      []*Attr
 	Shared     bool
 	SkipSelect bool
 	Parent     *Node
 	Children   []*Node
 
 	isDeleted  bool
-	CreateNode *CreateNode
-	Rename     *Rename
-	SetAttrs   []*SetAttr
-	AddAttrs   []*AddAttr
+	CreateNode *CreateNodeCmd
+	Rename     *RenameCmd
+	SetAttrs   []*SetAttrCmd
+	AddAttrs   []*AddAttrCmd
 }
 
-func (n *Node) Attr(name string) *AttrObject {
+func (n *Node) Attr(name string) *Attr {
 	for _, a := range n.Attrs {
 		if a.Name == name {
 			return a
@@ -186,12 +186,12 @@ func (n *Node) Remove() error {
 	return nil
 }
 
-type SelectObject struct {
+type Select struct {
 	Name string
 
-	Select   *Select
-	SetAttrs []*SetAttr
-	AddAttrs []*AddAttr
+	Select   *SelectCmd
+	SetAttrs []*SetAttrCmd
+	AddAttrs []*AddAttrCmd
 }
 
 type ConnectionArgs struct {
@@ -264,19 +264,19 @@ func (n *Node) ListConnections(ca *ConnectionArgs) []*Node {
 	return typeFiltered
 }
 
-type AttrObject struct {
+type Attr struct {
 	LineNo uint
 	Name   string
 	Node   *Node
-	Values []Attr
+	Values []AttrValue
 	Type   AttrType
 
-	SA        *SetAttr
+	SA        *SetAttrCmd
 	err       error
 	isDeleted bool
 }
 
-func (a *AttrObject) Remove() error {
+func (a *Attr) Remove() error {
 	if a.isDeleted {
 		return errors.New(fmt.Sprintf("%s.%s was already deleted",
 			a.Node.Name, a.Name))
@@ -285,7 +285,7 @@ func (a *AttrObject) Remove() error {
 	return nil
 }
 
-func (a *AttrObject) String() (string, error) {
+func (a *Attr) String() (string, error) {
 	return a.Name, a.err
 }
 
@@ -348,7 +348,7 @@ func (p *Parser) CheckErrors() bool {
 
 func (p *Parser) parseFiles() error {
 	f := MakeFile(p.CurCmd)
-	file := &FileObject{
+	file := &File{
 		Lineno:    f.LineNo,
 		Path:      f.Path,
 		Namespace: f.Namespace,
@@ -370,7 +370,7 @@ func (p *Parser) parseFiles() error {
 		prevFile := p.o.Files[i]
 		if prevFile.File.ReferenceDepthInfo < f.ReferenceDepthInfo {
 			if prevFile.Children == nil {
-				prevFile.Children = []*FileObject{}
+				prevFile.Children = []*File{}
 			}
 			prevFile.Children = append(prevFile.Children, file)
 			file.Parent = prevFile
@@ -382,7 +382,7 @@ func (p *Parser) parseFiles() error {
 
 func (p *Parser) parseFileInfos() error {
 	fi := MakeFileInfo(p.CurCmd)
-	fileInfo := &FileInfoObject{
+	fileInfo := &FileInfo{
 		Lineno: fi.LineNo,
 		Name: fi.Name,
 		Value: fi.Value,
@@ -415,8 +415,8 @@ func (p *Parser) parseCreateNode() error {
 		SkipSelect: cn.SkipSelect,
 		CreateNode: cn,
 		LineNo:     cn.LineNo,
-		SetAttrs:   []*SetAttr{},
-		AddAttrs:   []*AddAttr{},
+		SetAttrs:   []*SetAttrCmd{},
+		AddAttrs:   []*AddAttrCmd{},
 	}
 	if _, ok := p.o.Nodes[node.Name]; ok {
 		return errors.New(fmt.Sprintf("Already found node ... %s", node.Name))
@@ -447,7 +447,7 @@ func (p *Parser) parseCreateNode() error {
 
 	for p.PeekCmdIs(SetAttrType) {
 		p.NextCmd()
-		var at *SetAttr
+		var at *SetAttrCmd
 		var err error
 		if len(node.SetAttrs) == 0 {
 			at, err = MakeSetAttr(p.CurCmd, nil)
@@ -458,7 +458,7 @@ func (p *Parser) parseCreateNode() error {
 			return err
 		}
 		node.SetAttrs = append(node.SetAttrs, at)
-		a := &AttrObject{
+		a := &Attr{
 			Name:   at.AttrName,
 			Node:   node,
 			Values: at.Attr,
@@ -504,12 +504,12 @@ func (p *Parser) parseSelect() error {
 	} else if len(s.Names) == 0 {
 		return errors.New(fmt.Sprintf("un-support zero select. %v", *s))
 	}
-	sel := &SelectObject{
+	sel := &Select{
 		Name: s.Names[0],
 
 		Select:   s,
-		SetAttrs: []*SetAttr{},
-		AddAttrs: []*AddAttr{},
+		SetAttrs: []*SetAttrCmd{},
+		AddAttrs: []*AddAttrCmd{},
 	}
 	p.o.Selects = append(p.o.Selects, sel)
 
@@ -521,7 +521,7 @@ func (p *Parser) parseSelect() error {
 
 	for p.PeekCmdIs(SetAttrType) {
 		p.NextCmd()
-		var at *SetAttr
+		var at *SetAttrCmd
 		var err error
 		if len(sel.SetAttrs) == 0 {
 			at, err = MakeSetAttr(p.CurCmd, nil)

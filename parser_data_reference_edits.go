@@ -80,7 +80,7 @@ func (p *DataReferenceEditsParser) parseSetAttr() (*RECmdSetAttr, error) {
 		return nil, errors.New("parseSetAttrError: not enough tokens")
 	}
 	p.NextToken() // skip node name
-	//fmt.Println("setAttr Attr ", *p.CurToken)
+	//fmt.Println("setAttr AttrValue ", *p.CurToken)
 	sa.Attr = strings.Trim(*p.CurToken, "\"")
 	if p.PeekToken == nil {
 		return nil, errors.New("parseSetAttrError: not enough tokens")
@@ -427,7 +427,7 @@ func NewDataReferenceEditsParser(token *[]string, start int) *DataReferenceEdits
 	return p
 }
 
-func MakeDataReferenceEdits(token *[]string, start int) ([]Attr, int, error) {
+func MakeDataReferenceEdits(token *[]string, start int) ([]AttrValue, int, error) {
 	referenceNode := (*token)[start]
 	re := AttrDataReferenceEdits{
 		TopReferenceNode: strings.Trim(referenceNode, "\""),
@@ -437,6 +437,6 @@ func MakeDataReferenceEdits(token *[]string, start int) ([]Attr, int, error) {
 	p.ErrorCheck()
 	re.ReferenceEdits = p.ParseToken()
 
-	a := []Attr{&re}
+	a := []AttrValue{&re}
 	return a, len(*token) - start, nil
 }

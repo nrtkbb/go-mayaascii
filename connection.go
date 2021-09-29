@@ -1,16 +1,16 @@
 package mayaascii
 
 type Connections struct {
-	source []*ConnectAttr
+	source []*ConnectAttrCmd
 }
 
 func NewConnections() Connections {
 	return Connections{
-		source: []*ConnectAttr{},
+		source: []*ConnectAttrCmd{},
 	}
 }
 
-func (ci *Connections) Append(ca *ConnectAttr) {
+func (ci *Connections) Append(ca *ConnectAttrCmd) {
 	ci.source = append(ci.source, ca)
 }
 
