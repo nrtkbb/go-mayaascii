@@ -50,7 +50,7 @@ func TestIsSameAttr(t *testing.T) {
 func TestMakeSetAttr_Size(t *testing.T) {
 	c := &CmdBuilder{}
 	c.Append(`setAttr -s 4 ".attrName";`)
-	beforeSetAttr, err := MakeSetAttr(c.Parse(), nil)
+	beforeSetAttr, err := ParseSetAttr(c.Parse(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -66,7 +66,7 @@ func TestMakeSetAttr_Size(t *testing.T) {
 func TestMakeSetAttr_int(t *testing.T) {
 	c := &CmdBuilder{}
 	c.Append(`setAttr ".attrName" 1 2;`)
-	sa, err := MakeSetAttr(c.Parse(), nil)
+	sa, err := ParseSetAttr(c.Parse(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -86,7 +86,7 @@ func TestMakeSetAttr_int(t *testing.T) {
 	}
 	c.Clear()
 	c.Append(`setAttr ".attrName" 3 4;`)
-	sa, err = MakeSetAttr(c.Parse(), sa)
+	sa, err = ParseSetAttr(c.Parse(), sa)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -109,7 +109,7 @@ func TestMakeSetAttr_int(t *testing.T) {
 func TestMakeSetAttr_int_toDouble_toInt(t *testing.T) {
 	c := &CmdBuilder{}
 	c.Append(`setAttr ".attrName" 1 2;`)
-	sa, err := MakeSetAttr(c.Parse(), nil)
+	sa, err := ParseSetAttr(c.Parse(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -131,7 +131,7 @@ func TestMakeSetAttr_int_toDouble_toInt(t *testing.T) {
 	}
 	c.Clear()
 	c.Append(`setAttr ".attrName" 3.3 4e+020 5e-020;`)
-	sa, err = MakeSetAttr(c.Parse(), sa)
+	sa, err = ParseSetAttr(c.Parse(), sa)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -160,7 +160,7 @@ func TestMakeSetAttr_int_toDouble_toInt(t *testing.T) {
 	}
 	c.Clear()
 	c.Append(`setAttr ".attrName" 5 6;`)
-	sa, err = MakeSetAttr(c.Parse(), sa)
+	sa, err = ParseSetAttr(c.Parse(), sa)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -196,7 +196,7 @@ func TestMakeSetAttr_int_toDouble_toInt(t *testing.T) {
 func TestMakeSetAttr_string(t *testing.T) {
 	c := &CmdBuilder{}
 	c.Append(`setAttr ".attrName" -type "string" "//network/folder/texture.jpg";`)
-	sa, err := MakeSetAttr(c.Parse(), nil)
+	sa, err := ParseSetAttr(c.Parse(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -220,7 +220,7 @@ func TestMakeSetAttr_string(t *testing.T) {
 func TestMakeSetAttr_stringArray(t *testing.T) {
 	c := &CmdBuilder{}
 	c.Append(`setAttr ".attrName" -type "stringArray" 2 "//network/folder/texture.jpg" "//network/folder/texture.jpg";`)
-	sa, err := MakeSetAttr(c.Parse(), nil)
+	sa, err := ParseSetAttr(c.Parse(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -247,7 +247,7 @@ func TestMakeSetAttr_stringArray(t *testing.T) {
 func TestMakeSetAttr_doubleWithExponent(t *testing.T) {
 	c := &CmdBuilder{}
 	c.Append(`setAttr ".attrName" 1e+020 2;`)
-	sa, err := MakeSetAttr(c.Parse(), nil)
+	sa, err := ParseSetAttr(c.Parse(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -271,7 +271,7 @@ func TestMakeSetAttr_doubleWithExponent(t *testing.T) {
 func TestMakeSetAttr_double(t *testing.T) {
 	c := &CmdBuilder{}
 	c.Append(`setAttr ".attrName" 1.1 2.2;`)
-	sa, err := MakeSetAttr(c.Parse(), nil)
+	sa, err := ParseSetAttr(c.Parse(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -296,7 +296,7 @@ func TestMakeSetAttr_double(t *testing.T) {
 	}
 	c.Clear()
 	c.Append(`setAttr ".attrName" 3.3 4.4;`)
-	sa, err = MakeSetAttr(c.Parse(), sa)
+	sa, err = ParseSetAttr(c.Parse(), sa)
 	if sa.AttrType != TypeDouble {
 		t.Errorf(msg, "AttrType", sa.AttrType, TypeDouble)
 	}
@@ -324,7 +324,7 @@ func TestMakeSetAttr_double(t *testing.T) {
 func testBool(t *testing.T, boolString string, wont bool) {
 	c := &CmdBuilder{}
 	c.Append(`setAttr ".attrName" ` + boolString + `;`)
-	sa, err := MakeSetAttr(c.Parse(), nil)
+	sa, err := ParseSetAttr(c.Parse(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -352,7 +352,7 @@ func TestMakeSetAttr_boolNo(t *testing.T) {
 func TestMakeSetAttr_short2(t *testing.T) {
 	c := &CmdBuilder{}
 	c.Append(`setAttr ".attrName" -type "short2" 1 2;`)
-	sa, err := MakeSetAttr(c.Parse(), nil)
+	sa, err := ParseSetAttr(c.Parse(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -374,9 +374,9 @@ func TestMakeSetAttr_short2(t *testing.T) {
 func TestMakeSetAttr_short2_add(t *testing.T) {
 	c := &CmdBuilder{}
 	c.Append(`setAttr ".attrName" -type "short2" 1 2;`)
-	sa, err := MakeSetAttr(c.Parse(), nil)
+	sa, err := ParseSetAttr(c.Parse(), nil)
 	c.Append(`setAttr ".attrName" -type "short2" 3 4;`)
-	sa, err = MakeSetAttr(c.Parse(), sa)
+	sa, err = ParseSetAttr(c.Parse(), sa)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -403,7 +403,7 @@ func TestMakeSetAttr_short2_add(t *testing.T) {
 func TestMakeSetAttr_short2_size(t *testing.T) {
 	c := &CmdBuilder{}
 	c.Append(`setAttr -s 2 ".attrName" -type "short2" 1 2 1 2;`)
-	sa, err := MakeSetAttr(c.Parse(), nil)
+	sa, err := ParseSetAttr(c.Parse(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -430,11 +430,11 @@ func TestMakeSetAttr_short2_size(t *testing.T) {
 func TestMakeSetAttr_short2_sizeOver(t *testing.T) {
 	c := &CmdBuilder{}
 	c.Append(`setAttr -s 4 ".attrName";`)
-	sa, err := MakeSetAttr(c.Parse(), nil)
+	sa, err := ParseSetAttr(c.Parse(), nil)
 	c.Append(`setAttr ".attrName" -type "short2" 1 2 1 2;`)
-	sa, err = MakeSetAttr(c.Parse(), sa)
+	sa, err = ParseSetAttr(c.Parse(), sa)
 	c.Append(`setAttr ".attrName" -type "short2" 1 2 1 2;`)
-	sa, err = MakeSetAttr(c.Parse(), sa)
+	sa, err = ParseSetAttr(c.Parse(), sa)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -469,7 +469,7 @@ func TestMakeSetAttr_short2_sizeOver(t *testing.T) {
 func TestMakeSetAttr_long2(t *testing.T) {
 	c := &CmdBuilder{}
 	c.Append(`setAttr ".attrName" -type "long2" 1 2;`)
-	sa, err := MakeSetAttr(c.Parse(), nil)
+	sa, err := ParseSetAttr(c.Parse(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -492,7 +492,7 @@ func TestMakeSetAttr_long2(t *testing.T) {
 	}
 	c.Clear()
 	c.Append(`setAttr -s 2 ".attrName" -type "long2" 1 2 1 2;`)
-	sa, err = MakeSetAttr(c.Parse(), nil)
+	sa, err = ParseSetAttr(c.Parse(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -521,7 +521,7 @@ func TestMakeSetAttr_long2(t *testing.T) {
 func TestMakeSetAttr_short3(t *testing.T) {
 	c := &CmdBuilder{}
 	c.Append(`setAttr ".attrName" -type "short3" 1 2 3;`)
-	sa, err := MakeSetAttr(c.Parse(), nil)
+	sa, err := ParseSetAttr(c.Parse(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -542,7 +542,7 @@ func TestMakeSetAttr_short3(t *testing.T) {
 		t.Errorf(msg, "len(AttrValue)", len(ret), 1)
 	}
 	c.Append(`setAttr -s 2 ".attrName" -type "short3" 1 2 3 1 2 3;`)
-	sa, err = MakeSetAttr(c.Parse(), nil)
+	sa, err = ParseSetAttr(c.Parse(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -572,7 +572,7 @@ func TestMakeSetAttr_short3(t *testing.T) {
 func TestMakeSetAttr_long3(t *testing.T) {
 	c := &CmdBuilder{}
 	c.Append(`setAttr ".attrName" -type "long3" 1 2 3;`)
-	sa, err := MakeSetAttr(c.Parse(), nil)
+	sa, err := ParseSetAttr(c.Parse(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -594,7 +594,7 @@ func TestMakeSetAttr_long3(t *testing.T) {
 	}
 	c.Clear()
 	c.Append(`setAttr -s 2 ".attrName" -type "long3" 1 2 3 1 2 3;`)
-	sa, err = MakeSetAttr(c.Parse(), nil)
+	sa, err = ParseSetAttr(c.Parse(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -624,7 +624,7 @@ func TestMakeSetAttr_long3(t *testing.T) {
 func TestMakeSetAttr_Int32Array(t *testing.T) {
 	c := &CmdBuilder{}
 	c.Append(`setAttr ".attrName" -type "Int32Array" 2 1 2;`)
-	sa, err := MakeSetAttr(c.Parse(), nil)
+	sa, err := ParseSetAttr(c.Parse(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -647,7 +647,7 @@ func TestMakeSetAttr_Int32Array(t *testing.T) {
 func TestMakeSetAttr_float2(t *testing.T) {
 	c := &CmdBuilder{}
 	c.Append(`setAttr ".attrName" -type "float2" 1 2.2;`)
-	sa, err := MakeSetAttr(c.Parse(), nil)
+	sa, err := ParseSetAttr(c.Parse(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -669,7 +669,7 @@ func TestMakeSetAttr_float2(t *testing.T) {
 	}
 	c.Clear()
 	c.Append(`setAttr -s 2 ".attrName" -type "float2" 1 2.2 1 2.2;`)
-	sa, err = MakeSetAttr(c.Parse(), nil)
+	sa, err = ParseSetAttr(c.Parse(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -697,7 +697,7 @@ func TestMakeSetAttr_float2(t *testing.T) {
 func TestMakeSetAttr_float3(t *testing.T) {
 	c := &CmdBuilder{}
 	c.Append(`setAttr ".attrName" -type "float3" 1 2.2 3.3;`)
-	sa, err := MakeSetAttr(c.Parse(), nil)
+	sa, err := ParseSetAttr(c.Parse(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -719,7 +719,7 @@ func TestMakeSetAttr_float3(t *testing.T) {
 	}
 	c.Clear()
 	c.Append(`setAttr -s 2 ".attrName" -type "float3" 1 2.2 3.3 1 2.2 3.3;`)
-	sa, err = MakeSetAttr(c.Parse(), nil)
+	sa, err = ParseSetAttr(c.Parse(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -749,7 +749,7 @@ func TestMakeSetAttr_float3(t *testing.T) {
 func TestMakeSetAttr_double2(t *testing.T) {
 	c := &CmdBuilder{}
 	c.Append(`setAttr ".attrName" -type "double2" 1 2.2;`)
-	sa, err := MakeSetAttr(c.Parse(), nil)
+	sa, err := ParseSetAttr(c.Parse(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -771,7 +771,7 @@ func TestMakeSetAttr_double2(t *testing.T) {
 	}
 	c.Clear()
 	c.Append(`setAttr -s 2 ".attrName" -type "double2" 1 2.2 1 2.2;`)
-	sa, err = MakeSetAttr(c.Parse(), nil)
+	sa, err = ParseSetAttr(c.Parse(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -799,7 +799,7 @@ func TestMakeSetAttr_double2(t *testing.T) {
 func TestMakeSetAttr_double3(t *testing.T) {
 	c := &CmdBuilder{}
 	c.Append(`setAttr ".attrName" -type "double3" 1 2.2 3.3;`)
-	sa, err := MakeSetAttr(c.Parse(), nil)
+	sa, err := ParseSetAttr(c.Parse(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -819,7 +819,7 @@ func TestMakeSetAttr_double3(t *testing.T) {
 	}
 	c.Clear()
 	c.Append(`setAttr -s 2 ".attrName" -type "double3" 1 2.2 3.3 1 2.2 3.3;`)
-	sa, err = MakeSetAttr(c.Parse(), nil)
+	sa, err = ParseSetAttr(c.Parse(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -849,7 +849,7 @@ func TestMakeSetAttr_double3(t *testing.T) {
 func TestMakeSetAttr_doubleArray(t *testing.T) {
 	c := &CmdBuilder{}
 	c.Append(`setAttr ".attrName" -type "doubleArray" 2 1.1 2.2;`)
-	sa, err := MakeSetAttr(c.Parse(), nil)
+	sa, err := ParseSetAttr(c.Parse(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -869,7 +869,7 @@ func TestMakeSetAttr_doubleArray(t *testing.T) {
 	}
 	c.Clear()
 	c.Append(`setAttr ".attrName" -type "doubleArray" 0;`)
-	sa, err = MakeSetAttr(c.Parse(), nil)
+	sa, err = ParseSetAttr(c.Parse(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -888,7 +888,7 @@ func TestMakeSetAttr_doubleArray(t *testing.T) {
 func TestMakeSetAttr_matrix(t *testing.T) {
 	c := &CmdBuilder{}
 	c.Append(`setAttr ".ix" -type "matrix" 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16;`)
-	sa, err := MakeSetAttr(c.Parse(), nil)
+	sa, err := ParseSetAttr(c.Parse(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -925,7 +925,7 @@ func TestMakeSetAttr_matrix_xform(t *testing.T) {
 	c := &CmdBuilder{}
 	c.Append(`setAttr ".ix" -type "matrix" "xform" 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 0 0 0 0 0 0 0 0 0 0 1 0 0 0 1 1 1 1 yes;`)
-	sa, err := MakeSetAttr(c.Parse(), nil)
+	sa, err := ParseSetAttr(c.Parse(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -957,7 +957,7 @@ func TestMakeSetAttr_matrix_xform(t *testing.T) {
 func TestMakeSetAttr_pointArray(t *testing.T) {
 	c := &CmdBuilder{}
 	c.Append(`setAttr ".attrName" -type "pointArray" 1 1.1 2.2 3.3 4.4;`)
-	sa, err := MakeSetAttr(c.Parse(), nil)
+	sa, err := ParseSetAttr(c.Parse(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -980,7 +980,7 @@ func TestMakeSetAttr_pointArray(t *testing.T) {
 	}
 	c.Clear()
 	c.Append(`setAttr ".attrName" -type "pointArray" 2 1.1 2.2 3.3 4.4 1.1 2.2 3.3 4.4;`)
-	sa, err = MakeSetAttr(c.Parse(), nil)
+	sa, err = ParseSetAttr(c.Parse(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1014,7 +1014,7 @@ f 3 1 2 3
 mc 1 3 0 1 2
 f 3 2 3 4
 mc 2 3 2 3 4;`)
-	sa, err := MakeSetAttr(c.Parse(), nil)
+	sa, err := ParseSetAttr(c.Parse(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1078,7 +1078,7 @@ func TestMakeSetAttr_polyFacesMax(t *testing.T) {
 	mu 0 3 2 3 4
 	mu 1 3 2 3 4
 	mc 2 3 2 3 4;`)
-	sa, err := MakeSetAttr(c.Parse(), nil)
+	sa, err := ParseSetAttr(c.Parse(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1197,7 +1197,7 @@ func TestMakeDataPolyComponent(t *testing.T) {
 		32 4.6099758148193359
 		34 4.6099758148193359
 		35 4.6099758148193359 ;`)
-	sa, err := MakeSetAttr(c.Parse(), nil)
+	sa, err := ParseSetAttr(c.Parse(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1290,7 +1290,7 @@ func sameDPC(t *testing.T, dpc []*AttrDataPolyComponent, dpcType AttrDPCType) {
 func TestMakeDataPolyComponentVertex(t *testing.T) {
 	c := &CmdBuilder{}
 	c.Append(`setAttr ".cvd" -type "dataPolyComponent" Index_Data Vertex 0;`)
-	sa, err := MakeSetAttr(c.Parse(), nil)
+	sa, err := ParseSetAttr(c.Parse(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1314,7 +1314,7 @@ func TestMakeDataPolyComponentVertex(t *testing.T) {
 func TestMakeDataPolyComponentUV(t *testing.T) {
 	c := &CmdBuilder{}
 	c.Append(`setAttr ".pd[0]" -type "dataPolyComponent" Index_Data UV 0 ;`)
-	sa, err := MakeSetAttr(c.Parse(), nil)
+	sa, err := ParseSetAttr(c.Parse(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1338,7 +1338,7 @@ func TestMakeDataPolyComponentUV(t *testing.T) {
 func TestMakeDataPolyComponentFace(t *testing.T) {
 	c := &CmdBuilder{}
 	c.Append(`setAttr ".hfd" -type "dataPolyComponent" Index_Data Face 0 ;`)
-	sa, err := MakeSetAttr(c.Parse(), nil)
+	sa, err := ParseSetAttr(c.Parse(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1379,7 +1379,7 @@ func TestMakeDataReferenceEdits(t *testing.T) {
 	"add 396 -4131.291016 18 18 1 0 0 423 -4131.291016 18 18 1 0 0" 0
     8 "|namespace:topNode" "attrNameA"
     9 "|namespace:topNode" "attrNameA";`)
-	sa, err := MakeSetAttr(c.Parse(), nil)
+	sa, err := ParseSetAttr(c.Parse(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1630,7 +1630,7 @@ func TestMakeAttributeAlias(t *testing.T) {
 	c.Append(`setAttr ".aal" -type "attributeAlias" {"detonationFrame","borderConnections[0]","incandescence"
 		,"borderConnections[1]","color","borderConnections[2]","nucleusSolver","publishedNodeInfo[0]"
 		} ;`)
-	sa, err := MakeSetAttr(c.Parse(), nil)
+	sa, err := ParseSetAttr(c.Parse(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1678,7 +1678,7 @@ func TestMakeAttributeAlias(t *testing.T) {
 func TestMakeComponentList(t *testing.T) {
 	c := &CmdBuilder{}
 	c.Append(`setAttr ".ics" -type "componentList" 2 "vtx[130]" "vtx[147]";`)
-	sa, err := MakeSetAttr(c.Parse(), nil)
+	sa, err := ParseSetAttr(c.Parse(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1706,7 +1706,7 @@ func TestMakeComponentList(t *testing.T) {
 func TestMakeCone(t *testing.T) {
 	c := &CmdBuilder{}
 	c.Append(`setAttr ".cone" -type "cone" 45.0 5.0;`)
-	sa, err := MakeSetAttr(c.Parse(), nil)
+	sa, err := ParseSetAttr(c.Parse(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1736,7 +1736,7 @@ func TestMakeCone(t *testing.T) {
 func TestMakeDoubleArray(t *testing.T) {
 	c := &CmdBuilder{}
 	c.Append(`setAttr ".dd" -type "doubleArray" 7 -1 1 0 0 0.5 1 -0.11000000000000004 ;`)
-	sa, err := MakeSetAttr(c.Parse(), nil)
+	sa, err := ParseSetAttr(c.Parse(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1776,7 +1776,7 @@ func TestMakeLattice(t *testing.T) {
 	0.5 -0.5 0.5
 	-0.5 0.5 0.5
 	0.5 0.5 0.5 ;`)
-	sa, err := MakeSetAttr(c.Parse(), nil)
+	sa, err := ParseSetAttr(c.Parse(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1850,7 +1850,7 @@ func TestMakeNurbsCurve(t *testing.T) {
 	0.66666666666666663 0 -0.66666666666666663
 	1 0 -1
 	;`)
-	sa, err := MakeSetAttr(c.Parse(), nil)
+	sa, err := ParseSetAttr(c.Parse(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1945,10 +1945,10 @@ func TestMakeNurbsSurface(t *testing.T) {
 		6 0 0 0 1 1 1
 		6 0 0 0 1 1 1
 		16
-		-0.5 -3.061616997868383e-17 0.5
-		-0.5 -1.0205389992894611e-17 0.16666666666666669
-		-0.5 1.0205389992894608e-17 -0.16666666666666663
-		-0.5 3.061616997868383e-17 -0.5
+		-0.1 -3.061616997868383e-17 0.5
+		-0.2 -1.0205389992894611e-17 0.16666666666666669
+		-0.3 1.0205389992894608e-17 -0.16666666666666663
+		-0.4 3.061616997868383e-17 -0.5
 		-0.16666666666666669 -3.061616997868383e-17 0.5
 		-0.16666666666666669 -1.0205389992894611e-17 0.16666666666666669
 		-0.16666666666666669 1.0205389992894608e-17 -0.16666666666666663
@@ -1961,7 +1961,7 @@ func TestMakeNurbsSurface(t *testing.T) {
 		0.5 -1.0205389992894611e-17 0.16666666666666669
 		0.5 1.0205389992894608e-17 -0.16666666666666663
 		0.5 3.061616997868383e-17 -0.5;`)
-	sa, err := MakeSetAttr(c.Parse(), nil)
+	sa, err := ParseSetAttr(c.Parse(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1994,22 +1994,22 @@ func TestMakeNurbsSurface(t *testing.T) {
 		(*ret[0]).VKnotValues[5] != 1 ||
 		(*ret[0]).IsTrim != nil ||
 		len((*ret[0]).CvValues) != 16 ||
-		(*ret[0]).CvValues[0].X != -0.5 ||
+		(*ret[0]).CvValues[0].X != -0.1 ||
 		(*ret[0]).CvValues[0].Y != -3.061616997868383e-17 ||
 		(*ret[0]).CvValues[0].Z == nil ||
 		*(*ret[0]).CvValues[0].Z != 0.5 ||
 		(*ret[0]).CvValues[0].W != nil ||
-		(*ret[0]).CvValues[1].X != -0.5 ||
+		(*ret[0]).CvValues[1].X != -0.2 ||
 		(*ret[0]).CvValues[1].Y != -1.0205389992894611e-17 ||
 		(*ret[0]).CvValues[1].Z == nil ||
 		*(*ret[0]).CvValues[1].Z != 0.16666666666666669 ||
 		(*ret[0]).CvValues[1].W != nil ||
-		(*ret[0]).CvValues[2].X != -0.5 ||
+		(*ret[0]).CvValues[2].X != -0.3 ||
 		(*ret[0]).CvValues[2].Y != 1.0205389992894608e-17 ||
 		(*ret[0]).CvValues[2].Z == nil ||
 		*(*ret[0]).CvValues[2].Z != -0.16666666666666663 ||
 		(*ret[0]).CvValues[2].W != nil ||
-		(*ret[0]).CvValues[3].X != -0.5 ||
+		(*ret[0]).CvValues[3].X != -0.4 ||
 		(*ret[0]).CvValues[3].Y != 3.061616997868383e-17 ||
 		(*ret[0]).CvValues[3].Z == nil ||
 		*(*ret[0]).CvValues[3].Z != -0.5 ||

@@ -8,7 +8,7 @@ func TestMakeWorkspace(t *testing.T) {
 	cb := &CmdBuilder{}
 	cb.Append(`workspace -fr "sourceImages" "sourceimages";`)
 	c := cb.Parse()
-	w := MakeWorkspace(c)
+	w := ParseWorkspace(c)
 	if w.FileRule != "sourceImages" {
 		t.Errorf("got %v, wont %v", w.FileRule, "sourceImages")
 	}

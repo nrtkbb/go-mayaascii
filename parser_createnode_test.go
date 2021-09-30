@@ -7,7 +7,7 @@ import (
 func TestMakeCreateNode_Min(t *testing.T) {
 	c := &CmdBuilder{}
 	c.Append(`createNode transform -n "nodeName";`)
-	cn := MakeCreateNode(c.Parse())
+	cn := ParseCreateNode(c.Parse())
 	msg := `got CreateNodeCmd %s "%s", wont "%s"`
 	if cn.NodeType != "transform" {
 		t.Errorf(msg, "NodeType", cn.NodeType, "transform")
@@ -29,7 +29,7 @@ func TestMakeCreateNode_Min(t *testing.T) {
 func TestMakeCreateNode_Max(t *testing.T) {
 	c := &CmdBuilder{}
 	c.Append(`createNode camera -s -n "ns:grp|ns:cam|ns:camShape" -p "ns:grp|ns:cam";`)
-	cn := MakeCreateNode(c.Parse())
+	cn := ParseCreateNode(c.Parse())
 	msg := `got CreateNodeCmd %s "%s", wont "%s"`
 	if cn.NodeType != "camera" {
 		t.Errorf(msg, "NodeType", cn.NodeName, "camera")

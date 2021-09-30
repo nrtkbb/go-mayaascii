@@ -8,7 +8,13 @@ import (
 	"strings"
 )
 
-func MakeFile(c *Cmd) *FileCmd {
+func ParseLineComment(c *Cmd) *LineCommentCmd {
+	lc := LineCommentCmd{Cmd: c}
+	lc.Comment = lc.Token[1]
+	return &lc
+}
+
+func ParseFile(c *Cmd) *FileCmd {
 	// [file, -rdi, 1, -ns, "ns", -rfn, "nsRN", -op, "v=0;", -typ, "mayaAscii", "path/to/file.ma"]
 	// [file, -r, -ns, "namespace", -dr, 1, -rfn, "nsRN", -op, "v=0;", -typ, "mayaAscii", "path/to/file.ma"]
 	f := FileCmd{Cmd: c}
@@ -49,14 +55,14 @@ func MakeFile(c *Cmd) *FileCmd {
 	return &f
 }
 
-func MakeFileInfo(c *Cmd) *FileInfoCmd {
+func ParseFileInfo(c *Cmd) *FileInfoCmd {
 	fi := &FileInfoCmd{Cmd: c}
 	fi.Name = strings.Trim(fi.Token[1], "\"")
 	fi.Value = strings.Trim(fi.Token[2], "\"")
 	return fi
 }
 
-func MakeWorkspace(c *Cmd) *WorkspaceCmd {
+func ParseWorkspace(c *Cmd) *WorkspaceCmd {
 	w := WorkspaceCmd{Cmd: c}
 	for i := 1; i < len(w.Token); i++ {
 		switch w.Token[i] {
@@ -71,7 +77,7 @@ func MakeWorkspace(c *Cmd) *WorkspaceCmd {
 	return &w
 }
 
-func MakeRequires(c *Cmd) *RequiresCmd {
+func ParseRequires(c *Cmd) *RequiresCmd {
 	// max Token = [requires, -nodeType, "typeName1", -dataType, "typeName2", "pluginName", "version"]
 	// min Token = [requires, "pluginName", "version"]
 	r := RequiresCmd{Cmd: c}
@@ -92,7 +98,7 @@ func MakeRequires(c *Cmd) *RequiresCmd {
 	return &r
 }
 
-func MakeConnectAttr(c *Cmd) (*ConnectAttrCmd, error) {
+func ParseConnectAttr(c *Cmd) (*ConnectAttrCmd, error) {
 	ca := &ConnectAttrCmd{Cmd: c}
 	for i := 1; i < len(ca.Token); i++ {
 		switch ca.Token[i] {
@@ -129,7 +135,7 @@ func MakeConnectAttr(c *Cmd) (*ConnectAttrCmd, error) {
 	return ca, nil
 }
 
-func MakeCreateNode(c *Cmd) *CreateNodeCmd {
+func ParseCreateNode(c *Cmd) *CreateNodeCmd {
 	n := &CreateNodeCmd{Cmd: c}
 	n.NodeType = c.Token[1]
 	for i := 2; i < len(n.Token); i++ {
@@ -150,7 +156,7 @@ func MakeCreateNode(c *Cmd) *CreateNodeCmd {
 	return n
 }
 
-func MakeRename(c *Cmd) *RenameCmd {
+func ParseRename(c *Cmd) *RenameCmd {
 	r := &RenameCmd{Cmd: c}
 	for i := 1; i < len(r.Token); i++ {
 		switch r.Token[i] {
@@ -172,7 +178,7 @@ func MakeRename(c *Cmd) *RenameCmd {
 	return r
 }
 
-func MakeSelect(c *Cmd) *SelectCmd {
+func ParseSelect(c *Cmd) *SelectCmd {
 	s := &SelectCmd{Cmd: c}
 	for i := 1; i < len(c.Token); i++ {
 		switch s.Token[i] {
@@ -280,7 +286,7 @@ var PrimitiveTypes = map[AttrType]struct{}{
 	TypeDouble:  struct{}{},
 }
 
-func MakeSetAttr(c *Cmd, beforeSetAttr *SetAttrCmd) (*SetAttrCmd, error) {
+func ParseSetAttr(c *Cmd, beforeSetAttr *SetAttrCmd) (*SetAttrCmd, error) {
 	attrNameIdx, attrName := getAttrNameFromSetAttr(&c.Token)
 	sa := &SetAttrCmd{Cmd: c}
 	sa.AttrName = attrName
@@ -348,14 +354,14 @@ func MakeSetAttr(c *Cmd, beforeSetAttr *SetAttrCmd) (*SetAttrCmd, error) {
 			sa.Size = &us
 		case "-type":
 			i++
-			attrType, err := MakeAttrType(&sa.Token, i)
+			attrType, err := ParseAttrType(&sa.Token, i)
 			if err != nil {
 				return nil, err
 			}
 			sa.AttrType = attrType
 		default:
 			if _, ok := PrimitiveTypes[sa.AttrType]; !ok {
-				a, count, err := MakeAttr(&sa.Token, i, sa.Size, sa.AttrType)
+				a, count, err := ParseAttr(&sa.Token, i, sa.Size, sa.AttrType)
 				if err != nil {
 					log.Println(sa.Token)
 					log.Println(i)
@@ -482,7 +488,7 @@ func ParseFloats(token ...string) ([]float64, error) {
 	return result, nil
 }
 
-func MakeShort2Long2(
+func ParseShort2Long2(
 	token *[]string,
 	start int,
 	size *uint,
@@ -522,7 +528,7 @@ func MakeShort2Long2(
 	}
 }
 
-func MakeShort3Long3(token *[]string, start int, size *uint, at *AttrType) ([]AttrValue, int, error) {
+func ParseShort3Long3(token *[]string, start int, size *uint, at *AttrType) ([]AttrValue, int, error) {
 	var end int
 	if size != nil {
 		end = fixSizeOver(start+(3*int(*size)), token)
@@ -560,7 +566,7 @@ func MakeShort3Long3(token *[]string, start int, size *uint, at *AttrType) ([]At
 	}
 }
 
-func MakeInt32Array(token *[]string, start int) ([]AttrValue, int, error) {
+func ParseInt32Array(token *[]string, start int) ([]AttrValue, int, error) {
 	numberOfArray, err := strconv.Atoi((*token)[start])
 	if err != nil {
 		return nil, 0, err
@@ -580,7 +586,7 @@ func MakeInt32Array(token *[]string, start int) ([]AttrValue, int, error) {
 	return a, 1 + numberOfArray, nil
 }
 
-func MakeFloat2Double2(token *[]string, start int, size *uint, at *AttrType) ([]AttrValue, int, error) {
+func ParseFloat2Double2(token *[]string, start int, size *uint, at *AttrType) ([]AttrValue, int, error) {
 	var end int
 	if size != nil {
 		end = fixSizeOver(start+(2*int(*size)), token)
@@ -616,7 +622,7 @@ func MakeFloat2Double2(token *[]string, start int, size *uint, at *AttrType) ([]
 	}
 }
 
-func MakeFloat3Double3(token *[]string, start int, size *uint, at *AttrType) ([]AttrValue, int, error) {
+func ParseFloat3Double3(token *[]string, start int, size *uint, at *AttrType) ([]AttrValue, int, error) {
 	var end int
 	if size != nil {
 		end = fixSizeOver(start+(3*int(*size)), token)
@@ -654,7 +660,7 @@ func MakeFloat3Double3(token *[]string, start int, size *uint, at *AttrType) ([]
 	}
 }
 
-func MakeDoubleArray(token *[]string, start int) ([]AttrValue, int, error) {
+func ParseDoubleArray(token *[]string, start int) ([]AttrValue, int, error) {
 	numberOfArray, err := strconv.Atoi((*token)[start])
 	if err != nil {
 		return nil, 0, err
@@ -674,7 +680,7 @@ func MakeDoubleArray(token *[]string, start int) ([]AttrValue, int, error) {
 	return a, 1 + numberOfArray, nil
 }
 
-func MakeMatrix(token *[]string, start int) ([]AttrValue, int, error) {
+func ParseMatrix(token *[]string, start int) ([]AttrValue, int, error) {
 	mat4x4, err := ParseFloats((*token)[start : start+16]...)
 	if err != nil {
 		return nil, 0, err
@@ -689,7 +695,7 @@ func MakeMatrix(token *[]string, start int) ([]AttrValue, int, error) {
 	return a, 16, nil
 }
 
-func MakeMatrixXform(token *[]string, start int) ([]AttrValue, int, error) {
+func ParseMatrixXform(token *[]string, start int) ([]AttrValue, int, error) {
 	// type:
 	// string double double double
 	// double double double
@@ -750,7 +756,7 @@ func MakeMatrixXform(token *[]string, start int) ([]AttrValue, int, error) {
 	return a, 38, nil
 }
 
-func MakePointArray(token *[]string, start int) ([]AttrValue, int, error) {
+func ParsePointArray(token *[]string, start int) ([]AttrValue, int, error) {
 	numberOfArray, err := strconv.Atoi((*token)[start])
 	if err != nil {
 		return nil, 0, err
@@ -777,7 +783,7 @@ func MakePointArray(token *[]string, start int) ([]AttrValue, int, error) {
 	return a, 1 + (numberOfArray * 4), nil
 }
 
-func MakeVectorArray(token *[]string, start int) ([]AttrValue, int, error) {
+func ParseVectorArray(token *[]string, start int) ([]AttrValue, int, error) {
 	numberOfArray, err := strconv.Atoi((*token)[start])
 	if err != nil {
 		return nil, 0, err
@@ -815,13 +821,13 @@ func MakeVectorArray(token *[]string, start int) ([]AttrValue, int, error) {
 	return a, 1 + (numberOfArray * 3), nil
 }
 
-func MakeString(token *[]string, start int) ([]AttrValue, int, error) {
+func ParseString(token *[]string, start int) ([]AttrValue, int, error) {
 	s := AttrString((*token)[start][1 : len((*token)[start])-1])
 	a := []AttrValue{&s}
 	return a, 1, nil
 }
 
-func MakeStringArray(token *[]string, start int) ([]AttrValue, int, error) {
+func ParseStringArray(token *[]string, start int) ([]AttrValue, int, error) {
 	numberOfArray, err := strconv.Atoi((*token)[start])
 	if err != nil {
 		return nil, 0, err
@@ -834,7 +840,7 @@ func MakeStringArray(token *[]string, start int) ([]AttrValue, int, error) {
 	return a, 1 + numberOfArray, nil
 }
 
-func MakeSphere(token *[]string, start int) ([]AttrValue, int, error) {
+func ParseSphere(token *[]string, start int) ([]AttrValue, int, error) {
 	s, err := strconv.ParseFloat((*token)[start], 64)
 	if err != nil {
 		return nil, 0, err
@@ -844,7 +850,7 @@ func MakeSphere(token *[]string, start int) ([]AttrValue, int, error) {
 	return a, 1, nil
 }
 
-func MakeCone(token *[]string, start int) ([]AttrValue, int, error) {
+func ParseCone(token *[]string, start int) ([]AttrValue, int, error) {
 	f, err := ParseFloats((*token)[start : start+2]...)
 	if err != nil {
 		return nil, 0, err
@@ -857,7 +863,7 @@ func MakeCone(token *[]string, start int) ([]AttrValue, int, error) {
 	return a, 2, nil
 }
 
-func MakeReflectanceRGB(token *[]string, start int) ([]AttrValue, int, error) {
+func ParseReflectanceRGB(token *[]string, start int) ([]AttrValue, int, error) {
 	f, err := ParseFloats((*token)[start : start+3]...)
 	if err != nil {
 		return nil, 0, err
@@ -871,7 +877,7 @@ func MakeReflectanceRGB(token *[]string, start int) ([]AttrValue, int, error) {
 	return a, 3, nil
 }
 
-func MakeSpectrumRGB(token *[]string, start int) ([]AttrValue, int, error) {
+func ParseSpectrumRGB(token *[]string, start int) ([]AttrValue, int, error) {
 	f, err := ParseFloats((*token)[start : start+3]...)
 	if err != nil {
 		return nil, 0, err
@@ -885,7 +891,7 @@ func MakeSpectrumRGB(token *[]string, start int) ([]AttrValue, int, error) {
 	return a, 3, nil
 }
 
-func MakeComponentList(token *[]string, start int) ([]AttrValue, int, error) {
+func ParseComponentList(token *[]string, start int) ([]AttrValue, int, error) {
 	numberOfArray, err := strconv.Atoi((*token)[start])
 	if err != nil {
 		return nil, 0, err
@@ -898,7 +904,7 @@ func MakeComponentList(token *[]string, start int) ([]AttrValue, int, error) {
 	return a, 1 + numberOfArray, nil
 }
 
-func MakeAttributeAlias(token *[]string, start int) ([]AttrValue, int, error) {
+func ParseAttributeAlias(token *[]string, start int) ([]AttrValue, int, error) {
 	if (*token)[start] != "{" {
 		return nil, 0, errors.New("there was no necessary token")
 	}
@@ -919,7 +925,7 @@ func MakeAttributeAlias(token *[]string, start int) ([]AttrValue, int, error) {
 	return a, 2 + (len(aaa) * 2), nil
 }
 
-func MakeNurbsCurve(token *[]string, start int) ([]AttrValue, int, error) {
+func ParseNurbsCurve(token *[]string, start int) ([]AttrValue, int, error) {
 	i1, err := ParseInts((*token)[start : start+3]...)
 	if err != nil {
 		return nil, 0, err
@@ -988,7 +994,7 @@ func MakeNurbsCurve(token *[]string, start int) ([]AttrValue, int, error) {
 	return a, count, nil
 }
 
-func MakeNurbsSurface(token *[]string, start int) ([]AttrValue, int, error) {
+func ParseNurbsSurface(token *[]string, start int) ([]AttrValue, int, error) {
 	i1, err := ParseInts((*token)[start : start+4]...)
 	if err != nil {
 		return nil, 0, err
@@ -1070,13 +1076,13 @@ func MakeNurbsSurface(token *[]string, start int) ([]AttrValue, int, error) {
 	return a, count, nil
 }
 
-func MakeNurbsTrimface(token *[]string, start int) ([]AttrValue, int, error) {
+func ParseNurbsTrimface(token *[]string, start int) ([]AttrValue, int, error) {
 	// TODO: Waiting for Autodesk
 	a := []AttrValue{&AttrNurbsTrimface{}}
 	return a, -1, nil
 }
 
-func MakeCountInt(token *[]string, start int) ([]int, error) {
+func ParseCountInt(token *[]string, start int) ([]int, error) {
 	count, err := strconv.Atoi((*token)[start])
 	if err != nil {
 		return nil, err
@@ -1088,7 +1094,7 @@ func MakeCountInt(token *[]string, start int) ([]int, error) {
 	return result, nil
 }
 
-func MakePolyFace(token *[]string, start int, size *uint) ([]AttrValue, int, error) {
+func ParsePolyFace(token *[]string, start int, size *uint) ([]AttrValue, int, error) {
 	switchNumber := start
 	var pfs []AttrPolyFaces
 	var fCount uint
@@ -1109,7 +1115,7 @@ func MakePolyFace(token *[]string, start int, size *uint) ([]AttrValue, int, err
 	for loop && len(*token) > switchNumber {
 		switch (*token)[switchNumber] {
 		case "f":
-			fe, err := MakeCountInt(token, switchNumber+1)
+			fe, err := ParseCountInt(token, switchNumber+1)
 			if err != nil {
 				log.Println("error case f")
 				log.Printf("token number is %d", switchNumber+1)
@@ -1123,14 +1129,14 @@ func MakePolyFace(token *[]string, start int, size *uint) ([]AttrValue, int, err
 			pfs[i].FaceEdge = fe
 			switchNumber += 2 + len(fe)
 		case "h":
-			he, err := MakeCountInt(token, switchNumber+1)
+			he, err := ParseCountInt(token, switchNumber+1)
 			if err != nil {
 				return nil, 0, err
 			}
 			pfs[i].HoleEdge = he
 			switchNumber += 2 + len(he)
 		case "fc":
-			fc, err := MakeCountInt(token, switchNumber+1)
+			fc, err := ParseCountInt(token, switchNumber+1)
 			if err != nil {
 				return nil, 0, err
 			}
@@ -1141,7 +1147,7 @@ func MakePolyFace(token *[]string, start int, size *uint) ([]AttrValue, int, err
 			if err != nil {
 				return nil, 0, err
 			}
-			colorIDs, err := MakeCountInt(token, switchNumber+2)
+			colorIDs, err := ParseCountInt(token, switchNumber+2)
 			if err != nil {
 				return nil, 0, err
 			}
@@ -1158,7 +1164,7 @@ func MakePolyFace(token *[]string, start int, size *uint) ([]AttrValue, int, err
 				return nil, 0, err
 			}
 			fuv.UVSet = uvSet
-			uv, err := MakeCountInt(token, switchNumber+2)
+			uv, err := ParseCountInt(token, switchNumber+2)
 			if err != nil {
 				return nil, 0, err
 			}
@@ -1177,7 +1183,7 @@ func MakePolyFace(token *[]string, start int, size *uint) ([]AttrValue, int, err
 	return a, switchNumber - start, nil
 }
 
-func MakeDataPolyComponent(token *[]string, start int) ([]AttrValue, int, error) {
+func ParseDataPolyComponent(token *[]string, start int) ([]AttrValue, int, error) {
 	if "Index_Data" != (*token)[start] {
 		return nil, 0, errors.New(
 			"since the Index_Data did not exist, " +
@@ -1218,13 +1224,13 @@ func MakeDataPolyComponent(token *[]string, start int) ([]AttrValue, int, error)
 	return a, 3 + (count * 2), nil
 }
 
-func MakeMesh(_ *[]string, _ int) ([]AttrValue, int, error) {
+func ParseMesh(_ *[]string, _ int) ([]AttrValue, int, error) {
 	// Not Implement
 	var a []AttrValue
 	return a, -1, nil
 }
 
-func MakeLattice(token *[]string, start int) ([]AttrValue, int, error) {
+func ParseLattice(token *[]string, start int) ([]AttrValue, int, error) {
 	c, err := ParseInts((*token)[start : start+4]...)
 	if err != nil {
 		return nil, 0, err
@@ -1248,65 +1254,65 @@ func MakeLattice(token *[]string, start int) ([]AttrValue, int, error) {
 	return a, 4 + (c[3] * 3), nil
 }
 
-func MakeAttr(token *[]string, start int, size *uint, attrType AttrType) ([]AttrValue, int, error) {
+func ParseAttr(token *[]string, start int, size *uint, attrType AttrType) ([]AttrValue, int, error) {
 	switch attrType {
 	case TypeShort2, TypeLong2:
-		return MakeShort2Long2(token, start, size, &attrType)
+		return ParseShort2Long2(token, start, size, &attrType)
 	case TypeShort3, TypeLong3:
-		return MakeShort3Long3(token, start, size, &attrType)
+		return ParseShort3Long3(token, start, size, &attrType)
 	case TypeInt32Array:
-		return MakeInt32Array(token, start)
+		return ParseInt32Array(token, start)
 	case TypeFloat2, TypeDouble2:
-		return MakeFloat2Double2(token, start, size, &attrType)
+		return ParseFloat2Double2(token, start, size, &attrType)
 	case TypeFloat3, TypeDouble3:
-		return MakeFloat3Double3(token, start, size, &attrType)
+		return ParseFloat3Double3(token, start, size, &attrType)
 	case TypeDoubleArray:
-		return MakeDoubleArray(token, start)
+		return ParseDoubleArray(token, start)
 	case TypeMatrix:
-		return MakeMatrix(token, start)
+		return ParseMatrix(token, start)
 	case TypeMatrixXform:
-		return MakeMatrixXform(token, start)
+		return ParseMatrixXform(token, start)
 	case TypePointArray:
-		return MakePointArray(token, start)
+		return ParsePointArray(token, start)
 	case TypeVectorArray:
-		return MakeVectorArray(token, start)
+		return ParseVectorArray(token, start)
 	case TypeString:
-		return MakeString(token, start)
+		return ParseString(token, start)
 	case TypeStringArray:
-		return MakeStringArray(token, start)
+		return ParseStringArray(token, start)
 	case TypeSphere:
-		return MakeSphere(token, start)
+		return ParseSphere(token, start)
 	case TypeCone:
-		return MakeCone(token, start)
+		return ParseCone(token, start)
 	case TypeReflectanceRGB:
-		return MakeReflectanceRGB(token, start)
+		return ParseReflectanceRGB(token, start)
 	case TypeSpectrumRGB:
-		return MakeSpectrumRGB(token, start)
+		return ParseSpectrumRGB(token, start)
 	case TypeComponentList:
-		return MakeComponentList(token, start)
+		return ParseComponentList(token, start)
 	case TypeAttributeAlias:
-		return MakeAttributeAlias(token, start)
+		return ParseAttributeAlias(token, start)
 	case TypeNurbsCurve:
-		return MakeNurbsCurve(token, start)
+		return ParseNurbsCurve(token, start)
 	case TypeNurbsSurface:
-		return MakeNurbsSurface(token, start)
+		return ParseNurbsSurface(token, start)
 	case TypeNurbsTrimface:
-		return MakeNurbsTrimface(token, start)
+		return ParseNurbsTrimface(token, start)
 	case TypePolyFaces:
-		return MakePolyFace(token, start, size)
+		return ParsePolyFace(token, start, size)
 	case TypeDataPolyComponent:
-		return MakeDataPolyComponent(token, start)
+		return ParseDataPolyComponent(token, start)
 	case TypeDataReferenceEdits:
 		return MakeDataReferenceEdits(token, start)
 	case TypeMesh:
-		return MakeMesh(token, start)
+		return ParseMesh(token, start)
 	case TypeLattice:
-		return MakeLattice(token, start)
+		return ParseLattice(token, start)
 	}
 	return nil, 0, nil
 }
 
-func MakeAttrType(token *[]string, start int) (AttrType, error) {
+func ParseAttrType(token *[]string, start int) (AttrType, error) {
 	typeString := (*token)[start][1 : len((*token)[start])-1]
 	switch typeString {
 	case "short2":
@@ -1376,7 +1382,7 @@ func MakeAttrType(token *[]string, start int) (AttrType, error) {
 	return TypeInvalid, errors.New("Invalid type " + typeString)
 }
 
-func MakeAddAttr(c *Cmd) *AddAttrCmd {
+func ParseAddAttr(c *Cmd) *AddAttrCmd {
 	aa := &AddAttrCmd{Cmd: c}
 	// TODO: Do finish!
 	return aa

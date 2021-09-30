@@ -8,7 +8,7 @@ func TestMakeFile_ReferenceDepthInfo(t *testing.T) {
 	c := &CmdBuilder{}
 	fileLine := `file -rdi 1 -ns "baseA" -rfn "baseARN" -op "v=0;" -typ "mayaAscii" "C:/baseA.ma";`
 	c.Append(fileLine)
-	f := MakeFile(c.Parse())
+	f := ParseFile(c.Parse())
 	msg := `got FileCmd %v "%v", wont "%v"`
 	if f.ReferenceDepthInfo != 1 {
 		t.Errorf(msg, "ReferenceDepthInfo", f.ReferenceDepthInfo, 1)
@@ -37,7 +37,7 @@ func TestMakeFile_Reference(t *testing.T) {
 	c := &CmdBuilder{}
 	fileLine := `file -r -ns "baseA" -dr 1 -rfn "baseARN" -op "v=0;" -typ "mayaAscii" "C:/baseA.ma";`
 	c.Append(fileLine)
-	f := MakeFile(c.Parse())
+	f := ParseFile(c.Parse())
 	msg := `got FileCmd %v "%v", wont "%v"`
 	if f.Reference != true {
 		t.Errorf(msg, "Reference", f.Reference, true)

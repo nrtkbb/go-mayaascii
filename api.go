@@ -6,6 +6,7 @@ import (
 )
 
 const (
+	LineCommentCommand = "//"
 	FileCommand        = "file "
 	FileInfoCommand    = "fileInfo "
 	WorkspaceCommand   = "workspace "
@@ -21,8 +22,9 @@ const (
 type CommandTypes []string
 
 func (ct *CommandTypes) InHasPrefix(line *string) bool {
-	for i := 0; i < len(*ct); i ++ {
-		if strings.HasPrefix(*line, (*ct)[i]) {
+	trimed := strings.TrimLeft(*line, " \t\n")
+	for i := 0; i < len(*ct); i++ {
+		if strings.HasPrefix(trimed, (*ct)[i]) {
 			return true
 		}
 	}
@@ -31,10 +33,11 @@ func (ct *CommandTypes) InHasPrefix(line *string) bool {
 
 func Unmarshal(reader io.Reader) (*Object, error) {
 	mo := &Object{
-		Files:     []*File{},
-		FileInfos: []*FileInfo{},
-		Requires:  []*Require{},
-		Nodes:     map[string]*Node{},
+		LineComments: []*LineComment{},
+		Files:        []*File{},
+		FileInfos:    []*FileInfo{},
+		Requires:     []*Require{},
+		Nodes:        map[string]*Node{},
 
 		cmds:        []*Cmd{},
 		connections: NewConnections(),
@@ -49,10 +52,11 @@ func Unmarshal(reader io.Reader) (*Object, error) {
 
 func UnmarshalFocus(reader io.Reader, focusCommands CommandTypes) (*Object, error) {
 	mo := &Object{
-		Files:     []*File{},
-		FileInfos: []*FileInfo{},
-		Requires:  []*Require{},
-		Nodes:     map[string]*Node{},
+		LineComments: []*LineComment{},
+		Files:        []*File{},
+		FileInfos:    []*FileInfo{},
+		Requires:     []*Require{},
+		Nodes:        map[string]*Node{},
 
 		cmds:        []*Cmd{},
 		connections: NewConnections(),

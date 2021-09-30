@@ -211,11 +211,11 @@ func TestRequires(t *testing.T) {
 		t.Error("got nil, wont *Object")
 	}
 
-	if len(mo.Requires) != 1 {
-		t.Errorf("got len(mo.RequiresCmd) %d, wont 1", len(mo.Requires))
+	if len(mo.Requires) != 2 {
+		t.Errorf("got len(mo.RequiresCmd) %d, wont 2", len(mo.Requires))
 	}
 
-	require := mo.Requires[0]
+	require := mo.Requires[1]
 	if require.Name != "nearestPointOnMesh" {
 		t.Errorf("got %s, wont nearestPointOnMesh", require.Name)
 	}
@@ -233,7 +233,7 @@ func TestRequires(t *testing.T) {
 	}
 
 	if len(require.NodeTypes) != 1 {
-		t.Errorf("got %d, wont 1", len(require.NodeTypes))
+		t.Fatalf("got %d, wont 1", len(require.NodeTypes))
 	}
 
 	nodeType := require.NodeTypes[0]

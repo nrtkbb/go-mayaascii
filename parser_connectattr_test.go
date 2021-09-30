@@ -8,7 +8,7 @@ func TestMakeConnectAttr_Min(t *testing.T) {
 	cb := &CmdBuilder{}
 	cb.Append(`connectAttr "tmp_file11.msg" ":defaultTextureList1.tx" -na;`)
 	c := cb.Parse()
-	ca, err := MakeConnectAttr(c)
+	ca, err := ParseConnectAttr(c)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -43,7 +43,7 @@ func TestMakeConnectAttr_Max(t *testing.T) {
 	cb := &CmdBuilder{}
 	cb.Append(`connectAttr -f -l on -rd "test" "tmp_file11.msg" ":defaultTextureList1.tx" -na;`)
 	c := cb.Parse()
-	ca, err := MakeConnectAttr(c)
+	ca, err := ParseConnectAttr(c)
 	if err != nil {
 		t.Fatal(err)
 	}

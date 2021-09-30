@@ -12,11 +12,12 @@ import (
 
 // Object ...
 type Object struct {
-	Files     []*File
-	FileInfos []*FileInfo
-	Requires  []*Require
-	Nodes     map[string]*Node
-	Selects   []*Select
+	LineComments []*LineComment
+	Files        []*File
+	FileInfos    []*FileInfo
+	Requires     []*Require
+	Nodes        map[string]*Node
+	Selects      []*Select
 
 	cmds        []*Cmd
 	connections Connections
@@ -26,8 +27,21 @@ func (o *Object) Unmarshal(reader io.Reader) error {
 	br := bufio.NewReader(reader)
 
 	cmdBuilder := &CmdBuilder{}
+	lineCommentBuilder := &CmdBuilder{}
 	err := bufscan.BufScan(br, func(line string) error {
+		// Normally, it should be parsed with a proper
+		// tokenizer and lexer, but here it is simply
+		// treated as one token per line.
+		if LineCommentType.HasPrefix(line) {
+			lineCommentBuilder.Append(line)
+			c := lineCommentBuilder.Parse()
+			o.cmds = append(o.cmds, c)
+			lineCommentBuilder.Clear()
+			cmdBuilder.lineNo ++
+			return nil
+		}
 		cmdBuilder.Append(line)
+		lineCommentBuilder.lineNo ++
 		if cmdBuilder.IsCmdEOF() {
 			c := cmdBuilder.Parse()
 			o.cmds = append(o.cmds, c)
@@ -57,15 +71,29 @@ func (o *Object) UnmarshalFocus(reader io.Reader, focusCommands CommandTypes) er
 	br := bufio.NewReader(reader)
 
 	cmdBuilder := &CmdBuilder{}
+	lineCommentBuilder := &CmdBuilder{}
 	isFocus := false
 	err := bufscan.BufScan(br, func(line string) error {
+		if LineCommentType.HasPrefix(line) {
+			lcc := "//"
+			if focusCommands.InHasPrefix(&lcc) {
+				lineCommentBuilder.Append(line)
+				c := lineCommentBuilder.Parse()
+				o.cmds = append(o.cmds, c)
+				lineCommentBuilder.Clear()
+			}
+			cmdBuilder.lineNo ++
+			return nil
+		}
 		if cmdBuilder.IsClear() {
 			isFocus = focusCommands.InHasPrefix(&line)
 		}
 		if !isFocus {
+			cmdBuilder.lineNo ++
 			return nil
 		}
 		cmdBuilder.Append(line)
+		lineCommentBuilder.lineNo ++
 		if cmdBuilder.IsCmdEOF() {
 			c := cmdBuilder.Parse()
 			o.cmds = append(o.cmds, c)
@@ -108,8 +136,14 @@ func (o *Object) GetNodes(nodeType string) ([]*Node, error) {
 	return results, nil
 }
 
+type LineComment struct {
+	LineNo      uint
+	Comment     string
+	LineComment *LineCommentCmd
+}
+
 type File struct {
-	Lineno    uint
+	LineNo    uint
 	Path      string
 	Namespace string
 
@@ -302,7 +336,7 @@ type Parser struct {
 func New(cmds []*Cmd) *Parser {
 	p := &Parser{
 		cmds: cmds,
-		cur:  0,
+		cur:  -1,
 	}
 	p.NextCmd()
 	p.NextCmd()
@@ -313,6 +347,8 @@ func (p *Parser) ParseCmds() {
 	for p.CurCmd != nil {
 		var err error
 		switch p.CurCmd.Type {
+		case LineCommentType:
+			err = p.parseLineComments()
 		case FileType:
 			err = p.parseFiles()
 		case FileInfoType:
@@ -346,10 +382,21 @@ func (p *Parser) CheckErrors() bool {
 	return true
 }
 
+func (p *Parser) parseLineComments() error {
+	lc := ParseLineComment(p.CurCmd)
+	lineComment := &LineComment{
+		LineNo:      lc.LineNo,
+		Comment:     lc.Comment,
+		LineComment: lc,
+	}
+	p.o.LineComments = append(p.o.LineComments, lineComment)
+	return nil
+}
+
 func (p *Parser) parseFiles() error {
-	f := MakeFile(p.CurCmd)
+	f := ParseFile(p.CurCmd)
 	file := &File{
-		Lineno:    f.LineNo,
+		LineNo:    f.LineNo,
 		Path:      f.Path,
 		Namespace: f.Namespace,
 		Parent:    nil,
@@ -381,11 +428,11 @@ func (p *Parser) parseFiles() error {
 }
 
 func (p *Parser) parseFileInfos() error {
-	fi := MakeFileInfo(p.CurCmd)
+	fi := ParseFileInfo(p.CurCmd)
 	fileInfo := &FileInfo{
-		Lineno: fi.LineNo,
-		Name: fi.Name,
-		Value: fi.Value,
+		Lineno:   fi.LineNo,
+		Name:     fi.Name,
+		Value:    fi.Value,
 		FileInfo: fi,
 	}
 	p.o.FileInfos = append(p.o.FileInfos, fileInfo)
@@ -393,7 +440,7 @@ func (p *Parser) parseFileInfos() error {
 }
 
 func (p *Parser) parseRequires() error {
-	rq := MakeRequires(p.CurCmd)
+	rq := ParseRequires(p.CurCmd)
 	requires := &Require{
 		Name:      rq.PluginName,
 		Version:   rq.Version,
@@ -406,7 +453,7 @@ func (p *Parser) parseRequires() error {
 }
 
 func (p *Parser) parseCreateNode() error {
-	cn := MakeCreateNode(p.CurCmd)
+	cn := ParseCreateNode(p.CurCmd)
 	node := &Node{
 		object:     p.o,
 		Type:       cn.NodeType,
@@ -436,12 +483,12 @@ func (p *Parser) parseCreateNode() error {
 
 	if p.PeekCmdIs(RenameType) {
 		p.NextCmd()
-		node.Rename = MakeRename(p.CurCmd)
+		node.Rename = ParseRename(p.CurCmd)
 	}
 
 	for p.PeekCmdIs(AddAttrType) {
 		p.NextCmd()
-		ad := MakeAddAttr(p.CurCmd)
+		ad := ParseAddAttr(p.CurCmd)
 		node.AddAttrs = append(node.AddAttrs, ad)
 	}
 
@@ -450,9 +497,9 @@ func (p *Parser) parseCreateNode() error {
 		var at *SetAttrCmd
 		var err error
 		if len(node.SetAttrs) == 0 {
-			at, err = MakeSetAttr(p.CurCmd, nil)
+			at, err = ParseSetAttr(p.CurCmd, nil)
 		} else {
-			at, err = MakeSetAttr(p.CurCmd, node.SetAttrs[len(node.SetAttrs)-1])
+			at, err = ParseSetAttr(p.CurCmd, node.SetAttrs[len(node.SetAttrs)-1])
 		}
 		if err != nil {
 			return err
@@ -489,7 +536,7 @@ func (p *Parser) parseCreateNode() error {
 }
 
 func (p *Parser) parseConnectAttr() error {
-	ca, err := MakeConnectAttr(p.CurCmd)
+	ca, err := ParseConnectAttr(p.CurCmd)
 	if err != nil {
 		return err
 	}
@@ -498,7 +545,7 @@ func (p *Parser) parseConnectAttr() error {
 }
 
 func (p *Parser) parseSelect() error {
-	s := MakeSelect(p.CurCmd)
+	s := ParseSelect(p.CurCmd)
 	if len(s.Names) > 1 {
 		return errors.New(fmt.Sprintf("un-support bulk select. [%s], %v", strings.Join(s.Names, ", "), *s))
 	} else if len(s.Names) == 0 {
@@ -515,7 +562,7 @@ func (p *Parser) parseSelect() error {
 
 	for p.PeekCmdIs(AddAttrType) {
 		p.NextCmd()
-		ad := MakeAddAttr(p.CurCmd)
+		ad := ParseAddAttr(p.CurCmd)
 		sel.AddAttrs = append(sel.AddAttrs, ad)
 	}
 
@@ -524,9 +571,9 @@ func (p *Parser) parseSelect() error {
 		var at *SetAttrCmd
 		var err error
 		if len(sel.SetAttrs) == 0 {
-			at, err = MakeSetAttr(p.CurCmd, nil)
+			at, err = ParseSetAttr(p.CurCmd, nil)
 		} else {
-			at, err = MakeSetAttr(p.CurCmd, sel.SetAttrs[len(sel.SetAttrs)-1])
+			at, err = ParseSetAttr(p.CurCmd, sel.SetAttrs[len(sel.SetAttrs)-1])
 		}
 		if err != nil {
 			return err

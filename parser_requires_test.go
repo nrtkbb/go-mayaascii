@@ -8,7 +8,7 @@ func TestMakeRequires_Min(t *testing.T) {
 	cb := &CmdBuilder{}
 	cb.Append(`requires maya "2016";`)
 	c := cb.Parse()
-	r := MakeRequires(c)
+	r := ParseRequires(c)
 	if r.PluginName != "maya" {
 		t.Fatalf("got %v, wont %v", r.PluginName, "maya")
 	}
@@ -28,7 +28,7 @@ func TestMakeRequires_Max(t *testing.T) {
 	cb.Append(`requires -nodeType "typeName1"
 		-dataType "typeName2" "pluginName" "version";`)
 	c := cb.Parse()
-	r := MakeRequires(c)
+	r := ParseRequires(c)
 	if r.PluginName != "pluginName" {
 		t.Fatalf("got %v, wont %v", r.PluginName, "pluginName")
 	}

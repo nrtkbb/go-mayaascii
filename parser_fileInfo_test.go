@@ -8,7 +8,7 @@ func TestMakeFileInfo(t *testing.T) {
 	c := &CmdBuilder{}
 	fileInfoLine := `fileInfo "fileInfoName" "fileInfoValue";`
 	c.Append(fileInfoLine)
-	fi := MakeFileInfo(c.Parse())
+	fi := ParseFileInfo(c.Parse())
 	msg := `got FileInfoCmd %v "%v", wont "%v"`
 	if fi.Name != "fileInfoName" {
 		t.Errorf(msg, "Name", fi.Name, "fileInfoName")

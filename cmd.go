@@ -1,84 +1,51 @@
 package mayaascii
 
 import (
-	"bufio"
 	"bytes"
 	"errors"
 	"fmt"
 	"io"
-	"os"
 	"sort"
 	"strconv"
 	"strings"
-
-	"github.com/nrtkbb/bufscan"
 )
 
 type Type string
 
 const (
-	FileType        Type = "file"
-	FileInfoType    Type = "fileInfo"
-	WorkspaceType   Type = "workspace"
-	RequiresType    Type = "requires"
-	ConnectAttrType Type = "connectAttr"
-	CreateNodeType  Type = "createNode"
-	RenameType      Type = "rename"
-	SetAttrType     Type = "setAttr"
-	AddAttrType     Type = "addAttr"
-	SelectType      Type = "select"
+	NoneType         Type = ""
+	LineCommentType  Type = "//"
+	BlockCommentType Type = "/*"
+	FileType         Type = "file"
+	FileInfoType     Type = "fileInfo"
+	WorkspaceType    Type = "workspace"
+	RequiresType     Type = "requires"
+	ConnectAttrType  Type = "connectAttr"
+	CreateNodeType   Type = "createNode"
+	RenameType       Type = "rename"
+	SetAttrType      Type = "setAttr"
+	AddAttrType      Type = "addAttr"
+	SelectType       Type = "select"
 )
 
-type ParseFile struct {
-	Path string
-	Cmds []*Cmd
+func (t Type) String() string {
+	return string(t)
 }
 
-func (f *ParseFile) Parse() (err error) {
-	fp, err := os.Open(f.Path)
-	if err != nil {
-		return
-	}
-	defer func(fp *os.File) {
-		err = fp.Close()
-	}(fp)
-
-	reader := bufio.NewReader(fp)
-	f.Cmds = []*Cmd{}
-	cmdBuilder := &CmdBuilder{}
-	err = bufscan.BufScan(reader, func(line string) error {
-		cmdBuilder.Append(line)
-		if cmdBuilder.IsCmdEOF() {
-			cmd := cmdBuilder.Parse()
-			f.Cmds = append(f.Cmds, cmd)
-			cmdBuilder.Clear()
-		}
-		return nil
-	})
-	return
+func (t Type) HasPrefix(line string) bool {
+	line = strings.TrimLeft(line, " \t\n")
+	return strings.HasPrefix(line, t.String())
 }
 
-func (f *ParseFile) SaveSceneAs(outputPath string) error {
-	if _, err := os.Stat(outputPath); err == nil {
-		return errors.New("file already existed")
-	}
-	fp, err := os.Create(outputPath)
-	if err != nil {
-		return err
-	}
-	defer fp.Close()
-	writer := bufio.NewWriter(fp)
-	defer writer.Flush()
-
-	for _, cmd := range f.Cmds {
-		fmt.Fprintln(writer, cmd.Raw)
-	}
-	return nil
+func (t Type) HasPrefixWithSpace(line string) bool {
+	line = strings.TrimLeft(line, " \t\n")
+	return strings.HasPrefix(line, t.String()+" ")
 }
 
 type CmdBuilder struct {
-	cmdLine []string
-	lineNo  uint
+	cmdLine       []string
+	lineNo        uint
+	isLineComment bool
 }
 
 func (c *CmdBuilder) Append(line string) {
@@ -110,6 +77,7 @@ const (
 	tabSpace          = '\t'
 	enter             = '\n'
 	slash             = '/'
+	asterisk          = '*'
 	backSlash         = '\\'
 	dQuatation        = '"'
 	sQuatation        = '\''
@@ -124,19 +92,51 @@ const (
 )
 
 type Cmd struct {
-	Type Type   `json:"cmd"`
-	Raw  string `json:"raw"`
+	Type   Type     `json:"cmd"`
+	Raw    string   `json:"raw"`
 	Token  []string `json:"token"`
 	LineNo uint
 }
 
 func (c *CmdBuilder) Parse() *Cmd {
-	cmd := Cmd{Raw: strings.Join(c.cmdLine, "\n"), LineNo: c.lineNo}
+	cmd := Cmd{
+		Raw:    strings.Join(c.cmdLine, "\n"),
+		LineNo: c.lineNo,
+		Type:   NoneType,
+	}
+	// fmt.Println("Raw", cmd.Raw)
 	c.Clear()
 	var buf []rune
 	var subBuf []rune
 	var subToken []string
 	for _, c := range cmd.Raw {
+		// comment
+		if (0 == len(buf) && c == slash) ||
+			(1 == len(buf) && buf[0] == slash && (c == slash || c == asterisk)) {
+			buf = append(buf, c)
+			if 2 == len(buf) {
+				cmd.Token = append(cmd.Token, string(buf))
+				buf = buf[:0]
+				if c == slash {
+					cmd.Type = LineCommentType
+				} else if c == asterisk {
+					cmd.Type = BlockCommentType
+				}
+			}
+			continue
+		}
+		if cmd.Type == BlockCommentType {
+			if buf[len(buf)-1] == asterisk && c == slash {
+				cmd.Token = append(cmd.Token, string(buf[:len(buf)-2]))
+				break
+			}
+			buf = append(buf, c)
+			continue
+		}
+		if cmd.Type == LineCommentType {
+			buf = append(buf, c)
+			continue
+		}
 		if 0 < len(buf) && buf[len(buf)-1] == backSlash {
 			buf = append(buf, c)
 			subBuf = append(subBuf, c)
@@ -149,6 +149,7 @@ func (c *CmdBuilder) Parse() *Cmd {
 			buf = append(buf, c)
 			if len(buf) == 1 {
 				cmd.Token = append(cmd.Token, string(c))
+				// buf = [:0] はしない
 				continue
 			}
 			if c == dQuatation ||
@@ -231,12 +232,20 @@ func (c *CmdBuilder) Parse() *Cmd {
 		}
 		buf = append(buf, c)
 	}
+	if 0 != len(buf) && cmd.Type == LineCommentType {
+		cmd.Token = append(cmd.Token, string(buf))
+	}
 	if 0 == len(cmd.Token) {
-		cmd.Type = Type("None")
+		cmd.Type = NoneType
 	} else {
 		cmd.Type = Type(cmd.Token[0])
 	}
 	return &cmd
+}
+
+type LineCommentCmd struct {
+	*Cmd
+	Comment string `json:"comment"`
 }
 
 type FileCmd struct {
@@ -390,17 +399,17 @@ type SelectCmd struct {
 
 type SetAttrCmd struct {
 	*Cmd
-	AttrName string   `json:"attr_name"`
-	AlteredValue bool     `json:"altered_value" short:"-av"`
-	Caching      *bool    `json:"caching,omitempty" short:"-ca"`
-	CapacityHint *uint    `json:"capacity_hint,omitempty" short:"-ch"`
-	ChannelBox   *bool    `json:"channel_box,omitempty" short:"-cb"`
-	Clamp        bool     `json:"clamp" short:"-c"`
-	Keyable      *bool    `json:"keyable,omitempty" short:"-k"`
-	Lock         *bool    `json:"lock,omitempty" short:"-l"`
-	Size     *uint    `json:"size,omitempty" short:"-s"`
-	AttrType AttrType    `json:"attr_type" short:"-typ"`
-	Attr     []AttrValue `json:"attr"`
+	AttrName     string      `json:"attr_name"`
+	AlteredValue bool        `json:"altered_value" short:"-av"`
+	Caching      *bool       `json:"caching,omitempty" short:"-ca"`
+	CapacityHint *uint       `json:"capacity_hint,omitempty" short:"-ch"`
+	ChannelBox   *bool       `json:"channel_box,omitempty" short:"-cb"`
+	Clamp        bool        `json:"clamp" short:"-c"`
+	Keyable      *bool       `json:"keyable,omitempty" short:"-k"`
+	Lock         *bool       `json:"lock,omitempty" short:"-l"`
+	Size         *uint       `json:"size,omitempty" short:"-s"`
+	AttrType     AttrType    `json:"attr_type" short:"-typ"`
+	Attr         []AttrValue `json:"attr"`
 }
 
 func (sa *SetAttrCmd) StringWrite(writer io.StringWriter) (int, error) {
@@ -1794,14 +1803,14 @@ func (anc *AttrNurbsCurve) StringWrite(writer io.StringWriter) (int, error) {
 
 type AttrNurbsSurface struct {
 	UDegree     int           `json:"u_degree"`
-	VDegree    int           `json:"v_degree"`
-	UForm      AttrFormType  `json:"u_form"`
-	VForm      AttrFormType  `json:"v_form"`
-	IsRational bool          `json:"is_rational"`
+	VDegree     int           `json:"v_degree"`
+	UForm       AttrFormType  `json:"u_form"`
+	VForm       AttrFormType  `json:"v_form"`
+	IsRational  bool          `json:"is_rational"`
 	UKnotValues []float64     `json:"u_knot_values"`
 	VKnotValues []float64     `json:"v_knot_values"`
-	IsTrim     *bool         `json:"is_trim,omitempty"`
-	CvValues   []AttrCvValue `json:"cv_values"`
+	IsTrim      *bool         `json:"is_trim,omitempty"`
+	CvValues    []AttrCvValue `json:"cv_values"`
 }
 
 func ToAttrNurbsSurface(attrs []AttrValue) ([]*AttrNurbsSurface, error) {
