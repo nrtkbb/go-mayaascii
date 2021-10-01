@@ -14,6 +14,12 @@ func ParseLineComment(c *Cmd) *LineCommentCmd {
 	return &lc
 }
 
+func ParseBlockComment(c *Cmd) *BlockCommentCmd {
+	bc := BlockCommentCmd{Cmd: c}
+	bc.Comment = bc.Token[1]
+	return &bc
+}
+
 func ParseFile(c *Cmd) *FileCmd {
 	// [file, -rdi, 1, -ns, "ns", -rfn, "nsRN", -op, "v=0;", -typ, "mayaAscii", "path/to/file.ma"]
 	// [file, -r, -ns, "namespace", -dr, 1, -rfn, "nsRN", -op, "v=0;", -typ, "mayaAscii", "path/to/file.ma"]

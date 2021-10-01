@@ -186,6 +186,11 @@ select -ne :hardwareRenderGlobals;
 	setAttr ".btrs" 512;
 select -ne :ikSystem;
 	setAttr -s 4 ".sol";
+/*block comment1*/
+/*
+	block
+	comment2
+*/
 connectAttr "polyCube1.out" "|group1|pCube1|pCubeShape1.i";
 relationship "link" ":lightLinker1" ":initialShadingGroup.message" ":defaultLightSet.message";
 relationship "link" ":lightLinker1" ":initialParticleSE.message" ":defaultLightSet.message";
@@ -264,6 +269,57 @@ func TestRequires(t *testing.T) {
 
 	if *nearestPointOnMeshNode.Rename.To != "B2C0D7BA-4FA2-A74E-5D6A-8DAA23AAF72E" {
 		t.Errorf("got %s, wont B2C0D7BA-4FA2-A74E-5D6A-8DAA23AAF72E", *nearestPointOnMeshNode.Rename.To)
+	}
+}
+
+func TestLineComment(t *testing.T) {
+	reader := strings.NewReader(getTestMa())
+
+	mo, err := Unmarshal(reader)
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	if mo == nil {
+		t.Error("got nil, wont *Object")
+	}
+
+	lineComments := mo.LineComments
+	if len(lineComments) != 5 {
+		t.Fatalf("got mo.LineComments len %d, wont 5", len(lineComments))
+	}
+
+	firstComment := lineComments[0]
+	if firstComment.Comment != "Maya ASCII 2019 scene" {
+		t.Errorf("got \"%s\", wont \"Maya ASCII 2019 scene\"", firstComment.Comment)
+	}
+}
+
+func TestBlockComment(t *testing.T) {
+	reader := strings.NewReader(getTestMa())
+
+	mo, err := Unmarshal(reader)
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	blockComments := mo.BlockComments
+	if len(blockComments) != 2 {
+		t.Fatalf("got mo.BlockComments len %d, wont 2.", len(blockComments))
+	}
+
+	if blockComments[0].Comment != "block comment1" {
+		t.Errorf("got mo.BlockComments[0].Comment \"%s\", wont \"block comment1\".",
+			blockComments[0].Comment)
+	}
+
+	comment2 := `
+	block
+	comment2
+`
+	if blockComments[1].Comment != comment2 {
+		t.Errorf("got mo.BlockComments[1].Comment \"%s\", wont \"block comment2\".",
+			blockComments[1].Comment)
 	}
 }
 

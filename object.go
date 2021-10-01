@@ -12,12 +12,13 @@ import (
 
 // Object ...
 type Object struct {
-	LineComments []*LineComment
 	Files        []*File
 	FileInfos    []*FileInfo
 	Requires     []*Require
 	Nodes        map[string]*Node
 	Selects      []*Select
+	LineComments []*LineComment
+	BlockComments []*BlockComment
 
 	cmds        []*Cmd
 	connections Connections
@@ -140,6 +141,12 @@ type LineComment struct {
 	LineNo      uint
 	Comment     string
 	LineComment *LineCommentCmd
+}
+
+type BlockComment struct {
+	LineNo uint
+	Comment string
+	BlockComment *BlockCommentCmd
 }
 
 type File struct {
@@ -349,6 +356,8 @@ func (p *Parser) ParseCmds() {
 		switch p.CurCmd.Type {
 		case LineCommentType:
 			err = p.parseLineComments()
+		case BlockCommentType:
+			err = p.parseBlockComments()
 		case FileType:
 			err = p.parseFiles()
 		case FileInfoType:
@@ -390,6 +399,17 @@ func (p *Parser) parseLineComments() error {
 		LineComment: lc,
 	}
 	p.o.LineComments = append(p.o.LineComments, lineComment)
+	return nil
+}
+
+func (p *Parser) parseBlockComments() error {
+	bc := ParseBlockComment(p.CurCmd)
+	blockComment := &BlockComment{
+		LineNo: bc.LineNo,
+		Comment: bc.Comment,
+		BlockComment: bc,
+	}
+	p.o.BlockComments = append(p.o.BlockComments, blockComment)
 	return nil
 }
 

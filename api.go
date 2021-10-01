@@ -33,11 +33,12 @@ func (ct *CommandTypes) InHasPrefix(line *string) bool {
 
 func Unmarshal(reader io.Reader) (*Object, error) {
 	mo := &Object{
-		LineComments: []*LineComment{},
-		Files:        []*File{},
-		FileInfos:    []*FileInfo{},
-		Requires:     []*Require{},
-		Nodes:        map[string]*Node{},
+		Files:         []*File{},
+		FileInfos:     []*FileInfo{},
+		Requires:      []*Require{},
+		Nodes:         map[string]*Node{},
+		LineComments:  []*LineComment{},
+		BlockComments: []*BlockComment{},
 
 		cmds:        []*Cmd{},
 		connections: NewConnections(),
@@ -52,11 +53,12 @@ func Unmarshal(reader io.Reader) (*Object, error) {
 
 func UnmarshalFocus(reader io.Reader, focusCommands CommandTypes) (*Object, error) {
 	mo := &Object{
-		LineComments: []*LineComment{},
-		Files:        []*File{},
-		FileInfos:    []*FileInfo{},
-		Requires:     []*Require{},
-		Nodes:        map[string]*Node{},
+		Files:         []*File{},
+		FileInfos:     []*FileInfo{},
+		Requires:      []*Require{},
+		Nodes:         map[string]*Node{},
+		LineComments:  []*LineComment{},
+		BlockComments: []*BlockComment{},
 
 		cmds:        []*Cmd{},
 		connections: NewConnections(),

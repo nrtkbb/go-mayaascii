@@ -43,12 +43,15 @@ func (t Type) HasPrefixWithSpace(line string) bool {
 }
 
 type CmdBuilder struct {
-	cmdLine       []string
-	lineNo        uint
-	isLineComment bool
+	cmdLine        []string
+	lineNo         uint
+	isBlockComment bool
 }
 
 func (c *CmdBuilder) Append(line string) {
+	if !c.isBlockComment && BlockCommentType.HasPrefix(line) {
+		c.isBlockComment = true
+	}
 	c.cmdLine = append(c.cmdLine, line)
 	c.lineNo++
 }
@@ -61,7 +64,12 @@ func (c *CmdBuilder) IsCmdEOF() bool {
 	if len(lastLine) == 0 {
 		return false
 	}
-	return lastLine[len(lastLine)-1] == byte(';')
+	if c.isBlockComment {
+		return strings.HasSuffix(
+			strings.TrimRight(lastLine, " \t\r\n"), "*/")
+	} else {
+		return lastLine[len(lastLine)-1] == byte(';')
+	}
 }
 
 func (c *CmdBuilder) Clear() {
@@ -126,8 +134,8 @@ func (c *CmdBuilder) Parse() *Cmd {
 			continue
 		}
 		if cmd.Type == BlockCommentType {
-			if buf[len(buf)-1] == asterisk && c == slash {
-				cmd.Token = append(cmd.Token, string(buf[:len(buf)-2]))
+			if 2 <= len(buf) && buf[len(buf)-1] == asterisk && c == slash {
+				cmd.Token = append(cmd.Token, string(buf[:len(buf)-1]))
 				break
 			}
 			buf = append(buf, c)
@@ -244,6 +252,11 @@ func (c *CmdBuilder) Parse() *Cmd {
 }
 
 type LineCommentCmd struct {
+	*Cmd
+	Comment string `json:"comment"`
+}
+
+type BlockCommentCmd struct {
 	*Cmd
 	Comment string `json:"comment"`
 }
