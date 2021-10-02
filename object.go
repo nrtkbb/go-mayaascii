@@ -127,7 +127,7 @@ func (o *Object) GetNode(n string) (*Node, error) {
 func (o *Object) GetNodes(nodeType string) ([]*Node, error) {
 	var results []*Node
 	for _, node := range o.Nodes {
-		if node.Type == nodeType {
+		if node.GetType() == nodeType {
 			results = append(results, node)
 		}
 	}
@@ -209,12 +209,7 @@ func (r Require) GetDataTypes() []string {
 
 type Node struct {
 	object     *Object
-	LineNo     uint
-	Type       string
-	Name       string
 	Attrs      []*Attr
-	Shared     bool
-	SkipSelect bool
 	Parent     *Node
 	Children   []*Node
 
@@ -247,9 +242,13 @@ func (n *Node) GetUUID() (string, error) {
 	return "", errors.New(fmt.Sprintf("%s has not UUID", n.GetName()))
 }
 
+func (n *Node) IsShared() bool {
+	return n.createNodeCmd.Shared
+}
+
 func (n *Node) Remove() error {
 	if n.isDeleted {
-		return errors.New(fmt.Sprintf("%s was already deleted", n.Name))
+		return errors.New(fmt.Sprintf("%s was already deleted", n.GetName()))
 	}
 	for _, c := range n.Children {
 		err := c.Remove()
@@ -295,16 +294,16 @@ func (n *Node) ListConnections(ca *ConnectionArgs) []*Node {
 	var names []string
 	if ca.Source {
 		if ca.AttrName != "" {
-			names = n.object.connections.GetSrcNamesAttr(n.Name, ca.AttrName)
+			names = n.object.connections.GetSrcNamesAttr(n.GetName(), ca.AttrName)
 		} else {
-			names = n.object.connections.GetSrcNames(n.Name)
+			names = n.object.connections.GetSrcNames(n.GetName())
 		}
 	}
 	if ca.Destination {
 		if ca.AttrName != "" {
-			names = n.object.connections.GetDstNamesAttr(n.Name, ca.AttrName)
+			names = n.object.connections.GetDstNamesAttr(n.GetName(), ca.AttrName)
 		} else {
-			names = n.object.connections.GetDstNames(n.Name)
+			names = n.object.connections.GetDstNames(n.GetName())
 		}
 	}
 	var nodes []*Node
@@ -314,12 +313,7 @@ func (n *Node) ListConnections(ca *ConnectionArgs) []*Node {
 			// name is maybe default node.
 			defaultNode := &Node{
 				object:        n.object,
-				LineNo:        0,
-				Type:          "Unknown",
-				Name:          name,
 				Attrs:         nil,
-				Shared:        true,
-				SkipSelect:    false,
 				Parent:        nil,
 				Children:      nil,
 				isDeleted:     false,
@@ -336,7 +330,7 @@ func (n *Node) ListConnections(ca *ConnectionArgs) []*Node {
 	}
 	var typeFiltered []*Node
 	for _, node := range nodes {
-		if node.Type == ca.Type {
+		if node.GetType() == ca.Type {
 			typeFiltered = append(typeFiltered, node)
 		}
 	}
@@ -374,7 +368,7 @@ func (a *Attr) GetAttrValue() []AttrValue {
 func (a *Attr) Remove() error {
 	if a.isDeleted {
 		return errors.New(fmt.Sprintf("%s.%s was already deleted",
-			a.Node.Name, a.GetName()))
+			a.Node.GetName(), a.GetName()))
 	}
 	a.isDeleted = true
 	return nil
@@ -518,24 +512,19 @@ func (p *Parser) parseCreateNode() error {
 	cn := ParseCreateNode(p.CurCmd)
 	node := &Node{
 		object:        p.o,
-		Type:          cn.NodeType,
-		Name:          cn.NodeName,
-		Shared:        cn.Shared,
-		SkipSelect:    cn.SkipSelect,
 		createNodeCmd: cn,
-		LineNo:        cn.LineNo,
 	}
-	if _, ok := p.o.Nodes[node.Name]; ok {
-		return errors.New(fmt.Sprintf("Already found node ... %s", node.Name))
+	if _, ok := p.o.Nodes[node.GetName()]; ok {
+		return errors.New(fmt.Sprintf("Already found node ... %s", node.GetName()))
 	}
-	p.o.Nodes[node.Name] = node
+	p.o.Nodes[node.GetName()] = node
 
 	if cn.Parent != nil {
 		// reverse loop.
 		parentNode, ok := p.o.Nodes[*cn.Parent]
 		if !ok {
 			return errors.New(fmt.Sprintf("Not found parent %s. node is %s",
-				*cn.Parent, node.Name))
+				*cn.Parent, node.GetName()))
 		}
 		node.Parent = parentNode
 		parentNode.Children = append(parentNode.Children, node)
@@ -581,7 +570,7 @@ func (p *Parser) parseCreateNode() error {
 	if len(p.o.Requires) != 0 {
 		for _, r := range p.o.Requires {
 			for _, nt := range r.GetNodeTypes() {
-				if node.Type == nt {
+				if node.GetType() == nt {
 					r.Nodes = append(r.Nodes, node)
 					isPluginsNode = true
 					break

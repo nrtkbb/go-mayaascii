@@ -247,8 +247,8 @@ func TestRequires(t *testing.T) {
 	}
 
 	nearestPointOnMeshNode := require.Nodes[0]
-	if nearestPointOnMeshNode.Name != "nearestPointOnMesh1" {
-		t.Errorf("got %s, wont nearestPointOnMesh1", nearestPointOnMeshNode.Name)
+	if nearestPointOnMeshNode.GetName()!= "nearestPointOnMesh1" {
+		t.Errorf("got %s, wont nearestPointOnMesh1", nearestPointOnMeshNode.GetName())
 	}
 
 	if nearestPointOnMeshNode.renameCmd == nil {
@@ -333,12 +333,12 @@ func TestNodes(t *testing.T) {
 		t.Errorf(err.Error())
 	}
 
-	if perspShape.Name != "perspShape" {
-		t.Errorf("got %s, wont perspShape", perspShape.Name)
+	if perspShape.GetName() != "perspShape" {
+		t.Errorf("got %s, wont perspShape", perspShape.GetName())
 	}
 
-	if perspShape.Type != "camera" {
-		t.Errorf("got %s, wont camera", perspShape.Type)
+	if perspShape.GetType() != "camera" {
+		t.Errorf("got %s, wont camera", perspShape.GetType())
 	}
 
 	if len((*perspShape).Attrs) != 7 {

@@ -41,7 +41,7 @@ func TestSynopsis(t *testing.T) {
 
 	// Print all nodes.
 	for _, n := range mo.Nodes {
-		FmtPrintf("%d : %s\n", n.LineNo, n.Name)
+		FmtPrintf("%s\n", n.GetName())
 	}
 
 	// Specify node name.
@@ -55,12 +55,12 @@ func TestSynopsis(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	FmtPrintf("%s.t is %s", persp.Name, ow)
+	FmtPrintf("%s.t is %s", persp.GetName(), ow)
 
 	// Print Node's all attrs.
 	for _, a := range persp.Attrs {
 		FmtPrintf("%s%s is %d type is %s\n",
-			persp.Name,
+			persp.GetName(),
 			a.GetName(),
 			len(a.GetAttrValue()),
 			a.GetAttrType())
@@ -68,12 +68,12 @@ func TestSynopsis(t *testing.T) {
 
 	// Print Node's all children.
 	for _, c := range persp.Children {
-		FmtPrintf("%s child is %s\n", persp.Name, c.Name)
+		FmtPrintf("%s child is %s\n", persp.GetName(), c.GetName())
 	}
 
 	// Print Node's parent node.
 	if persp.Parent != nil {
-		FmtPrintf("%s parent is %s\n", persp.Name, persp.Parent.Name)
+		FmtPrintf("%s parent is %s\n", persp.GetName(), persp.Parent.GetName())
 	}
 
 	// Get nodes by nodeType.
@@ -84,7 +84,7 @@ func TestSynopsis(t *testing.T) {
 
 	// Print transform nodes.
 	for _, t := range transforms {
-		FmtPrintf("%d : %s\n", t.LineNo, t.Name)
+		FmtPrintf("%s\n", t.GetName())
 	}
 
 	// Get specified source connection nodes.
@@ -96,7 +96,7 @@ func TestSynopsis(t *testing.T) {
 
 	// Print src nodes.
 	for _, t := range srcNodes {
-		FmtPrintf("%d : %s\n", t.LineNo, t.Name)
+		FmtPrintf("%s\n", t.GetName())
 	}
 
 	// Get all destination connection nodes.
@@ -106,7 +106,7 @@ func TestSynopsis(t *testing.T) {
 
 	// Print dst nodes.
 	for _, t := range dstNodes {
-		FmtPrintf("%d : %s\n", t.LineNo, t.Name)
+		FmtPrintf("%s\n", t.GetName())
 	}
 }
 

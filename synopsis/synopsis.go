@@ -42,7 +42,7 @@ func main() {
 
 	// Print all nodes.
 	for _, n := range mo.Nodes {
-		fmt.Printf("%d : %s\n", n.LineNo, n.Name)
+		fmt.Printf("%s\n", n.GetName())
 	}
 
 	// Specify node name.
@@ -56,12 +56,12 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("%s.t is %s", persp.Name, ow)
+	fmt.Printf("%s.t is %s", persp.GetName(), ow)
 
 	// Print Node's all attrs.
 	for _, a := range persp.Attrs {
 		fmt.Printf("%s%s is %d type is %s\n",
-			persp.Name,
+			persp.GetName(),
 			a.GetName(),
 			len(a.GetAttrValue()),
 			a.GetAttrType())
@@ -69,12 +69,12 @@ func main() {
 
 	// Print Node's all children.
 	for _, c := range persp.Children {
-		fmt.Printf("%s child is %s\n", persp.Name, c.Name)
+		fmt.Printf("%s child is %s\n", persp.GetName(), c.GetName())
 	}
 
 	// Print Node's parent node.
 	if persp.Parent != nil {
-		fmt.Printf("%s parent is %s\n", persp.Name, persp.Parent.Name)
+		fmt.Printf("%s parent is %s\n", persp.GetName(), persp.Parent.GetName())
 	}
 
 	// Get nodes by nodeType.
@@ -85,7 +85,7 @@ func main() {
 
 	// Print transform nodes.
 	for _, t := range transforms {
-		fmt.Printf("%d : %s\n", t.LineNo, t.Name)
+		fmt.Printf("%s\n", t.GetName())
 	}
 
 	// Get specified source connection nodes.
@@ -97,7 +97,7 @@ func main() {
 
 	// Print src nodes.
 	for _, t := range srcNodes {
-		fmt.Printf("%d : %s\n", t.LineNo, t.Name)
+		fmt.Printf("%s\n", t.GetName())
 	}
 
 	// Get all destination connection nodes.
@@ -107,6 +107,6 @@ func main() {
 
 	// Print dst nodes.
 	for _, t := range dstNodes {
-		fmt.Printf("%d : %s\n", t.LineNo, t.Name)
+		fmt.Printf("%s\n", t.GetName())
 	}
 }
