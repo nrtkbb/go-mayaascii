@@ -37,7 +37,11 @@ func main() {
 	// requires command parsed data.
 	for _, r := range mo.Requires {
 		fmt.Printf("%s version is %s. %d nodeTypes, %d dataTypes, %d Plugin's nodes.\n",
-			r.Name, r.Version, len(r.NodeTypes), len(r.DataTypes), len(r.Nodes))
+			r.GetPluginName(),
+			r.GetVersion(),
+			len(r.GetNodeTypes()),
+			len(r.GetDataTypes()),
+			len(r.Nodes))
 	}
 
 	// Print all nodes.

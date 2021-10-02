@@ -185,13 +185,26 @@ func (fi FileInfo) GetValue() string {
 }
 
 type Require struct {
-	LineNo    uint
-	Name      string
-	Version   string
-	NodeTypes []string
-	DataTypes []string
 	Nodes     []*Node
 	Data      []*Node // TODO: 何もセットしてない
+
+	requireCmd *RequiresCmd
+}
+
+func (r Require) GetPluginName() string {
+	return r.requireCmd.PluginName
+}
+
+func (r Require) GetVersion() string {
+	return r.requireCmd.Version
+}
+
+func (r Require) GetNodeTypes() []string {
+	return r.requireCmd.NodeTypes
+}
+
+func (r Require) GetDataTypes() []string {
+	return r.requireCmd.DataTypes
 }
 
 type Node struct {
@@ -468,11 +481,9 @@ func (p *Parser) parseFileInfos() error {
 func (p *Parser) parseRequires() error {
 	rq := ParseRequires(p.CurCmd)
 	requires := &Require{
-		Name:      rq.PluginName,
-		Version:   rq.Version,
-		NodeTypes: rq.NodeTypes,
-		DataTypes: rq.DataTypes,
-		LineNo:    rq.LineNo,
+		Nodes: []*Node{},
+		Data: []*Node{},
+		requireCmd: rq,
 	}
 	p.o.Requires = append(p.o.Requires, requires)
 	return nil
@@ -545,7 +556,7 @@ func (p *Parser) parseCreateNode() error {
 	isPluginsNode := false
 	if len(p.o.Requires) != 0 {
 		for _, r := range p.o.Requires {
-			for _, nt := range r.NodeTypes {
+			for _, nt := range r.GetNodeTypes() {
 				if node.Type == nt {
 					r.Nodes = append(r.Nodes, node)
 					isPluginsNode = true

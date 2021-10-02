@@ -221,27 +221,23 @@ func TestRequires(t *testing.T) {
 	}
 
 	require := mo.Requires[1]
-	if require.Name != "nearestPointOnMesh" {
-		t.Errorf("got %s, wont nearestPointOnMesh", require.Name)
+	if require.GetPluginName() != "nearestPointOnMesh" {
+		t.Errorf("got %s, wont nearestPointOnMesh", require.GetPluginName())
 	}
 
-	if require.LineNo != 6 {
-		t.Errorf("got %d, wont 6", require.LineNo)
+	if require.GetVersion() != "4.0" {
+		t.Errorf("got %s, wont 4.0", require.GetVersion())
 	}
 
-	if require.Version != "4.0" {
-		t.Errorf("got %s, wont 4.0", require.Version)
+	if len(require.GetDataTypes()) != 0 {
+		t.Errorf("got %d, wont 0", len(require.GetDataTypes()))
 	}
 
-	if len(require.DataTypes) != 0 {
-		t.Errorf("got %d, wont 0", len(require.DataTypes))
+	if len(require.GetNodeTypes()) != 1 {
+		t.Fatalf("got %d, wont 1", len(require.GetNodeTypes()))
 	}
 
-	if len(require.NodeTypes) != 1 {
-		t.Fatalf("got %d, wont 1", len(require.NodeTypes))
-	}
-
-	nodeType := require.NodeTypes[0]
+	nodeType := require.GetNodeTypes()[0]
 	if nodeType != "nearestPointOnMesh" {
 		t.Errorf("got %s, wont nearestPointOnMesh", nodeType)
 	}
