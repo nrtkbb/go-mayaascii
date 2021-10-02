@@ -410,6 +410,14 @@ type SelectCmd struct {
 	Visible            bool     `json:"visible" short:"-vis"`
 }
 
+type AttrCmd interface {
+	GetName() string
+	IsChannelBox() bool
+	IsKeyable() bool
+	GetAttrType() AttrType
+	GetAttrValue() []AttrValue
+}
+
 type SetAttrCmd struct {
 	*Cmd
 	AttrName     string      `json:"attr_name"`
@@ -423,6 +431,30 @@ type SetAttrCmd struct {
 	Size         *uint       `json:"size,omitempty" short:"-s"`
 	AttrType     AttrType    `json:"attr_type" short:"-typ"`
 	Attr         []AttrValue `json:"attr"`
+}
+
+func (sa *SetAttrCmd) GetName() string {
+	return sa.AttrName
+}
+
+func (sa *SetAttrCmd) IsChannelBox() bool {
+	if sa.Keyable != nil && *sa.Keyable {
+		// Keyable なら ChannelBox がどうであれ channel box に表示される
+		return true
+	}
+	return sa.ChannelBox != nil && *sa.ChannelBox
+}
+
+func (sa *SetAttrCmd) IsKeyable() bool {
+	return sa.Keyable != nil && *sa.Keyable
+}
+
+func (sa *SetAttrCmd) GetAttrType() AttrType {
+	return sa.AttrType
+}
+
+func (sa *SetAttrCmd) GetAttrValue() []AttrValue {
+	return sa.Attr
 }
 
 func (sa *SetAttrCmd) StringWrite(writer io.StringWriter) (int, error) {
@@ -647,6 +679,27 @@ type AddAttrCmd struct {
 	DataType            *string              `json:"data_type,omitempty" short:"-dt"`
 	DefaultValue        *float64             `json:"default_value,omitempty" short:"-dv"`
 	DisconnectBehaviour *DisconnectBehaviour `json:"disconnect_behaviour,omitempty" short:"-dcb"`
+	EnumName            *string              `json:"enum_name,omitempty" short:"-en"`
+}
+
+func (a *AddAttrCmd) GetName() string {
+	panic("implement me")
+}
+
+func (a *AddAttrCmd) IsChannelBox() bool {
+	panic("implement me")
+}
+
+func (a *AddAttrCmd) IsKeyable() bool {
+	panic("implement me")
+}
+
+func (a *AddAttrCmd) GetAttrType() AttrType {
+	panic("implement me")
+}
+
+func (a *AddAttrCmd) GetAttrValue() []AttrValue {
+	panic("implement me")
 }
 
 type AttrValue interface {

@@ -32,7 +32,11 @@ func TestSynopsis(t *testing.T) {
 	// requires command parsed data.
 	for _, r := range mo.Requires {
 		FmtPrintf("%s version is %s. %d nodeTypes, %d dataTypes, %d Plugin's nodes.\n",
-			r.Name, r.Version, len(r.NodeTypes), len(r.DataTypes), len(r.Nodes))
+			r.GetPluginName(),
+			r.GetVersion(),
+			len(r.GetNodeTypes()),
+			len(r.GetDataTypes()),
+			len(r.Nodes))
 	}
 
 	// Print all nodes.
@@ -47,7 +51,7 @@ func TestSynopsis(t *testing.T) {
 	}
 
 	// Get attribute (Must be short name) and cast to string.
-	ow, err := persp.Attr(".imn").String() // or .Int() or .Float() etc..
+	ow, err := persp.GetAttr(".imn").String() // or .Int() or .Float() etc..
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -55,7 +59,11 @@ func TestSynopsis(t *testing.T) {
 
 	// Print Node's all attrs.
 	for _, a := range persp.Attrs {
-		FmtPrintf("%s%s is %d type is %s\n", persp.Name, a.Name, len(a.Values), a.Type)
+		FmtPrintf("%s%s is %d type is %s\n",
+			persp.Name,
+			a.GetName(),
+			len(a.GetAttrValue()),
+			a.GetAttrType())
 	}
 
 	// Print Node's all children.

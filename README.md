@@ -64,7 +64,11 @@ func main() {
 
 	// Print Node's all attrs.
 	for _, a := range persp.Attrs {
-		fmt.Printf("%s%s is %d type is %s\n", persp.Name, a.Name, len(a.Values), a.Type)
+		fmt.Printf("%s%s is %d type is %s\n",
+			persp.Name,
+			a.GetName(),
+			len(a.GetAttrValue()),
+			a.GetAttrType())
 	}
 
 	// Print Node's all children.

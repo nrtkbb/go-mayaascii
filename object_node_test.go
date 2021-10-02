@@ -251,20 +251,13 @@ func TestRequires(t *testing.T) {
 		t.Errorf("got %s, wont nearestPointOnMesh1", nearestPointOnMeshNode.Name)
 	}
 
-	if nearestPointOnMeshNode.Rename == nil {
+	if nearestPointOnMeshNode.renameCmd == nil {
 		t.Errorf("got nil, wont *RenameCmd")
 	}
 
-	if nearestPointOnMeshNode.Rename.UUID != true {
-		t.Errorf("got %v, wont true", nearestPointOnMeshNode.Rename.UUID)
-	}
-
-	if nearestPointOnMeshNode.Rename.From != nil {
-		t.Errorf("got %v, wont nil", nearestPointOnMeshNode.Rename.From)
-	}
-
-	if *nearestPointOnMeshNode.Rename.To != "B2C0D7BA-4FA2-A74E-5D6A-8DAA23AAF72E" {
-		t.Errorf("got %s, wont B2C0D7BA-4FA2-A74E-5D6A-8DAA23AAF72E", *nearestPointOnMeshNode.Rename.To)
+	if uuid, err := nearestPointOnMeshNode.GetUUID(); err != nil &&
+		uuid == "B2C0D7BA-4FA2-A74E-5D6A-8DAA23AAF72E" {
+		t.Errorf("got %s, wont B2C0D7BA-4FA2-A74E-5D6A-8DAA23AAF72E", uuid)
 	}
 }
 
@@ -348,21 +341,21 @@ func TestNodes(t *testing.T) {
 		t.Errorf("got %s, wont camera", perspShape.Type)
 	}
 
-	if len((*perspShape).SetAttrs) != 7 {
-		t.Errorf("got %d, wont 7", len(perspShape.SetAttrs))
+	if len((*perspShape).Attrs) != 7 {
+		t.Errorf("got %d, wont 7", len(perspShape.Attrs))
 	}
 
-	for _, setAttr := range (*perspShape).SetAttrs {
-		switch setAttr.AttrName {
+	for _, attr := range (*perspShape).Attrs {
+		switch attr.GetName() {
 		case ".v":
-			if setAttr.AttrType != TypeBool {
-				t.Errorf("got %v, wont cmd.TypeBool", setAttr.AttrType)
+			if attr.GetAttrType() != TypeBool {
+				t.Errorf("got %v, wont cmd.TypeBool", attr.GetAttrType())
 			}
-			if len(setAttr.Attr) != 1 {
-				t.Errorf("got %d, wont 1", len(setAttr.Attr))
+			if len(attr.GetAttrValue()) != 1 {
+				t.Errorf("got %d, wont 1", len(attr.GetAttrValue()))
 			}
 
-			attrBools, err := ToAttrBool(setAttr.Attr)
+			attrBools, err := ToAttrBool(attr.GetAttrValue())
 			if err != nil {
 				t.Error("AttrBool convert NG! " + err.Error())
 			}
@@ -379,7 +372,8 @@ func TestNodes(t *testing.T) {
 		}
 	}
 
-	if perspShape.Rename.UUID != true {
-		t.Errorf("got %v, wont true", perspShape.Rename.UUID)
+	if uuid, err := perspShape.GetUUID(); err != nil &&
+		uuid == "CFAE1109-4845-2AC4-5BC0-CB8FB886A568" {
+		t.Errorf("got %v, wont CFAE1109-4845-2AC4-5BC0-CB8FB886A568", uuid)
 	}
 }

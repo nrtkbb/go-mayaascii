@@ -185,8 +185,8 @@ func (fi FileInfo) GetValue() string {
 }
 
 type Require struct {
-	Nodes     []*Node
-	Data      []*Node // TODO: 何もセットしてない
+	Nodes []*Node
+	Data  []*Node // TODO: 何もセットしてない
 
 	requireCmd *RequiresCmd
 }
@@ -218,22 +218,33 @@ type Node struct {
 	Parent     *Node
 	Children   []*Node
 
-	isDeleted  bool
-	CreateNode *CreateNodeCmd
-	Rename     *RenameCmd
-	SetAttrs   []*SetAttrCmd
-	AddAttrs   []*AddAttrCmd
+	isDeleted     bool
+	createNodeCmd *CreateNodeCmd
+	renameCmd     *RenameCmd
 }
 
-func (n *Node) Attr(name string) *Attr {
+func (n *Node) GetType() string {
+	return n.createNodeCmd.NodeType
+}
+
+func (n *Node) GetName() string {
+	return n.createNodeCmd.NodeName
+}
+
+func (n *Node) GetAttr(name string) *Attr {
 	for _, a := range n.Attrs {
-		if a.Name == name {
+		if a.GetName() == name {
 			return a
 		}
 	}
+	return nil // not found.
+}
 
-	// not found.
-	return nil
+func (n *Node) GetUUID() (string, error) {
+	if n.renameCmd.UUID && n.renameCmd.To != nil {
+		return *n.renameCmd.To, nil
+	}
+	return "", errors.New(fmt.Sprintf("%s has not UUID", n.GetName()))
 }
 
 func (n *Node) Remove() error {
@@ -302,20 +313,18 @@ func (n *Node) ListConnections(ca *ConnectionArgs) []*Node {
 		if !ok {
 			// name is maybe default node.
 			defaultNode := &Node{
-				object:     n.object,
-				LineNo:     0,
-				Type:       "Unknown",
-				Name:       name,
-				Attrs:      nil,
-				Shared:     true,
-				SkipSelect: false,
-				Parent:     nil,
-				Children:   nil,
-				isDeleted:  false,
-				CreateNode: nil,
-				Rename:     nil,
-				SetAttrs:   nil,
-				AddAttrs:   nil,
+				object:        n.object,
+				LineNo:        0,
+				Type:          "Unknown",
+				Name:          name,
+				Attrs:         nil,
+				Shared:        true,
+				SkipSelect:    false,
+				Parent:        nil,
+				Children:      nil,
+				isDeleted:     false,
+				createNodeCmd: nil,
+				renameCmd:     nil,
 			}
 			nodes = append(nodes, defaultNode)
 		} else {
@@ -335,28 +344,44 @@ func (n *Node) ListConnections(ca *ConnectionArgs) []*Node {
 }
 
 type Attr struct {
-	LineNo uint
-	Name   string
-	Node   *Node
-	Values []AttrValue
-	Type   AttrType
+	Node *Node
 
-	SA        *SetAttrCmd
+	attrCmd   AttrCmd
 	err       error
 	isDeleted bool
+}
+
+func (a *Attr) GetName() string {
+	return a.attrCmd.GetName()
+}
+
+func (a *Attr) IsChannelBox() bool {
+	return a.attrCmd.IsChannelBox()
+}
+
+func (a *Attr) IsKeyable() bool {
+	return a.attrCmd.IsKeyable()
+}
+
+func (a *Attr) GetAttrType() AttrType {
+	return a.attrCmd.GetAttrType()
+}
+
+func (a *Attr) GetAttrValue() []AttrValue {
+	return a.attrCmd.GetAttrValue()
 }
 
 func (a *Attr) Remove() error {
 	if a.isDeleted {
 		return errors.New(fmt.Sprintf("%s.%s was already deleted",
-			a.Node.Name, a.Name))
+			a.Node.Name, a.GetName()))
 	}
 	a.isDeleted = true
 	return nil
 }
 
 func (a *Attr) String() (string, error) {
-	return a.Name, a.err
+	return a.GetName(), a.err
 }
 
 type Parser struct {
@@ -481,8 +506,8 @@ func (p *Parser) parseFileInfos() error {
 func (p *Parser) parseRequires() error {
 	rq := ParseRequires(p.CurCmd)
 	requires := &Require{
-		Nodes: []*Node{},
-		Data: []*Node{},
+		Nodes:      []*Node{},
+		Data:       []*Node{},
 		requireCmd: rq,
 	}
 	p.o.Requires = append(p.o.Requires, requires)
@@ -492,15 +517,13 @@ func (p *Parser) parseRequires() error {
 func (p *Parser) parseCreateNode() error {
 	cn := ParseCreateNode(p.CurCmd)
 	node := &Node{
-		object:     p.o,
-		Type:       cn.NodeType,
-		Name:       cn.NodeName,
-		Shared:     cn.Shared,
-		SkipSelect: cn.SkipSelect,
-		CreateNode: cn,
-		LineNo:     cn.LineNo,
-		SetAttrs:   []*SetAttrCmd{},
-		AddAttrs:   []*AddAttrCmd{},
+		object:        p.o,
+		Type:          cn.NodeType,
+		Name:          cn.NodeName,
+		Shared:        cn.Shared,
+		SkipSelect:    cn.SkipSelect,
+		createNodeCmd: cn,
+		LineNo:        cn.LineNo,
 	}
 	if _, ok := p.o.Nodes[node.Name]; ok {
 		return errors.New(fmt.Sprintf("Already found node ... %s", node.Name))
@@ -520,35 +543,36 @@ func (p *Parser) parseCreateNode() error {
 
 	if p.PeekCmdIs(RenameType) {
 		p.NextCmd()
-		node.Rename = ParseRename(p.CurCmd)
+		node.renameCmd = ParseRename(p.CurCmd)
 	}
 
 	for p.PeekCmdIs(AddAttrType) {
 		p.NextCmd()
 		ad := ParseAddAttr(p.CurCmd)
-		node.AddAttrs = append(node.AddAttrs, ad)
+		a := &Attr{
+			Node:    node,
+			attrCmd: ad,
+		}
+		node.Attrs = append(node.Attrs, a)
 	}
 
+	var setAttrCmds []*SetAttrCmd
 	for p.PeekCmdIs(SetAttrType) {
 		p.NextCmd()
-		var at *SetAttrCmd
+		var sa *SetAttrCmd
 		var err error
-		if len(node.SetAttrs) == 0 {
-			at, err = ParseSetAttr(p.CurCmd, nil)
+		if len(setAttrCmds) == 0 {
+			sa, err = ParseSetAttr(p.CurCmd, nil)
 		} else {
-			at, err = ParseSetAttr(p.CurCmd, node.SetAttrs[len(node.SetAttrs)-1])
+			sa, err = ParseSetAttr(p.CurCmd, setAttrCmds[len(setAttrCmds)-1])
 		}
 		if err != nil {
 			return err
 		}
-		node.SetAttrs = append(node.SetAttrs, at)
+		setAttrCmds = append(setAttrCmds, sa)
 		a := &Attr{
-			Name:   at.AttrName,
-			Node:   node,
-			Values: at.Attr,
-			Type:   at.AttrType,
-			SA:     at,
-			LineNo: at.LineNo,
+			Node:    node,
+			attrCmd: sa,
 		}
 		node.Attrs = append(node.Attrs, a)
 	}
