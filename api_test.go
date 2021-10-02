@@ -5,6 +5,8 @@ import (
 	"testing"
 )
 
+// TODO: TestApi_File, TestApi_FileInfo
+
 func TestApi_UnmarshalFocus(t *testing.T) {
 	reader := strings.NewReader(`//Maya test scene
 createNode transform -n "name1";
