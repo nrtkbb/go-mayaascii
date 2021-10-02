@@ -290,8 +290,8 @@ func TestLineComment(t *testing.T) {
 	}
 
 	firstComment := lineComments[0]
-	if firstComment.Comment != "Maya ASCII 2019 scene" {
-		t.Errorf("got \"%s\", wont \"Maya ASCII 2019 scene\"", firstComment.Comment)
+	if firstComment.GetComment() != "Maya ASCII 2019 scene" {
+		t.Errorf("got \"%s\", wont \"Maya ASCII 2019 scene\"", firstComment.GetComment())
 	}
 }
 
@@ -308,18 +308,18 @@ func TestBlockComment(t *testing.T) {
 		t.Fatalf("got mo.BlockComments len %d, wont 2.", len(blockComments))
 	}
 
-	if blockComments[0].Comment != "block comment1" {
+	if blockComments[0].GetComment() != "block comment1" {
 		t.Errorf("got mo.BlockComments[0].Comment \"%s\", wont \"block comment1\".",
-			blockComments[0].Comment)
+			blockComments[0].GetComment())
 	}
 
 	comment2 := `
 	block
 	comment2
 `
-	if blockComments[1].Comment != comment2 {
+	if blockComments[1].GetComment() != comment2 {
 		t.Errorf("got mo.BlockComments[1].Comment \"%s\", wont \"block comment2\".",
-			blockComments[1].Comment)
+			blockComments[1].GetComment())
 	}
 }
 

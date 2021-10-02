@@ -138,26 +138,38 @@ func (o *Object) GetNodes(nodeType string) ([]*Node, error) {
 }
 
 type LineComment struct {
-	LineNo      uint
-	Comment     string
-	LineComment *LineCommentCmd
+	lineCommentCmd *LineCommentCmd
+}
+
+func (lc LineComment) GetComment() string {
+	return lc.lineCommentCmd.Comment
 }
 
 type BlockComment struct {
-	LineNo uint
-	Comment string
-	BlockComment *BlockCommentCmd
+	blockCommentCmd *BlockCommentCmd
+}
+
+func (bc BlockComment) GetComment() string {
+	return bc.blockCommentCmd.Comment
 }
 
 type File struct {
-	LineNo    uint
-	Path      string
-	Namespace string
-
 	Parent   *File
 	Children []*File
 
 	File *FileCmd
+}
+
+func (f File) GetLineNo() uint {
+	return f.File.LineNo
+}
+
+func (f File) GetPath() string {
+	return f.File.Path
+}
+
+func (f File) GetNamespace() string {
+	return f.File.Namespace
 }
 
 type FileInfo struct {
@@ -394,9 +406,7 @@ func (p *Parser) CheckErrors() bool {
 func (p *Parser) parseLineComments() error {
 	lc := ParseLineComment(p.CurCmd)
 	lineComment := &LineComment{
-		LineNo:      lc.LineNo,
-		Comment:     lc.Comment,
-		LineComment: lc,
+		lineCommentCmd: lc,
 	}
 	p.o.LineComments = append(p.o.LineComments, lineComment)
 	return nil
@@ -405,9 +415,7 @@ func (p *Parser) parseLineComments() error {
 func (p *Parser) parseBlockComments() error {
 	bc := ParseBlockComment(p.CurCmd)
 	blockComment := &BlockComment{
-		LineNo: bc.LineNo,
-		Comment: bc.Comment,
-		BlockComment: bc,
+		blockCommentCmd: bc,
 	}
 	p.o.BlockComments = append(p.o.BlockComments, blockComment)
 	return nil
@@ -416,9 +424,6 @@ func (p *Parser) parseBlockComments() error {
 func (p *Parser) parseFiles() error {
 	f := ParseFile(p.CurCmd)
 	file := &File{
-		LineNo:    f.LineNo,
-		Path:      f.Path,
-		Namespace: f.Namespace,
 		Parent:    nil,
 		Children:  nil,
 		File:      f,
