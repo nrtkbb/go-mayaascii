@@ -12,12 +12,12 @@ import (
 
 // Object ...
 type Object struct {
-	Files        []*File
-	FileInfos    []*FileInfo
-	Requires     []*Require
-	Nodes        map[string]*Node
-	Selects      []*Select
-	LineComments []*LineComment
+	Files         []*File
+	FileInfos     []*FileInfo
+	Requires      []*Require
+	Nodes         map[string]*Node
+	Selects       []*Select
+	LineComments  []*LineComment
 	BlockComments []*BlockComment
 
 	cmds        []*Cmd
@@ -38,11 +38,11 @@ func (o *Object) Unmarshal(reader io.Reader) error {
 			c := lineCommentBuilder.Parse()
 			o.cmds = append(o.cmds, c)
 			lineCommentBuilder.Clear()
-			cmdBuilder.lineNo ++
+			cmdBuilder.lineNo++
 			return nil
 		}
 		cmdBuilder.Append(line)
-		lineCommentBuilder.lineNo ++
+		lineCommentBuilder.lineNo++
 		if cmdBuilder.IsCmdEOF() {
 			c := cmdBuilder.Parse()
 			o.cmds = append(o.cmds, c)
@@ -83,18 +83,18 @@ func (o *Object) UnmarshalFocus(reader io.Reader, focusCommands CommandTypes) er
 				o.cmds = append(o.cmds, c)
 				lineCommentBuilder.Clear()
 			}
-			cmdBuilder.lineNo ++
+			cmdBuilder.lineNo++
 			return nil
 		}
 		if cmdBuilder.IsClear() {
 			isFocus = focusCommands.InHasPrefix(&line)
 		}
 		if !isFocus {
-			cmdBuilder.lineNo ++
+			cmdBuilder.lineNo++
 			return nil
 		}
 		cmdBuilder.Append(line)
-		lineCommentBuilder.lineNo ++
+		lineCommentBuilder.lineNo++
 		if cmdBuilder.IsCmdEOF() {
 			c := cmdBuilder.Parse()
 			o.cmds = append(o.cmds, c)
