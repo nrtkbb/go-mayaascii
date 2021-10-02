@@ -173,11 +173,15 @@ func (f File) GetNamespace() string {
 }
 
 type FileInfo struct {
-	Lineno uint
-	Name   string
-	Value  string
+	fileInfoCmd *FileInfoCmd
+}
 
-	FileInfo *FileInfoCmd
+func (fi *FileInfo) GetName() string {
+	return fi.fileInfoCmd.Name
+}
+
+func (fi FileInfo) GetValue() string {
+	return fi.fileInfoCmd.Value
 }
 
 type Require struct {
@@ -455,10 +459,7 @@ func (p *Parser) parseFiles() error {
 func (p *Parser) parseFileInfos() error {
 	fi := ParseFileInfo(p.CurCmd)
 	fileInfo := &FileInfo{
-		Lineno:   fi.LineNo,
-		Name:     fi.Name,
-		Value:    fi.Value,
-		FileInfo: fi,
+		fileInfoCmd: fi,
 	}
 	p.o.FileInfos = append(p.o.FileInfos, fileInfo)
 	return nil
