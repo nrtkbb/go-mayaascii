@@ -157,19 +157,19 @@ type File struct {
 	Parent   *File
 	Children []*File
 
-	File *FileCmd
+	fileCmd *FileCmd
 }
 
 func (f File) GetLineNo() uint {
-	return f.File.LineNo
+	return f.fileCmd.LineNo
 }
 
 func (f File) GetPath() string {
-	return f.File.Path
+	return f.fileCmd.Path
 }
 
 func (f File) GetNamespace() string {
-	return f.File.Namespace
+	return f.fileCmd.Namespace
 }
 
 type FileInfo struct {
@@ -428,9 +428,9 @@ func (p *Parser) parseBlockComments() error {
 func (p *Parser) parseFiles() error {
 	f := ParseFile(p.CurCmd)
 	file := &File{
-		Parent:    nil,
-		Children:  nil,
-		File:      f,
+		Parent:   nil,
+		Children: nil,
+		fileCmd:  f,
 	}
 	p.o.Files = append(p.o.Files, file)
 
@@ -444,7 +444,7 @@ func (p *Parser) parseFiles() error {
 
 	for i := len(p.o.Files) - 2; i >= 0; i-- {
 		prevFile := p.o.Files[i]
-		if prevFile.File.ReferenceDepthInfo < f.ReferenceDepthInfo {
+		if prevFile.fileCmd.ReferenceDepthInfo < f.ReferenceDepthInfo {
 			if prevFile.Children == nil {
 				prevFile.Children = []*File{}
 			}
