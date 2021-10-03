@@ -7,6 +7,62 @@ import (
 
 // TODO: TestApi_File, TestApi_FileInfo, TestApi_Select
 
+type stringTestData struct {
+	title string
+	value string
+	wont  string
+}
+
+func stringTester(d stringTestData, t *testing.T) {
+	if d.value != d.wont {
+		t.Errorf("got %s was \"%s\", wont \"%s\"",
+			d.title, d.value, d.wont)
+	}
+}
+
+type intTestData struct {
+	title string
+	value int
+	wont  int
+}
+
+func intTester(d intTestData, t *testing.T) {
+	if d.value != d.wont {
+		t.Errorf("got %s was %d, wont %d",
+			d.title, d.value, d.wont)
+	}
+}
+
+func TestApi_File(t *testing.T) {
+	reader := strings.NewReader(`//Maya test scene
+file -rdi 1 -ns "test" -rfn "testRN" -typ "mayaAscii" "c:/test_data/test01.ma";
+file -r -ns "test" -dr 1 -rfn "testRN" -typ "mayaAscii" "c:/test_data/test01.ma";
+//End of test scene`)
+
+	focus := CommandTypes{
+		FileCommand,
+	}
+
+	mo, err := UnmarshalFocus(reader, focus)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	intTester(intTestData{ "len(mo.Files)", len(mo.Files), 2}, t)
+
+	ff := mo.Files[0] // first file = ff
+	intTester(intTestData{ "ff.GetReferenceDepthInfo()", ff.GetReferenceDepthInfo(), 1}, t)
+	stds := []stringTestData{
+		{"ff.GetNamespace()", ff.GetNamespace(), "test"},
+		{"ff.GetReferenceNode()", ff.GetReferenceNode(), "testRN"},
+		{"ff.GetType()", ff.GetType(), "mayaAscii"},
+		{"ff.Path()", ff.GetPath(), "c:/test_data/test01.ma"},
+	}
+	for _, std := range stds {
+		stringTester(std, t)
+	}
+}
+
 func TestApi_UnmarshalFocus(t *testing.T) {
 	reader := strings.NewReader(`//Maya test scene
 createNode transform -n "name1";
@@ -21,7 +77,7 @@ createNode transform -n "name1";
 
 	mo, err := UnmarshalFocus(reader, focus)
 	if err != nil {
-		t.Error(err.Error())
+		t.Fatal(err.Error())
 	}
 
 	if len(mo.Nodes) != 1 {

@@ -172,6 +172,30 @@ func (f File) GetNamespace() string {
 	return f.fileCmd.Namespace
 }
 
+func (f File) GetOptions() string {
+	return f.fileCmd.Options
+}
+
+func (f File) GetType() string {
+	return f.fileCmd.Type
+}
+
+func (f File) IsReference() bool {
+	return f.fileCmd.Reference
+}
+
+func (f File) GetReferenceDepthInfo() int {
+	return f.fileCmd.ReferenceDepthInfo
+}
+
+func (f File) GetReferenceNode() string {
+	return f.fileCmd.ReferenceNode
+}
+
+func (f File) IsDeferReference() bool {
+	return f.fileCmd.DeferReference
+}
+
 type FileInfo struct {
 	fileInfoCmd *FileInfoCmd
 }
