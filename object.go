@@ -267,11 +267,22 @@ func (n *Node) Remove() error {
 }
 
 type Select struct {
-	Name string
+	Attrs []*Attr
 
-	Select   *SelectCmd
-	SetAttrs []*SetAttrCmd
-	AddAttrs []*AddAttrCmd
+	selectCmd *SelectCmd
+}
+
+func (s *Select) GetName() string {
+	return s.selectCmd.Names[0]
+}
+
+func (s *Select) GetAttr(name string) *Attr {
+	for _, a := range s.Attrs {
+		if a.GetName() == name {
+			return a
+		}
+	}
+	return nil // not found.
 }
 
 type ConnectionArgs struct {
@@ -602,33 +613,39 @@ func (p *Parser) parseSelect() error {
 		return errors.New(fmt.Sprintf("un-support zero select. %v", *s))
 	}
 	sel := &Select{
-		Name: s.Names[0],
+		Attrs: []*Attr{},
 
-		Select:   s,
-		SetAttrs: []*SetAttrCmd{},
-		AddAttrs: []*AddAttrCmd{},
+		selectCmd: s,
 	}
 	p.o.Selects = append(p.o.Selects, sel)
 
 	for p.PeekCmdIs(AddAttrType) {
 		p.NextCmd()
 		ad := ParseAddAttr(p.CurCmd)
-		sel.AddAttrs = append(sel.AddAttrs, ad)
+		a := &Attr{
+			attrCmd: ad,
+		}
+		sel.Attrs = append(sel.Attrs, a)
 	}
 
+	var setAttrs []*SetAttrCmd
 	for p.PeekCmdIs(SetAttrType) {
 		p.NextCmd()
 		var at *SetAttrCmd
 		var err error
-		if len(sel.SetAttrs) == 0 {
+		if len(setAttrs) == 0 {
 			at, err = ParseSetAttr(p.CurCmd, nil)
 		} else {
-			at, err = ParseSetAttr(p.CurCmd, sel.SetAttrs[len(sel.SetAttrs)-1])
+			at, err = ParseSetAttr(p.CurCmd, setAttrs[len(setAttrs)-1])
 		}
 		if err != nil {
 			return err
 		}
-		sel.SetAttrs = append(sel.SetAttrs, at)
+		setAttrs = append(setAttrs, at)
+		a := &Attr{
+			attrCmd: at,
+		}
+		sel.Attrs = append(sel.Attrs, a)
 	}
 
 	return nil

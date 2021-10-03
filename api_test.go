@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-// TODO: TestApi_File, TestApi_FileInfo
+// TODO: TestApi_File, TestApi_FileInfo, TestApi_Select
 
 func TestApi_UnmarshalFocus(t *testing.T) {
 	reader := strings.NewReader(`//Maya test scene
