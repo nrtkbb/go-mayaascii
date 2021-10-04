@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-// TODO: TestApi_File, TestApi_FileInfo, TestApi_Select
+// TODO: TestApi_FileInfo, TestApi_Select
 
 type stringTestData struct {
 	title string
@@ -29,6 +29,19 @@ type intTestData struct {
 func intTester(d intTestData, t *testing.T) {
 	if d.value != d.wont {
 		t.Errorf("got %s was %d, wont %d",
+			d.title, d.value, d.wont)
+	}
+}
+
+type boolTestData struct {
+	title string
+	value bool
+	wont  bool
+}
+
+func boolTester(d boolTestData, t *testing.T) {
+	if d.value != d.wont {
+		t.Errorf("got %s was %v, wont %v",
 			d.title, d.value, d.wont)
 	}
 }
@@ -60,6 +73,21 @@ file -r -ns "test" -dr 1 -rfn "testRN" -typ "mayaAscii" "c:/test_data/test01.ma"
 	}
 	for _, std := range stds {
 		stringTester(std, t)
+	}
+
+	sf := mo.Files[1]
+	btds := []boolTestData{
+		{"sf.IsDeferReference()", sf.IsDeferReference(), true},
+		{"sf.IsReference()", sf.IsReference(), true},
+	}
+	for _, btd := range btds {
+		boolTester(btd, t)
+	}
+	stds = []stringTestData{
+		{"sf.GetNamespace()", sf.GetNamespace(), "test"},
+		{"sf.GetReferenceNode()", sf.GetReferenceNode(), "testRN"},
+		{"sf.GetType()", sf.GetType(), "mayaAscii"},
+		{"sf.Path()", sf.GetPath(), "c:/test_data/test01.ma"},
 	}
 }
 
