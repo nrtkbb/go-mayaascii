@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-// TODO: TestApi_FileInfo, TestApi_Select
+// TODO: TestApi_Select
 
 type stringTestData struct {
 	title string
@@ -61,7 +61,9 @@ file -r -ns "test" -dr 1 -rfn "testRN" -typ "mayaAscii" "c:/test_data/test01.ma"
 		t.Fatal(err.Error())
 	}
 
-	intTester(intTestData{ "len(mo.Files)", len(mo.Files), 2}, t)
+	if len(mo.Files) != 2 {
+		t.Fatalf("got len(mo.Files) %d, wont 2", len(mo.Files))
+	}
 
 	ff := mo.Files[0] // first file = ff
 	intTester(intTestData{ "ff.GetReferenceDepthInfo()", ff.GetReferenceDepthInfo(), 1}, t)
@@ -88,6 +90,48 @@ file -r -ns "test" -dr 1 -rfn "testRN" -typ "mayaAscii" "c:/test_data/test01.ma"
 		{"sf.GetReferenceNode()", sf.GetReferenceNode(), "testRN"},
 		{"sf.GetType()", sf.GetType(), "mayaAscii"},
 		{"sf.Path()", sf.GetPath(), "c:/test_data/test01.ma"},
+	}
+}
+
+func TestApi_FileInfo(t *testing.T) {
+	reader := strings.NewReader(`//Maya test scene
+fileInfo "application" "maya";
+fileInfo "product" "Maya 2022";
+fileInfo "version" "2022";
+fileInfo "cutIdentifier" "202106180615-26a94e7f8c";
+fileInfo "osv" "Windows 10 Pro v2009 (Build: 19042)";
+fileInfo "UUID" "1225D207-450E-1399-04FC-89B0FA6B1B7F";
+//End of test scene`)
+
+	focus := CommandTypes{
+		FileInfoCommand,
+	}
+
+	mo, err := UnmarshalFocus(reader, focus)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	if len(mo.FileInfos) != 6 {
+		t.Fatalf("got len(mo.FileInfos) %d, wont 6", len(mo.FileInfos))
+	}
+
+	stds := []stringTestData{
+		{"mo.FileInfos[0].GetName()", mo.FileInfos[0].GetName(), "application"},
+		{"mo.FileInfos[1].GetName()", mo.FileInfos[1].GetName(), "product"},
+		{"mo.FileInfos[2].GetName()", mo.FileInfos[2].GetName(), "version"},
+		{"mo.FileInfos[3].GetName()", mo.FileInfos[3].GetName(), "cutIdentifier"},
+		{"mo.FileInfos[4].GetName()", mo.FileInfos[4].GetName(), "osv"},
+		{"mo.FileInfos[5].GetName()", mo.FileInfos[5].GetName(), "UUID"},
+		{"mo.FileInfos[0].GetValue()", mo.FileInfos[0].GetValue(), "maya"},
+		{"mo.FileInfos[1].GetValue()", mo.FileInfos[1].GetValue(), "Maya 2022"},
+		{"mo.FileInfos[2].GetValue()", mo.FileInfos[2].GetValue(), "2022"},
+		{"mo.FileInfos[3].GetValue()", mo.FileInfos[3].GetValue(), "202106180615-26a94e7f8c"},
+		{"mo.FileInfos[4].GetValue()", mo.FileInfos[4].GetValue(), "Windows 10 Pro v2009 (Build: 19042)"},
+		{"mo.FileInfos[5].GetValue()", mo.FileInfos[5].GetValue(), "1225D207-450E-1399-04FC-89B0FA6B1B7F"},
+	}
+	for _, std := range stds {
+		stringTester(std, t)
 	}
 }
 
