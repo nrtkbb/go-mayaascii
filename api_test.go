@@ -5,8 +5,6 @@ import (
 	"testing"
 )
 
-// TODO: TestApi_Select
-
 type stringTestData struct {
 	title string
 	value string
@@ -66,30 +64,31 @@ file -r -ns "test" -dr 1 -rfn "testRN" -typ "mayaAscii" "c:/test_data/test01.ma"
 	}
 
 	ff := mo.Files[0] // first file = ff
-	intTester(intTestData{ "ff.GetReferenceDepthInfo()", ff.GetReferenceDepthInfo(), 1}, t)
-	stds := []stringTestData{
+	intTester(intTestData{"ff.GetReferenceDepthInfo()", ff.GetReferenceDepthInfo(), 1}, t)
+	for _, d := range []stringTestData{
 		{"ff.GetNamespace()", ff.GetNamespace(), "test"},
 		{"ff.GetReferenceNode()", ff.GetReferenceNode(), "testRN"},
 		{"ff.GetType()", ff.GetType(), "mayaAscii"},
 		{"ff.Path()", ff.GetPath(), "c:/test_data/test01.ma"},
-	}
-	for _, std := range stds {
-		stringTester(std, t)
+	} {
+		stringTester(d, t)
 	}
 
 	sf := mo.Files[1]
-	btds := []boolTestData{
+	for _, d := range []boolTestData{
 		{"sf.IsDeferReference()", sf.IsDeferReference(), true},
 		{"sf.IsReference()", sf.IsReference(), true},
+	} {
+		boolTester(d, t)
 	}
-	for _, btd := range btds {
-		boolTester(btd, t)
-	}
-	stds = []stringTestData{
+
+	for _, d := range []stringTestData{
 		{"sf.GetNamespace()", sf.GetNamespace(), "test"},
 		{"sf.GetReferenceNode()", sf.GetReferenceNode(), "testRN"},
 		{"sf.GetType()", sf.GetType(), "mayaAscii"},
 		{"sf.Path()", sf.GetPath(), "c:/test_data/test01.ma"},
+	} {
+		stringTester(d, t)
 	}
 }
 
@@ -116,7 +115,7 @@ fileInfo "UUID" "1225D207-450E-1399-04FC-89B0FA6B1B7F";
 		t.Fatalf("got len(mo.FileInfos) %d, wont 6", len(mo.FileInfos))
 	}
 
-	stds := []stringTestData{
+	for _, d := range []stringTestData{
 		{"mo.FileInfos[0].GetName()", mo.FileInfos[0].GetName(), "application"},
 		{"mo.FileInfos[1].GetName()", mo.FileInfos[1].GetName(), "product"},
 		{"mo.FileInfos[2].GetName()", mo.FileInfos[2].GetName(), "version"},
@@ -129,9 +128,47 @@ fileInfo "UUID" "1225D207-450E-1399-04FC-89B0FA6B1B7F";
 		{"mo.FileInfos[3].GetValue()", mo.FileInfos[3].GetValue(), "202106180615-26a94e7f8c"},
 		{"mo.FileInfos[4].GetValue()", mo.FileInfos[4].GetValue(), "Windows 10 Pro v2009 (Build: 19042)"},
 		{"mo.FileInfos[5].GetValue()", mo.FileInfos[5].GetValue(), "1225D207-450E-1399-04FC-89B0FA6B1B7F"},
+	} {
+		stringTester(d, t)
 	}
-	for _, std := range stds {
-		stringTester(std, t)
+}
+
+func TestApi_Select(t *testing.T) {
+	reader := strings.NewReader(`//Maya test scene
+select -ne :time1;
+	setAttr ".o" 1;
+	setAttr ".unw" 1;
+select -ne :hardwareRenderGlobals;
+	setAttr ".ctrs" 256;
+	setAttr ".btrs" 512;
+// End of test scene`)
+
+	focus := CommandTypes{
+		SelectCommand,
+		SetAttrCommand,
+	}
+
+	mo, err := UnmarshalFocus(reader, focus)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	if len(mo.Selects) != 2 {
+		t.Fatalf("got len(mo.Select) %d, wont 2", len(mo.Selects))
+	}
+
+	for _, d := range []stringTestData{
+		{"mo.Selects[0].GetName()", mo.Selects[0].GetName(), ":time1"},
+		{"mo.Selects[1].GetName()", mo.Selects[1].GetName(), ":hardwareRenderGlobals"},
+	} {
+		stringTester(d, t)
+	}
+
+	for _, d := range []intTestData{
+		{"len(mo.Selects[0].Attrs)", len(mo.Selects[0].Attrs), 2},
+		{"len(mo.Selects[1].Attrs)", len(mo.Selects[1].Attrs), 2},
+	} {
+		intTester(d, t)
 	}
 }
 
