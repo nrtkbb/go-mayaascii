@@ -6,69 +6,69 @@ import "strings"
 type SetAttrType int
 
 const (
-	// parse error
+	// SetAttrTypeInvalid parse error
 	SetAttrTypeInvalid SetAttrType = iota
 
 	SetAttrTypeBool
 	SetAttrTypeInt
 	SetAttrTypeDouble
 
-	// type: short short
+	// SetAttrTypeShort2 type: short short
 	// mean: value1 value2
 	// setAttr node.short2Attr -type short2 1 2;
 	SetAttrTypeShort2
 
-	// type: short short short
+	// SetAttrTypeShort3 type: short short short
 	// mean: value1 value2 value3
 	// setAttr node.short3Attr -type short3 1 2 3;
 	SetAttrTypeShort3
 
-	// type: long long
+	// SetAttrTypeLong2 type: long long
 	// mean: value1 value2
 	// setAttr node.long2Attr -type long2 1000000 2000000;
 	SetAttrTypeLong2
 
-	// type: long long long
+	// SetAttrTypeLong3 type: long long long
 	// mean: value1 value2 value3
 	// setAttr node.long3Attr -type long3 1000000 2000000 3000000;
 	SetAttrTypeLong3
 
-	// type: int [int]
+	// SetAttrTypeInt32Array type: int [int]
 	// mean: numberOfArrayValues {arrayValue}
 	// setAttr node.int32ArrayAttr -type Int32Array 2 12 75;
 	SetAttrTypeInt32Array
 
-	// type: float float
+	// SetAttrTypeFloat2 type: float float
 	// mean: value1 value2
 	// setAttr node.float2Attr -type float2 1.1 2.2;
 	SetAttrTypeFloat2
 
-	// type: float float float
+	// SetAttrTypeFloat3 type: float float float
 	// mean: value1 value2 value3
 	// setAttr node.float3Attr -type float3 1.1 2.2 3.3;
 	SetAttrTypeFloat3
 
-	// type: double double
+	// SetAttrTypeDouble2 type: double double
 	// mean: value1 value2
 	// setAttr node.double2Attr -type double2 1.1 2.2;
 	SetAttrTypeDouble2
 
-	// type: double double double
+	// SetAttrTypeDouble3 type: double double double
 	// mean: value1 value2 value3
 	// setAttr node.double3Attr -type double3 1.1 2.2 3.3;
 	SetAttrTypeDouble3
 
-	// type: int {double}
+	// SetAttrTypeDoubleArray type: int {double}
 	// mean: numberOfArrayValues {arrayValue}
 	// setAttr node.doubleArrayAttr -type doubleArray 2 3.14159 2.782;
 	SetAttrTypeDoubleArray
 
-	// type: double double double double double double double double double double double double double double double double
+	// SetAttrTypeMatrix type: double double double double double double double double double double double double double double double double
 	// mean: row1col1 row1col2 row1col3 row1col4 row2col1 row2col2 row2col3 row2col4 row3col1 row3col2 row3col3 row3col4 row4col1 row4col2 row4col3 row4col4
 	// setAttr ".ix" -type "matrix" 5 0 0 0 0 0 0 0 0 0 5 0 0 0 0 1;
 	SetAttrTypeMatrix
 
-	// type: string double double double
+	// SetAttrTypeMatrixXform type: string double double double
 	//       double double double
 	//       integer
 	//       double double double
@@ -97,57 +97,57 @@ const (
 	// setAttr ".xm[0]" -type "matrix" "xform" 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 1 1 1 1 yes;
 	SetAttrTypeMatrixXform
 
-	// type: int {double double double double}
+	// SetAttrTypePointArray type: int {double double double double}
 	// mean: numberOfArrayValues {xValue yValue zValue wValue}
 	// setAttr node.pointArrayAttr -type pointArray 2 1 1 1 1 2 2 2 1;
 	SetAttrTypePointArray
 
-	// type: int {double double double}
+	// SetAttrTypeVectorArray type: int {double double double}
 	// mean: numberOfArrayValues {xValue yValue zValue}
 	// setAttr node.vectorArrayAttr -type vectorArray 2 1 1 1 2 2 2;
 	SetAttrTypeVectorArray
 
-	// type: string
+	// SetAttrTypeString type: string
 	// mean: characterStringValue
 	// setAttr node.stringAttr -type "string" "blarg";
 	SetAttrTypeString
 
-	// type: int {string}
+	// SetAttrTypeStringArray type: int {string}
 	// mean: numberOfArrayValues {arrayValue}
 	// setAttr node.stringArrayAttr -type stringArray 3 "a" "b" "c";
 	SetAttrTypeStringArray
 
-	// type: 倍精度浮動小数点数
+	// SetAttrTypeSphere type: 倍精度浮動小数点数
 	// mean: sphereRadius
 	// setAttr node.sphereAttr -type sphere 5.0;
 	SetAttrTypeSphere
 
-	// type: double double
+	// SetAttrTypeCone type: double double
 	// mean: coneAngle coneCap
 	// setAttr node.coneAttr -type cone 45.0 5.0;
 	SetAttrTypeCone
 
-	// type: double double double
+	// SetAttrTypeReflectanceRGB type: double double double
 	// mean: redReflect greenReflect blueReflect
 	// setAttr node.reflectanceRGBAttr -type reflectanceRGB 0.5 0.5 0.1;
 	SetAttrTypeReflectanceRGB
 
-	// type: double double double
+	// SetAttrTypeSpectrumRGB type: double double double
 	// mean: redSpectrum greenSpectrum blueSpectrum
 	// setAttr node.spectrumRGBAttr -type spectrumRGB 0.5 0.5 0.1;
 	SetAttrTypeSpectrumRGB
 
-	// type: int {string}
+	// SetAttrTypeComponentList type: int {string}
 	// mean: numberOfComponents {componentName}
 	// setAttr node.componentListAttr -type componentList 3 cv[1] cv[12] cv[3];
 	SetAttrTypeComponentList
 
-	// type: string string
+	// SetAttrTypeAttributeAlias type: string string
 	// mean: newAlias currentName
 	// setAttr node.attrAliasAttr -type attributeAlias {"GoUp","translateY", "GoLeft","translateX"};
 	SetAttrTypeAttributeAlias
 
-	// type: int int int bool int int {double}
+	// SetAttrTypeNurbsCurve type: int int int bool int int {double}
 	//       int {double double double}
 	// mean: degree spans form isRational dimension knotCount {knotValue}
 	//       cvCount {xCVValue yCVValue [zCVValue] [wCVValue]}
@@ -167,7 +167,7 @@ const (
 	// 4 -2 3 0 -2 1 0 -2 -1 0 -2 -3 0;
 	SetAttrTypeNurbsCurve
 
-	// type: int int int int bool
+	// SetAttrTypeNurbsSurface type: int int int int bool
 	//       int {double}
 	//       int {double}
 	//       [string] int {double double double}
@@ -200,7 +200,7 @@ const (
 	// 3 3 0 3 1 0 3 -1 0 3 -3 0;
 	SetAttrTypeNurbsSurface
 
-	// type: bool int {int {int {int int int} int {int int}}}
+	// SetAttrTypeNurbsTrimface type: bool int {int {int {int int int} int {int int}}}
 	// mean: flipNormal boundaryCount {boundaryType tedgeCountOnBoundary
 	//       {splineCountOnEdge {edgeTolerance isEdgeReversed geometricContinuity}
 	//       {splineCountOnPedge {isMonotone pedgeTolerance}}}
@@ -232,7 +232,7 @@ const (
 	//
 	SetAttrTypeNurbsTrimface
 
-	// type: {"f" int {int}}
+	// SetAttrTypePolyFaces type: {"f" int {int}}
 	//       {"h" int {int}}
 	//       {"mf" int {int}}
 	//       {"mh" int {int}}
@@ -287,13 +287,13 @@ const (
 	// setAttr node.polyFaceAttr -type polyFaces "f" 3 1 2 3 "fc" 3 4 4 6;
 	SetAttrTypePolyFaces
 
-	// From the code
+	// SetAttrTypeDataPolyComponent From the code
 	// _dataPolyComponent_ takes data of the form
 	// Index_Data Edge|Face|Vertex|UV
 	// COUNT_OF_INDEX_VALUES {Index Value}
 	SetAttrTypeDataPolyComponent
 
-	// type: "string"
+	// SetAttrTypeDataReferenceEdits type: "string"
 	//       "string" int
 	//       0 "string" "string" "string"
 	//       1 string "string" "string" "string"
@@ -343,7 +343,7 @@ const (
 	//           ;
 	SetAttrTypeDataReferenceEdits
 
-	// type: {string [int {double double double}]}
+	// SetAttrTypeMesh type: {string [int {double double double}]}
 	//       {string [int {double double double}]}
 	//       [{string [int {double double}]}]
 	//       {string [int {double double string}]}
@@ -362,7 +362,7 @@ const (
 	// "e" 3 0 1 "hard" 1 2 "hard" 2 0 "hard";
 	SetAttrTypeMesh
 
-	// type: int int int int {double double double}
+	// SetAttrTypeLattice type: int int int int {double double double}
 	// mean: sDivisionCount tDivisionCount uDivisionCount
 	//       pointCount {pointX pointY pointZ}
 	// sDivisionCount は水平方向のラティス分割数
