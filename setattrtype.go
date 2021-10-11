@@ -1,5 +1,7 @@
 package mayaascii
 
+import "strings"
+
 // go:generate stringer -type=SetAttrType setattrtype.go
 type SetAttrType int
 
@@ -379,11 +381,9 @@ const (
 	SetAttrTypeLattice
 )
 
-/*
 func (sa SetAttrType) Name() string {
 	s := sa.String()
-	s = s[4:] // remove Type prefix.
+	s = s[11:] // remove SetAttrType prefix.
 	return strings.ToLower(s[:1]) + s[1:] // ToLower head one string.
 }
- */
 
