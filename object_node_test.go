@@ -348,8 +348,8 @@ func TestNodes(t *testing.T) {
 	for _, attr := range (*perspShape).Attrs {
 		switch attr.GetName() {
 		case ".v":
-			if attr.GetAttrType() != TypeBool {
-				t.Errorf("got %v, wont cmd.TypeBool", attr.GetAttrType())
+			if attr.GetAttrType() != SetAttrTypeBool {
+				t.Errorf("got %v, wont cmd.SetAttrTypeBool", attr.GetAttrType())
 			}
 			if len(attr.GetAttrValue()) != 1 {
 				t.Errorf("got %d, wont 1", len(attr.GetAttrValue()))

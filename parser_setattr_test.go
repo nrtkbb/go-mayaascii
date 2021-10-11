@@ -55,8 +55,8 @@ func TestMakeSetAttr_Size(t *testing.T) {
 		t.Fatal(err)
 	}
 	msg := `got SetAttrCmd %s %s, wont %s`
-	if beforeSetAttr.AttrType != TypeInvalid {
-		t.Errorf(msg, "AttrType", beforeSetAttr.AttrType, TypeInvalid)
+	if beforeSetAttr.AttrType != SetAttrTypeInvalid {
+		t.Errorf(msg, "SetAttrType", beforeSetAttr.AttrType, SetAttrTypeInvalid)
 	}
 	if *beforeSetAttr.Size != uint(4) {
 		t.Errorf(msg, "Size", *beforeSetAttr.Size, uint(4))
@@ -71,8 +71,8 @@ func TestMakeSetAttr_int(t *testing.T) {
 		t.Fatal(err)
 	}
 	msg := `got SetAttrCmd %s %s, wont %s`
-	if sa.AttrType != TypeInt {
-		t.Errorf(msg, "AttrType", sa.AttrType, TypeInt)
+	if sa.AttrType != SetAttrTypeInt {
+		t.Errorf(msg, "SetAttrType", sa.AttrType, SetAttrTypeInt)
 	}
 	ret, err := ToAttrInt(sa.Attr)
 	if err != nil {
@@ -90,8 +90,8 @@ func TestMakeSetAttr_int(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if sa.AttrType != TypeInt {
-		t.Errorf(msg, "AttrType", sa.AttrType, TypeInt)
+	if sa.AttrType != SetAttrTypeInt {
+		t.Errorf(msg, "SetAttrType", sa.AttrType, SetAttrTypeInt)
 	}
 	ret, err = ToAttrInt(sa.Attr)
 	if err != nil {
@@ -114,8 +114,8 @@ func TestMakeSetAttr_int_toDouble_toInt(t *testing.T) {
 		t.Fatal(err)
 	}
 	msg := `got SetAttrCmd %s %s, wont %s`
-	if sa.AttrType != TypeInt {
-		t.Errorf(msg, "AttrType", sa.AttrType, TypeInt)
+	if sa.AttrType != SetAttrTypeInt {
+		t.Errorf(msg, "SetAttrType", sa.AttrType, SetAttrTypeInt)
 	}
 	if len(sa.Attr) != 2 {
 		t.Errorf(msg, "len(AttrValue)", len(sa.Attr), 2)
@@ -135,8 +135,8 @@ func TestMakeSetAttr_int_toDouble_toInt(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if sa.AttrType != TypeDouble {
-		t.Errorf(msg, "AttrType", sa.AttrType, TypeDouble)
+	if sa.AttrType != SetAttrTypeDouble {
+		t.Errorf(msg, "SetAttrType", sa.AttrType, SetAttrTypeDouble)
 	}
 	af, err := ToAttrFloat(sa.Attr)
 	if err != nil {
@@ -164,8 +164,8 @@ func TestMakeSetAttr_int_toDouble_toInt(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if sa.AttrType != TypeDouble {
-		t.Errorf(msg, "AttrType", sa.AttrType, TypeDouble)
+	if sa.AttrType != SetAttrTypeDouble {
+		t.Errorf(msg, "SetAttrType", sa.AttrType, SetAttrTypeDouble)
 	}
 	af, err = ToAttrFloat(sa.Attr)
 	if err != nil {
@@ -201,8 +201,8 @@ func TestMakeSetAttr_string(t *testing.T) {
 		t.Fatal(err)
 	}
 	msg := `got SetAttrCmd %s %s, wont %s`
-	if sa.AttrType != TypeString {
-		t.Errorf(msg, "AttrType", sa.AttrType, TypeString)
+	if sa.AttrType != SetAttrTypeString {
+		t.Errorf(msg, "SetAttrType", sa.AttrType, SetAttrTypeString)
 	}
 	if len(sa.Attr) != 1 {
 		t.Errorf(msg, "len(AttrValue)", len(sa.Attr), 1)
@@ -225,8 +225,8 @@ func TestMakeSetAttr_stringArray(t *testing.T) {
 		t.Fatal(err)
 	}
 	msg := `got SetAttrCmd %s %s, wont %s`
-	if sa.AttrType != TypeStringArray {
-		t.Errorf(msg, "AttrType", sa.AttrType, TypeStringArray)
+	if sa.AttrType != SetAttrTypeStringArray {
+		t.Errorf(msg, "SetAttrType", sa.AttrType, SetAttrTypeStringArray)
 	}
 	if len(sa.Attr) != 1 {
 		t.Errorf(msg, "len(AttrValue)", len(sa.Attr), 1)
@@ -252,8 +252,8 @@ func TestMakeSetAttr_doubleWithExponent(t *testing.T) {
 		t.Fatal(err)
 	}
 	msg := `got SetAttrCmd %s %s, wont %s`
-	if sa.AttrType != TypeDouble {
-		t.Errorf(msg, "AttrType", sa.AttrType, TypeDouble)
+	if sa.AttrType != SetAttrTypeDouble {
+		t.Errorf(msg, "SetAttrType", sa.AttrType, SetAttrTypeDouble)
 	}
 	if len(sa.Attr) != 2 {
 		t.Errorf(msg, "len(AttrValue)", len(sa.Attr), 2)
@@ -276,8 +276,8 @@ func TestMakeSetAttr_double(t *testing.T) {
 		t.Fatal(err)
 	}
 	msg := `got SetAttrCmd %s %s, wont %s`
-	if sa.AttrType != TypeDouble {
-		t.Errorf(msg, "AttrType", sa.AttrType, TypeDouble)
+	if sa.AttrType != SetAttrTypeDouble {
+		t.Errorf(msg, "SetAttrType", sa.AttrType, SetAttrTypeDouble)
 	}
 	if len(sa.Attr) != 2 {
 		t.Errorf(msg, "len(AttrValue)", len(sa.Attr), 2)
@@ -297,8 +297,8 @@ func TestMakeSetAttr_double(t *testing.T) {
 	c.Clear()
 	c.Append(`setAttr ".attrName" 3.3 4.4;`)
 	sa, err = ParseSetAttr(c.Parse(), sa)
-	if sa.AttrType != TypeDouble {
-		t.Errorf(msg, "AttrType", sa.AttrType, TypeDouble)
+	if sa.AttrType != SetAttrTypeDouble {
+		t.Errorf(msg, "SetAttrType", sa.AttrType, SetAttrTypeDouble)
 	}
 	ret, err = ToAttrFloat(sa.Attr)
 	if err != nil {
@@ -329,8 +329,8 @@ func testBool(t *testing.T, boolString string, wont bool) {
 		t.Fatal(err)
 	}
 	msg := `got SetAttrCmd %s %s, wont %s`
-	if sa.AttrType != TypeBool {
-		t.Errorf(msg, "AttrType", sa.AttrType, TypeBool)
+	if sa.AttrType != SetAttrTypeBool {
+		t.Errorf(msg, "SetAttrType", sa.AttrType, SetAttrTypeBool)
 	}
 	if len(sa.Attr) != 1 {
 		t.Errorf(msg, "len(AttrValue)", len(sa.Attr), 1)
@@ -357,8 +357,8 @@ func TestMakeSetAttr_short2(t *testing.T) {
 		t.Fatal(err)
 	}
 	msg := `got SetAttrCmd %s %s, wont %s`
-	if sa.AttrType != TypeShort2 {
-		t.Errorf(msg, "AttrType", sa.AttrType, TypeShort2)
+	if sa.AttrType != SetAttrTypeShort2 {
+		t.Errorf(msg, "SetAttrType", sa.AttrType, SetAttrTypeShort2)
 	}
 	if len(sa.Attr) != 1 {
 		t.Errorf(msg, "len(AttrValue)", len(sa.Attr), 1)
@@ -408,8 +408,8 @@ func TestMakeSetAttr_short2_size(t *testing.T) {
 		t.Fatal(err)
 	}
 	msg := `got SetAttrCmd %s %s, wont %s`
-	if sa.AttrType != TypeShort2 {
-		t.Errorf(msg, "AttrType", sa.AttrType, TypeShort2)
+	if sa.AttrType != SetAttrTypeShort2 {
+		t.Errorf(msg, "SetAttrType", sa.AttrType, SetAttrTypeShort2)
 	}
 	ret, err := ToAttrShort2(sa.Attr)
 	if err != nil {
@@ -439,8 +439,8 @@ func TestMakeSetAttr_short2_sizeOver(t *testing.T) {
 		t.Fatal(err)
 	}
 	msg := `got SetAttrCmd %s %s, wont %s`
-	if sa.AttrType != TypeShort2 {
-		t.Errorf(msg, "AttrType", sa.AttrType, TypeShort2)
+	if sa.AttrType != SetAttrTypeShort2 {
+		t.Errorf(msg, "SetAttrType", sa.AttrType, SetAttrTypeShort2)
 	}
 	ret, err := ToAttrShort2(sa.Attr)
 	if err != nil {
@@ -474,8 +474,8 @@ func TestMakeSetAttr_long2(t *testing.T) {
 		t.Fatal(err)
 	}
 	msg := `got SetAttrCmd %s %s, wont %s`
-	if sa.AttrType != TypeLong2 {
-		t.Errorf(msg, "AttrType", sa.AttrType, TypeLong2)
+	if sa.AttrType != SetAttrTypeLong2 {
+		t.Errorf(msg, "SetAttrType", sa.AttrType, SetAttrTypeLong2)
 	}
 	ret, err := ToAttrLong2(sa.Attr)
 	if err != nil {
@@ -496,8 +496,8 @@ func TestMakeSetAttr_long2(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if sa.AttrType != TypeLong2 {
-		t.Errorf(msg, "AttrType", sa.AttrType, TypeLong2)
+	if sa.AttrType != SetAttrTypeLong2 {
+		t.Errorf(msg, "SetAttrType", sa.AttrType, SetAttrTypeLong2)
 	}
 	ret, err = ToAttrLong2(sa.Attr)
 	if err != nil {
@@ -526,8 +526,8 @@ func TestMakeSetAttr_short3(t *testing.T) {
 		t.Fatal(err)
 	}
 	msg := `got SetAttrCmd %s %s, wont %s`
-	if sa.AttrType != TypeShort3 {
-		t.Errorf(msg, "AttrType", sa.AttrType, TypeShort3)
+	if sa.AttrType != SetAttrTypeShort3 {
+		t.Errorf(msg, "SetAttrType", sa.AttrType, SetAttrTypeShort3)
 	}
 	ret, err := ToAttrShort3(sa.Attr)
 	if err != nil {
@@ -546,8 +546,8 @@ func TestMakeSetAttr_short3(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if sa.AttrType != TypeShort3 {
-		t.Errorf(msg, "AttrType", sa.AttrType, TypeShort3)
+	if sa.AttrType != SetAttrTypeShort3 {
+		t.Errorf(msg, "SetAttrType", sa.AttrType, SetAttrTypeShort3)
 	}
 	ret, err = ToAttrShort3(sa.Attr)
 	if err != nil {
@@ -577,8 +577,8 @@ func TestMakeSetAttr_long3(t *testing.T) {
 		t.Fatal(err)
 	}
 	msg := `got SetAttrCmd %s %s, wont %s`
-	if sa.AttrType != TypeLong3 {
-		t.Errorf(msg, "AttrType", sa.AttrType, TypeLong3)
+	if sa.AttrType != SetAttrTypeLong3 {
+		t.Errorf(msg, "SetAttrType", sa.AttrType, SetAttrTypeLong3)
 	}
 	ret, err := ToAttrLong3(sa.Attr)
 	if err != nil {
@@ -598,8 +598,8 @@ func TestMakeSetAttr_long3(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if sa.AttrType != TypeLong3 {
-		t.Errorf(msg, "AttrType", sa.AttrType, TypeLong3)
+	if sa.AttrType != SetAttrTypeLong3 {
+		t.Errorf(msg, "SetAttrType", sa.AttrType, SetAttrTypeLong3)
 	}
 	ret, err = ToAttrLong3(sa.Attr)
 	if err != nil {
@@ -629,8 +629,8 @@ func TestMakeSetAttr_Int32Array(t *testing.T) {
 		t.Fatal(err)
 	}
 	msg := `got SetAttrCmd %s %s, wont %s`
-	if sa.AttrType != TypeInt32Array {
-		t.Errorf(msg, "AttrType", sa.AttrType, TypeInt32Array)
+	if sa.AttrType != SetAttrTypeInt32Array {
+		t.Errorf(msg, "SetAttrType", sa.AttrType, SetAttrTypeInt32Array)
 	}
 	ret, err := ToAttrInt32Array(sa.Attr)
 	if err != nil {
@@ -652,8 +652,8 @@ func TestMakeSetAttr_float2(t *testing.T) {
 		t.Fatal(err)
 	}
 	msg := `got SetAttrCmd %s %s, wont %s`
-	if sa.AttrType != TypeFloat2 {
-		t.Errorf(msg, "AttrType", sa.AttrType, TypeFloat2)
+	if sa.AttrType != SetAttrTypeFloat2 {
+		t.Errorf(msg, "SetAttrType", sa.AttrType, SetAttrTypeFloat2)
 	}
 	ret, err := ToAttrFloat2(sa.Attr)
 	if err != nil {
@@ -673,8 +673,8 @@ func TestMakeSetAttr_float2(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if sa.AttrType != TypeFloat2 {
-		t.Errorf(msg, "AttrType", sa.AttrType, TypeFloat2)
+	if sa.AttrType != SetAttrTypeFloat2 {
+		t.Errorf(msg, "SetAttrType", sa.AttrType, SetAttrTypeFloat2)
 	}
 	ret, err = ToAttrFloat2(sa.Attr)
 	if err != nil {
@@ -702,8 +702,8 @@ func TestMakeSetAttr_float3(t *testing.T) {
 		t.Fatal(err)
 	}
 	msg := `got SetAttrCmd %s %s, wont %s`
-	if sa.AttrType != TypeFloat3 {
-		t.Errorf(msg, "AttrType", sa.AttrType, TypeFloat3)
+	if sa.AttrType != SetAttrTypeFloat3 {
+		t.Errorf(msg, "SetAttrType", sa.AttrType, SetAttrTypeFloat3)
 	}
 	ret, err := ToAttrFloat3(sa.Attr)
 	if err != nil {
@@ -723,8 +723,8 @@ func TestMakeSetAttr_float3(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if sa.AttrType != TypeFloat3 {
-		t.Errorf(msg, "AttrType", sa.AttrType, TypeFloat3)
+	if sa.AttrType != SetAttrTypeFloat3 {
+		t.Errorf(msg, "SetAttrType", sa.AttrType, SetAttrTypeFloat3)
 	}
 	ret, err = ToAttrFloat3(sa.Attr)
 	if err != nil {
@@ -754,8 +754,8 @@ func TestMakeSetAttr_double2(t *testing.T) {
 		t.Fatal(err)
 	}
 	msg := `got SetAttrCmd %s %s, wont %s`
-	if sa.AttrType != TypeDouble2 {
-		t.Errorf(msg, "AttrType", sa.AttrType, TypeDouble2)
+	if sa.AttrType != SetAttrTypeDouble2 {
+		t.Errorf(msg, "SetAttrType", sa.AttrType, SetAttrTypeDouble2)
 	}
 	ret, err := ToAttrDouble2(sa.Attr)
 	if err != nil {
@@ -775,8 +775,8 @@ func TestMakeSetAttr_double2(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if sa.AttrType != TypeDouble2 {
-		t.Errorf(msg, "AttrType", sa.AttrType, TypeDouble2)
+	if sa.AttrType != SetAttrTypeDouble2 {
+		t.Errorf(msg, "SetAttrType", sa.AttrType, SetAttrTypeDouble2)
 	}
 	ret, err = ToAttrDouble2(sa.Attr)
 	if err != nil {
@@ -804,8 +804,8 @@ func TestMakeSetAttr_double3(t *testing.T) {
 		t.Fatal(err)
 	}
 	msg := `got SetAttrCmd %s %s, wont %s`
-	if sa.AttrType != TypeDouble3 {
-		t.Errorf(msg, "AttrType", sa.AttrType, TypeDouble3)
+	if sa.AttrType != SetAttrTypeDouble3 {
+		t.Errorf(msg, "SetAttrType", sa.AttrType, SetAttrTypeDouble3)
 	}
 	ret, err := ToAttrDouble3(sa.Attr)
 	if err != nil {
@@ -823,8 +823,8 @@ func TestMakeSetAttr_double3(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if sa.AttrType != TypeDouble3 {
-		t.Errorf(msg, "AttrType", sa.AttrType, TypeDouble3)
+	if sa.AttrType != SetAttrTypeDouble3 {
+		t.Errorf(msg, "SetAttrType", sa.AttrType, SetAttrTypeDouble3)
 	}
 	ret, err = ToAttrDouble3(sa.Attr)
 	if err != nil {
@@ -854,8 +854,8 @@ func TestMakeSetAttr_doubleArray(t *testing.T) {
 		t.Fatal(err)
 	}
 	msg := `got SetAttrCmd %s %s, wont %s`
-	if sa.AttrType != TypeDoubleArray {
-		t.Errorf(msg, "AttrType", sa.AttrType, TypeDoubleArray)
+	if sa.AttrType != SetAttrTypeDoubleArray {
+		t.Errorf(msg, "SetAttrType", sa.AttrType, SetAttrTypeDoubleArray)
 	}
 	ret, err := ToAttrDoubleArray(sa.Attr)
 	if err != nil {
@@ -873,8 +873,8 @@ func TestMakeSetAttr_doubleArray(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if sa.AttrType != TypeDoubleArray {
-		t.Errorf(msg, "AttrType", sa.AttrType, TypeDoubleArray)
+	if sa.AttrType != SetAttrTypeDoubleArray {
+		t.Errorf(msg, "SetAttrType", sa.AttrType, SetAttrTypeDoubleArray)
 	}
 	ret, err = ToAttrDoubleArray(sa.Attr)
 	if err != nil {
@@ -893,8 +893,8 @@ func TestMakeSetAttr_matrix(t *testing.T) {
 		t.Fatal(err)
 	}
 	msg := `got SetAttrCmd %s %s, wont %s`
-	if sa.AttrType != TypeMatrix {
-		t.Errorf(msg, "AttrType", sa.AttrType, TypeMatrix)
+	if sa.AttrType != SetAttrTypeMatrix {
+		t.Errorf(msg, "SetAttrType", sa.AttrType, SetAttrTypeMatrix)
 	}
 	ret, err := ToAttrMatrix(sa.Attr)
 	if err != nil {
@@ -930,8 +930,8 @@ func TestMakeSetAttr_matrix_xform(t *testing.T) {
 		t.Fatal(err)
 	}
 	msg := `got SetAttrCmd %s %s, wont %s`
-	if sa.AttrType != TypeMatrixXform {
-		t.Errorf(msg, "AttrType", sa.AttrType, TypeMatrixXform)
+	if sa.AttrType != SetAttrTypeMatrixXform {
+		t.Errorf(msg, "SetAttrType", sa.AttrType, SetAttrTypeMatrixXform)
 	}
 	ret, err := ToAttrMatrixXform(sa.Attr)
 	if err != nil {
@@ -962,8 +962,8 @@ func TestMakeSetAttr_pointArray(t *testing.T) {
 		t.Fatal(err)
 	}
 	msg := `got SetAttrCmd %s %s, wont %s`
-	if sa.AttrType != TypePointArray {
-		t.Errorf(msg, "AttrType", sa.AttrType, TypePointArray)
+	if sa.AttrType != SetAttrTypePointArray {
+		t.Errorf(msg, "SetAttrType", sa.AttrType, SetAttrTypePointArray)
 	}
 	ret, err := ToAttrPointArray(sa.Attr)
 	if err != nil {
@@ -984,8 +984,8 @@ func TestMakeSetAttr_pointArray(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if sa.AttrType != TypePointArray {
-		t.Errorf(msg, "AttrType", sa.AttrType, TypePointArray)
+	if sa.AttrType != SetAttrTypePointArray {
+		t.Errorf(msg, "SetAttrType", sa.AttrType, SetAttrTypePointArray)
 	}
 	ret, err = ToAttrPointArray(sa.Attr)
 	pa = *ret[0]
@@ -1019,8 +1019,8 @@ mc 2 3 2 3 4;`)
 		t.Fatal(err)
 	}
 	msg := `got SetAttrCmd %s %s, wont %s`
-	if sa.AttrType != TypePolyFaces {
-		t.Errorf(msg, "AttrType", sa.AttrType, TypePolyFaces)
+	if sa.AttrType != SetAttrTypePolyFaces {
+		t.Errorf(msg, "SetAttrType", sa.AttrType, SetAttrTypePolyFaces)
 	}
 	ret, err := ToAttrPolyFaces(sa.Attr)
 	if err != nil {
@@ -1083,8 +1083,8 @@ func TestMakeSetAttr_polyFacesMax(t *testing.T) {
 		t.Fatal(err)
 	}
 	msg := `got SetAttrCmd %s %s, wont %s`
-	if sa.AttrType != TypePolyFaces {
-		t.Errorf(msg, "AttrType", sa.AttrType, TypePolyFaces)
+	if sa.AttrType != SetAttrTypePolyFaces {
+		t.Errorf(msg, "SetAttrType", sa.AttrType, SetAttrTypePolyFaces)
 	}
 	ret, err := ToAttrPolyFaces(sa.Attr)
 	if err != nil {
@@ -1202,8 +1202,8 @@ func TestMakeDataPolyComponent(t *testing.T) {
 		t.Fatal(err)
 	}
 	msg := `got SetAttrCmd %s %s, wont %s`
-	if sa.AttrType != TypeDataPolyComponent {
-		t.Errorf(msg, "AttrType", sa.AttrType, TypeDataPolyComponent)
+	if sa.AttrType != SetAttrTypeDataPolyComponent {
+		t.Errorf(msg, "SetAttrType", sa.AttrType, SetAttrTypeDataPolyComponent)
 	}
 	ret, err := ToAttrDataPolyComponent(sa.Attr)
 	if err != nil {
@@ -1295,8 +1295,8 @@ func TestMakeDataPolyComponentVertex(t *testing.T) {
 		t.Fatal(err)
 	}
 	msg := `got SetAttrCmd %s %s, wont %s`
-	if sa.AttrType != TypeDataPolyComponent {
-		t.Errorf(msg, "AttrType", sa.AttrType, TypeDataPolyComponent)
+	if sa.AttrType != SetAttrTypeDataPolyComponent {
+		t.Errorf(msg, "SetAttrType", sa.AttrType, SetAttrTypeDataPolyComponent)
 	}
 	ret, err := ToAttrDataPolyComponent(sa.Attr)
 	if err != nil {
@@ -1319,8 +1319,8 @@ func TestMakeDataPolyComponentUV(t *testing.T) {
 		t.Fatal(err)
 	}
 	msg := `got SetAttrCmd %s %s, wont %s`
-	if sa.AttrType != TypeDataPolyComponent {
-		t.Errorf(msg, "AttrType", sa.AttrType, TypeDataPolyComponent)
+	if sa.AttrType != SetAttrTypeDataPolyComponent {
+		t.Errorf(msg, "SetAttrType", sa.AttrType, SetAttrTypeDataPolyComponent)
 	}
 	ret, err := ToAttrDataPolyComponent(sa.Attr)
 	if err != nil {
@@ -1343,8 +1343,8 @@ func TestMakeDataPolyComponentFace(t *testing.T) {
 		t.Fatal(err)
 	}
 	msg := `got SetAttrCmd %s %s, wont %s`
-	if sa.AttrType != TypeDataPolyComponent {
-		t.Errorf(msg, "AttrType", sa.AttrType, TypeDataPolyComponent)
+	if sa.AttrType != SetAttrTypeDataPolyComponent {
+		t.Errorf(msg, "SetAttrType", sa.AttrType, SetAttrTypeDataPolyComponent)
 	}
 	ret, err := ToAttrDataPolyComponent(sa.Attr)
 	if err != nil {
@@ -1384,8 +1384,8 @@ func TestMakeDataReferenceEdits(t *testing.T) {
 		t.Fatal(err)
 	}
 	msg := `got SetAttrCmd %s %v, wont %v`
-	if sa.AttrType != TypeDataReferenceEdits {
-		t.Errorf(msg, "AttrType", sa.AttrType, TypeDataReferenceEdits)
+	if sa.AttrType != SetAttrTypeDataReferenceEdits {
+		t.Errorf(msg, "SetAttrType", sa.AttrType, SetAttrTypeDataReferenceEdits)
 	}
 	ret, err := ToAttrDataReferenceEdits(sa.Attr)
 	if err != nil {
@@ -1635,8 +1635,8 @@ func TestMakeAttributeAlias(t *testing.T) {
 		t.Fatal(err)
 	}
 	msg := `got SetAttrCmd %s %s, wont %s`
-	if sa.AttrType != TypeAttributeAlias {
-		t.Errorf(msg, "AttrType", sa.AttrType, TypeAttributeAlias)
+	if sa.AttrType != SetAttrTypeAttributeAlias {
+		t.Errorf(msg, "SetAttrType", sa.AttrType, SetAttrTypeAttributeAlias)
 	}
 	ret, err := ToAttrAttributeAlias(sa.Attr)
 	if err != nil {
@@ -1683,8 +1683,8 @@ func TestMakeComponentList(t *testing.T) {
 		t.Fatal(err)
 	}
 	msg := `got SetAttrCmd %s %s, wont %s`
-	if sa.AttrType != TypeComponentList {
-		t.Errorf(msg, "AttrType", sa.AttrType, TypeComponentList)
+	if sa.AttrType != SetAttrTypeComponentList {
+		t.Errorf(msg, "SetAttrType", sa.AttrType, SetAttrTypeComponentList)
 	}
 	ret, err := ToAttrComponentList(sa.Attr)
 	if err != nil {
@@ -1711,8 +1711,8 @@ func TestMakeCone(t *testing.T) {
 		t.Fatal(err)
 	}
 	msg := `got SetAttrCmd %s %s, wont %s`
-	if sa.AttrType != TypeCone {
-		t.Errorf(msg, "AttrType", sa.AttrType, TypeCone)
+	if sa.AttrType != SetAttrTypeCone {
+		t.Errorf(msg, "SetAttrType", sa.AttrType, SetAttrTypeCone)
 	}
 	ret, err := ToAttrCone(sa.Attr)
 	if err != nil {
@@ -1741,8 +1741,8 @@ func TestMakeDoubleArray(t *testing.T) {
 		t.Fatal(err)
 	}
 	msg := `got SetAttrCmd %s %s, wont %s`
-	if sa.AttrType != TypeDoubleArray {
-		t.Errorf(msg, "AttrType", sa.AttrType, TypeDoubleArray)
+	if sa.AttrType != SetAttrTypeDoubleArray {
+		t.Errorf(msg, "SetAttrType", sa.AttrType, SetAttrTypeDoubleArray)
 	}
 	ret, err := ToAttrDoubleArray(sa.Attr)
 	if err != nil {
@@ -1781,8 +1781,8 @@ func TestMakeLattice(t *testing.T) {
 		t.Fatal(err)
 	}
 	msg := `got SetAttrCmd %s %s, wont %s`
-	if sa.AttrType != TypeLattice {
-		t.Errorf(msg, "AttrType", sa.AttrType, TypeLattice)
+	if sa.AttrType != SetAttrTypeLattice {
+		t.Errorf(msg, "SetAttrType", sa.AttrType, SetAttrTypeLattice)
 	}
 	ret, err := ToAttrLattice(sa.Attr)
 	if err != nil {
@@ -1855,8 +1855,8 @@ func TestMakeNurbsCurve(t *testing.T) {
 		t.Fatal(err)
 	}
 	msg := `got SetAttrCmd %s %s, wont %s`
-	if sa.AttrType != TypeNurbsCurve {
-		t.Errorf(msg, "AttrType", sa.AttrType, TypeNurbsCurve)
+	if sa.AttrType != SetAttrTypeNurbsCurve {
+		t.Errorf(msg, "SetAttrType", sa.AttrType, SetAttrTypeNurbsCurve)
 	}
 	ret, err := ToAttrNurbsCurve(sa.Attr)
 	if err != nil {
@@ -1966,8 +1966,8 @@ func TestMakeNurbsSurface(t *testing.T) {
 		t.Fatal(err)
 	}
 	msg := `got SetAttrCmd %s %s, wont %s`
-	if sa.AttrType != TypeNurbsSurface {
-		t.Errorf(msg, "AttrType", sa.AttrType, TypeNurbsSurface)
+	if sa.AttrType != SetAttrTypeNurbsSurface {
+		t.Errorf(msg, "SetAttrType", sa.AttrType, SetAttrTypeNurbsSurface)
 	}
 	ret, err := ToAttrNurbsSurface(sa.Attr)
 	if err != nil {

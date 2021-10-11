@@ -13,19 +13,19 @@ import (
 type Type string
 
 const (
-	NoneType         Type = ""
-	LineCommentType  Type = "//"
-	BlockCommentType Type = "/*"
-	FileType         Type = "file"
-	FileInfoType     Type = "fileInfo"
-	WorkspaceType    Type = "workspace"
-	RequiresType     Type = "requires"
-	ConnectAttrType  Type = "connectAttr"
-	CreateNodeType   Type = "createNode"
-	RenameType       Type = "rename"
-	SetAttrType      Type = "setAttr"
-	AddAttrType      Type = "addAttr"
-	SelectType       Type = "select"
+	TypeNone         Type = ""
+	TypeLineComment  Type = "//"
+	TypeBlockComment Type = "/*"
+	TypeFile         Type = "file"
+	TypeFileInfo     Type = "fileInfo"
+	TypeWorkspace    Type = "workspace"
+	TypeRequires     Type = "requires"
+	TypeConnectAttr  Type = "connectAttr"
+	TypeCreateNode   Type = "createNode"
+	TypeRename       Type = "rename"
+	TypeSetAttr      Type = "setAttr"
+	TypeAddAttr      Type = "addAttr"
+	TypeSelect       Type = "select"
 )
 
 func (t Type) String() string {
@@ -49,7 +49,7 @@ type CmdBuilder struct {
 }
 
 func (c *CmdBuilder) Append(line string) {
-	if !c.isBlockComment && BlockCommentType.HasPrefix(line) {
+	if !c.isBlockComment && TypeBlockComment.HasPrefix(line) {
 		c.isBlockComment = true
 	}
 	c.cmdLine = append(c.cmdLine, line)
@@ -110,7 +110,7 @@ func (c *CmdBuilder) Parse() *Cmd {
 	cmd := Cmd{
 		Raw:    strings.Join(c.cmdLine, "\n"),
 		LineNo: c.lineNo,
-		Type:   NoneType,
+		Type:   TypeNone,
 	}
 	// fmt.Println("Raw", cmd.Raw)
 	c.Clear()
@@ -126,14 +126,14 @@ func (c *CmdBuilder) Parse() *Cmd {
 				cmd.Token = append(cmd.Token, string(buf))
 				buf = buf[:0]
 				if c == slash {
-					cmd.Type = LineCommentType
+					cmd.Type = TypeLineComment
 				} else if c == asterisk {
-					cmd.Type = BlockCommentType
+					cmd.Type = TypeBlockComment
 				}
 			}
 			continue
 		}
-		if cmd.Type == BlockCommentType {
+		if cmd.Type == TypeBlockComment {
 			if 2 <= len(buf) && buf[len(buf)-1] == asterisk && c == slash {
 				cmd.Token = append(cmd.Token, string(buf[:len(buf)-1]))
 				break
@@ -141,7 +141,7 @@ func (c *CmdBuilder) Parse() *Cmd {
 			buf = append(buf, c)
 			continue
 		}
-		if cmd.Type == LineCommentType {
+		if cmd.Type == TypeLineComment {
 			buf = append(buf, c)
 			continue
 		}
@@ -240,11 +240,11 @@ func (c *CmdBuilder) Parse() *Cmd {
 		}
 		buf = append(buf, c)
 	}
-	if 0 != len(buf) && cmd.Type == LineCommentType {
+	if 0 != len(buf) && cmd.Type == TypeLineComment {
 		cmd.Token = append(cmd.Token, string(buf))
 	}
 	if 0 == len(cmd.Token) {
-		cmd.Type = NoneType
+		cmd.Type = TypeNone
 	} else {
 		cmd.Type = Type(cmd.Token[0])
 	}
@@ -414,7 +414,7 @@ type AttrCmd interface {
 	GetName() string
 	IsChannelBox() bool
 	IsKeyable() bool
-	GetAttrType() AttrType
+	GetAttrType() SetAttrType
 	GetAttrValue() []AttrValue
 }
 
@@ -428,9 +428,9 @@ type SetAttrCmd struct {
 	Clamp        bool        `json:"clamp" short:"-c"`
 	Keyable      *bool       `json:"keyable,omitempty" short:"-k"`
 	Lock         *bool       `json:"lock,omitempty" short:"-l"`
-	Size         *uint       `json:"size,omitempty" short:"-s"`
-	AttrType     AttrType    `json:"attr_type" short:"-typ"`
-	Attr         []AttrValue `json:"attr"`
+	Size     *uint       `json:"size,omitempty" short:"-s"`
+	AttrType SetAttrType `json:"attr_type" short:"-typ"`
+	Attr     []AttrValue `json:"attr"`
 }
 
 func (sa *SetAttrCmd) GetName() string {
@@ -449,7 +449,7 @@ func (sa *SetAttrCmd) IsKeyable() bool {
 	return sa.Keyable != nil && *sa.Keyable
 }
 
-func (sa *SetAttrCmd) GetAttrType() AttrType {
+func (sa *SetAttrCmd) GetAttrType() SetAttrType {
 	return sa.AttrType
 }
 
@@ -573,7 +573,7 @@ func (sa *SetAttrCmd) StringWrite(writer io.StringWriter) (int, error) {
 		return 0, err
 	}
 	n += na
-	if sa.AttrType == TypeBool || sa.AttrType == TypeInt || sa.AttrType == TypeDouble {
+	if sa.AttrType == SetAttrTypeBool || sa.AttrType == SetAttrTypeInt || sa.AttrType == SetAttrTypeDouble {
 		// nothing
 	} else {
 		na, err = writer.WriteString("-type \"")
@@ -652,7 +652,7 @@ func (sa *SetAttrCmd) String() string {
 	buf.WriteString("\"")
 	buf.WriteString(sa.AttrName)
 	buf.WriteString("\" ")
-	if sa.AttrType == TypeBool || sa.AttrType == TypeInt || sa.AttrType == TypeDouble {
+	if sa.AttrType == SetAttrTypeBool || sa.AttrType == SetAttrTypeInt || sa.AttrType == SetAttrTypeDouble {
 		// nothing
 	} else {
 		buf.WriteString("-type \"")
@@ -694,7 +694,7 @@ func (a *AddAttrCmd) IsKeyable() bool {
 	panic("implement me")
 }
 
-func (a *AddAttrCmd) GetAttrType() AttrType {
+func (a *AddAttrCmd) GetAttrType() SetAttrType {
 	panic("implement me")
 }
 

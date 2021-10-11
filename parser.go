@@ -285,11 +285,11 @@ func fixSizeOver(end int, token *[]string) int {
 	return end
 }
 
-var PrimitiveTypes = map[AttrType]struct{}{
-	TypeInvalid: struct{}{},
-	TypeBool:    struct{}{},
-	TypeInt:     struct{}{},
-	TypeDouble:  struct{}{},
+var PrimitiveTypes = map[SetAttrType]struct{}{
+	SetAttrTypeInvalid: struct{}{},
+	SetAttrTypeBool:    struct{}{},
+	SetAttrTypeInt:     struct{}{},
+	SetAttrTypeDouble:  struct{}{},
 }
 
 func ParseSetAttr(c *Cmd, beforeSetAttr *SetAttrCmd) (*SetAttrCmd, error) {
@@ -386,7 +386,7 @@ func ParseSetAttr(c *Cmd, beforeSetAttr *SetAttrCmd) (*SetAttrCmd, error) {
 			}
 			b, err := isOnYesOrOffNo(v)
 			if err == nil {
-				sa.AttrType = TypeBool
+				sa.AttrType = SetAttrTypeBool
 				ab := AttrBool(b)
 				abs := []AttrValue{&ab}
 				sa.Attr = abs
@@ -403,7 +403,7 @@ func ParseSetAttr(c *Cmd, beforeSetAttr *SetAttrCmd) (*SetAttrCmd, error) {
 					isInt = true
 				}
 			}
-			if isInt && sa.AttrType != TypeDouble {
+			if isInt && sa.AttrType != SetAttrTypeDouble {
 				intArray, err := ParseInts(sa.Token[i:]...)
 				if err != nil {
 					return nil, err
@@ -412,7 +412,7 @@ func ParseSetAttr(c *Cmd, beforeSetAttr *SetAttrCmd) (*SetAttrCmd, error) {
 					ai := AttrInt(ia)
 					sa.Attr = append(sa.Attr, &ai)
 				}
-				sa.AttrType = TypeInt
+				sa.AttrType = SetAttrTypeInt
 				return sa, nil
 			}
 
@@ -420,7 +420,7 @@ func ParseSetAttr(c *Cmd, beforeSetAttr *SetAttrCmd) (*SetAttrCmd, error) {
 			if err != nil {
 				return nil, err
 			}
-			if sa.AttrType == TypeInt {
+			if sa.AttrType == SetAttrTypeInt {
 				if 0 < len(sa.Attr) {
 					first := sa.Attr[0]
 					_, ok := first.(*AttrInt)
@@ -438,7 +438,7 @@ func ParseSetAttr(c *Cmd, beforeSetAttr *SetAttrCmd) (*SetAttrCmd, error) {
 					sa.Attr = floatArrayAttr
 				}
 			}
-			sa.AttrType = TypeDouble
+			sa.AttrType = SetAttrTypeDouble
 			for _, f := range floatArray {
 				af := AttrFloat(f)
 				sa.Attr = append(sa.Attr, &af)
@@ -498,7 +498,7 @@ func ParseShort2Long2(
 	token *[]string,
 	start int,
 	size *uint,
-	at *AttrType) ([]AttrValue, int, error) {
+	at *SetAttrType) ([]AttrValue, int, error) {
 	var end int
 	if size != nil {
 		end = fixSizeOver(start+(2*int(*size)), token)
@@ -509,7 +509,7 @@ func ParseShort2Long2(
 	if err != nil {
 		return nil, 0, err
 	}
-	if at != nil && *at == TypeShort2 {
+	if at != nil && *at == SetAttrTypeShort2 {
 		s2 := make([]AttrShort2, (end-start)/2)
 		for i := 0; i < len(s2); i++ {
 			s2[i][0] = v[i*2]
@@ -534,7 +534,7 @@ func ParseShort2Long2(
 	}
 }
 
-func ParseShort3Long3(token *[]string, start int, size *uint, at *AttrType) ([]AttrValue, int, error) {
+func ParseShort3Long3(token *[]string, start int, size *uint, at *SetAttrType) ([]AttrValue, int, error) {
 	var end int
 	if size != nil {
 		end = fixSizeOver(start+(3*int(*size)), token)
@@ -545,7 +545,7 @@ func ParseShort3Long3(token *[]string, start int, size *uint, at *AttrType) ([]A
 	if err != nil {
 		return nil, 0, err
 	}
-	if at != nil && *at == TypeShort3 {
+	if at != nil && *at == SetAttrTypeShort3 {
 		s3 := make([]AttrShort3, (end-start)/3)
 		for i := 0; i < len(s3); i++ {
 			s3[i][0] = v[i*3]
@@ -592,7 +592,7 @@ func ParseInt32Array(token *[]string, start int) ([]AttrValue, int, error) {
 	return a, 1 + numberOfArray, nil
 }
 
-func ParseFloat2Double2(token *[]string, start int, size *uint, at *AttrType) ([]AttrValue, int, error) {
+func ParseFloat2Double2(token *[]string, start int, size *uint, at *SetAttrType) ([]AttrValue, int, error) {
 	var end int
 	if size != nil {
 		end = fixSizeOver(start+(2*int(*size)), token)
@@ -603,7 +603,7 @@ func ParseFloat2Double2(token *[]string, start int, size *uint, at *AttrType) ([
 	if err != nil {
 		return nil, 0, err
 	}
-	if at != nil && *at == TypeFloat2 {
+	if at != nil && *at == SetAttrTypeFloat2 {
 		f2 := make([]AttrFloat2, (end-start)/2)
 		for i := 0; i < len(f2); i++ {
 			f2[i][0] = v[i*2]
@@ -628,7 +628,7 @@ func ParseFloat2Double2(token *[]string, start int, size *uint, at *AttrType) ([
 	}
 }
 
-func ParseFloat3Double3(token *[]string, start int, size *uint, at *AttrType) ([]AttrValue, int, error) {
+func ParseFloat3Double3(token *[]string, start int, size *uint, at *SetAttrType) ([]AttrValue, int, error) {
 	var end int
 	if size != nil {
 		end = fixSizeOver(start+(3*int(*size)), token)
@@ -639,7 +639,7 @@ func ParseFloat3Double3(token *[]string, start int, size *uint, at *AttrType) ([
 	if err != nil {
 		return nil, 0, err
 	}
-	if at != nil && *at == TypeFloat3 {
+	if at != nil && *at == SetAttrTypeFloat3 {
 		f3 := make([]AttrFloat3, (end-start)/3)
 		for i := 0; i < len(f3); i++ {
 			f3[i][0] = v[i*3]
@@ -1260,132 +1260,132 @@ func ParseLattice(token *[]string, start int) ([]AttrValue, int, error) {
 	return a, 4 + (c[3] * 3), nil
 }
 
-func ParseAttr(token *[]string, start int, size *uint, attrType AttrType) ([]AttrValue, int, error) {
+func ParseAttr(token *[]string, start int, size *uint, attrType SetAttrType) ([]AttrValue, int, error) {
 	switch attrType {
-	case TypeShort2, TypeLong2:
+	case SetAttrTypeShort2, SetAttrTypeLong2:
 		return ParseShort2Long2(token, start, size, &attrType)
-	case TypeShort3, TypeLong3:
+	case SetAttrTypeShort3, SetAttrTypeLong3:
 		return ParseShort3Long3(token, start, size, &attrType)
-	case TypeInt32Array:
+	case SetAttrTypeInt32Array:
 		return ParseInt32Array(token, start)
-	case TypeFloat2, TypeDouble2:
+	case SetAttrTypeFloat2, SetAttrTypeDouble2:
 		return ParseFloat2Double2(token, start, size, &attrType)
-	case TypeFloat3, TypeDouble3:
+	case SetAttrTypeFloat3, SetAttrTypeDouble3:
 		return ParseFloat3Double3(token, start, size, &attrType)
-	case TypeDoubleArray:
+	case SetAttrTypeDoubleArray:
 		return ParseDoubleArray(token, start)
-	case TypeMatrix:
+	case SetAttrTypeMatrix:
 		return ParseMatrix(token, start)
-	case TypeMatrixXform:
+	case SetAttrTypeMatrixXform:
 		return ParseMatrixXform(token, start)
-	case TypePointArray:
+	case SetAttrTypePointArray:
 		return ParsePointArray(token, start)
-	case TypeVectorArray:
+	case SetAttrTypeVectorArray:
 		return ParseVectorArray(token, start)
-	case TypeString:
+	case SetAttrTypeString:
 		return ParseString(token, start)
-	case TypeStringArray:
+	case SetAttrTypeStringArray:
 		return ParseStringArray(token, start)
-	case TypeSphere:
+	case SetAttrTypeSphere:
 		return ParseSphere(token, start)
-	case TypeCone:
+	case SetAttrTypeCone:
 		return ParseCone(token, start)
-	case TypeReflectanceRGB:
+	case SetAttrTypeReflectanceRGB:
 		return ParseReflectanceRGB(token, start)
-	case TypeSpectrumRGB:
+	case SetAttrTypeSpectrumRGB:
 		return ParseSpectrumRGB(token, start)
-	case TypeComponentList:
+	case SetAttrTypeComponentList:
 		return ParseComponentList(token, start)
-	case TypeAttributeAlias:
+	case SetAttrTypeAttributeAlias:
 		return ParseAttributeAlias(token, start)
-	case TypeNurbsCurve:
+	case SetAttrTypeNurbsCurve:
 		return ParseNurbsCurve(token, start)
-	case TypeNurbsSurface:
+	case SetAttrTypeNurbsSurface:
 		return ParseNurbsSurface(token, start)
-	case TypeNurbsTrimface:
+	case SetAttrTypeNurbsTrimface:
 		return ParseNurbsTrimface(token, start)
-	case TypePolyFaces:
+	case SetAttrTypePolyFaces:
 		return ParsePolyFace(token, start, size)
-	case TypeDataPolyComponent:
+	case SetAttrTypeDataPolyComponent:
 		return ParseDataPolyComponent(token, start)
-	case TypeDataReferenceEdits:
+	case SetAttrTypeDataReferenceEdits:
 		return MakeDataReferenceEdits(token, start)
-	case TypeMesh:
+	case SetAttrTypeMesh:
 		return ParseMesh(token, start)
-	case TypeLattice:
+	case SetAttrTypeLattice:
 		return ParseLattice(token, start)
 	}
 	return nil, 0, nil
 }
 
-func ParseAttrType(token *[]string, start int) (AttrType, error) {
+func ParseAttrType(token *[]string, start int) (SetAttrType, error) {
 	typeString := (*token)[start][1 : len((*token)[start])-1]
 	switch typeString {
 	case "short2":
-		return TypeShort2, nil
+		return SetAttrTypeShort2, nil
 	case "short3":
-		return TypeShort3, nil
+		return SetAttrTypeShort3, nil
 	case "long2":
-		return TypeLong2, nil
+		return SetAttrTypeLong2, nil
 	case "long3":
-		return TypeLong3, nil
+		return SetAttrTypeLong3, nil
 	case "Int32Array":
-		return TypeInt32Array, nil
+		return SetAttrTypeInt32Array, nil
 	case "float2":
-		return TypeFloat2, nil
+		return SetAttrTypeFloat2, nil
 	case "double2":
-		return TypeDouble2, nil
+		return SetAttrTypeDouble2, nil
 	case "float3":
-		return TypeFloat3, nil
+		return SetAttrTypeFloat3, nil
 	case "double3":
-		return TypeDouble3, nil
+		return SetAttrTypeDouble3, nil
 	case "doubleArray":
-		return TypeDoubleArray, nil
+		return SetAttrTypeDoubleArray, nil
 	case "matrix":
 		typeString2 := (*token)[start+1]
 		if typeString2 == "\"xform\"" {
-			return TypeMatrixXform, nil
+			return SetAttrTypeMatrixXform, nil
 		} else {
-			return TypeMatrix, nil
+			return SetAttrTypeMatrix, nil
 		}
 	case "pointArray":
-		return TypePointArray, nil
+		return SetAttrTypePointArray, nil
 	case "vectorArray":
-		return TypeVectorArray, nil
+		return SetAttrTypeVectorArray, nil
 	case "string":
-		return TypeString, nil
+		return SetAttrTypeString, nil
 	case "stringArray":
-		return TypeStringArray, nil
+		return SetAttrTypeStringArray, nil
 	case "sphere":
-		return TypeSphere, nil
+		return SetAttrTypeSphere, nil
 	case "cone":
-		return TypeCone, nil
+		return SetAttrTypeCone, nil
 	case "reflectanceRGB":
-		return TypeReflectanceRGB, nil
+		return SetAttrTypeReflectanceRGB, nil
 	case "spectrumRGB":
-		return TypeSpectrumRGB, nil
+		return SetAttrTypeSpectrumRGB, nil
 	case "componentList":
-		return TypeComponentList, nil
+		return SetAttrTypeComponentList, nil
 	case "attributeAlias":
-		return TypeAttributeAlias, nil
+		return SetAttrTypeAttributeAlias, nil
 	case "nurbsCurve":
-		return TypeNurbsCurve, nil
+		return SetAttrTypeNurbsCurve, nil
 	case "nurbsSurface":
-		return TypeNurbsSurface, nil
+		return SetAttrTypeNurbsSurface, nil
 	case "nurbsTrimface":
-		return TypeNurbsTrimface, nil
+		return SetAttrTypeNurbsTrimface, nil
 	case "polyFaces":
-		return TypePolyFaces, nil
+		return SetAttrTypePolyFaces, nil
 	case "dataPolyComponent":
-		return TypeDataPolyComponent, nil
+		return SetAttrTypeDataPolyComponent, nil
 	case "dataReferenceEdits":
-		return TypeDataReferenceEdits, nil
+		return SetAttrTypeDataReferenceEdits, nil
 	case "mesh":
-		return TypeMesh, nil
+		return SetAttrTypeMesh, nil
 	case "lattice":
-		return TypeLattice, nil
+		return SetAttrTypeLattice, nil
 	}
-	return TypeInvalid, errors.New("Invalid type " + typeString)
+	return SetAttrTypeInvalid, errors.New("Invalid type " + typeString)
 }
 
 func ParseAddAttr(c *Cmd) *AddAttrCmd {

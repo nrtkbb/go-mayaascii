@@ -33,7 +33,7 @@ func (o *Object) Unmarshal(reader io.Reader) error {
 		// Normally, it should be parsed with a proper
 		// tokenizer and lexer, but here it is simply
 		// treated as one token per line.
-		if LineCommentType.HasPrefix(line) {
+		if TypeLineComment.HasPrefix(line) {
 			lineCommentBuilder.Append(line)
 			c := lineCommentBuilder.Parse()
 			o.cmds = append(o.cmds, c)
@@ -75,7 +75,7 @@ func (o *Object) UnmarshalFocus(reader io.Reader, focusCommands CommandTypes) er
 	lineCommentBuilder := &CmdBuilder{}
 	isFocus := false
 	err := bufscan.BufScan(br, func(line string) error {
-		if LineCommentType.HasPrefix(line) {
+		if TypeLineComment.HasPrefix(line) {
 			lcc := "//"
 			if focusCommands.InHasPrefix(&lcc) {
 				lineCommentBuilder.Append(line)
@@ -392,7 +392,7 @@ func (a *Attr) IsKeyable() bool {
 	return a.attrCmd.IsKeyable()
 }
 
-func (a *Attr) GetAttrType() AttrType {
+func (a *Attr) GetAttrType() SetAttrType {
 	return a.attrCmd.GetAttrType()
 }
 
@@ -437,21 +437,21 @@ func (p *Parser) ParseCmds() {
 	for p.CurCmd != nil {
 		var err error
 		switch p.CurCmd.Type {
-		case LineCommentType:
+		case TypeLineComment:
 			err = p.parseLineComments()
-		case BlockCommentType:
+		case TypeBlockComment:
 			err = p.parseBlockComments()
-		case FileType:
+		case TypeFile:
 			err = p.parseFiles()
-		case FileInfoType:
+		case TypeFileInfo:
 			err = p.parseFileInfos()
-		case RequiresType:
+		case TypeRequires:
 			err = p.parseRequires()
-		case CreateNodeType:
+		case TypeCreateNode:
 			err = p.parseCreateNode()
-		case ConnectAttrType:
+		case TypeConnectAttr:
 			err = p.parseConnectAttr()
-		case SelectType:
+		case TypeSelect:
 			err = p.parseSelect()
 		default:
 			err = errors.New(fmt.Sprintf(
@@ -565,12 +565,12 @@ func (p *Parser) parseCreateNode() error {
 		parentNode.Children = append(parentNode.Children, node)
 	}
 
-	if p.PeekCmdIs(RenameType) {
+	if p.PeekCmdIs(TypeRename) {
 		p.NextCmd()
 		node.renameCmd = ParseRename(p.CurCmd)
 	}
 
-	for p.PeekCmdIs(AddAttrType) {
+	for p.PeekCmdIs(TypeAddAttr) {
 		p.NextCmd()
 		ad := ParseAddAttr(p.CurCmd)
 		a := &Attr{
@@ -581,7 +581,7 @@ func (p *Parser) parseCreateNode() error {
 	}
 
 	var setAttrCmds []*SetAttrCmd
-	for p.PeekCmdIs(SetAttrType) {
+	for p.PeekCmdIs(TypeSetAttr) {
 		p.NextCmd()
 		var sa *SetAttrCmd
 		var err error
@@ -643,7 +643,7 @@ func (p *Parser) parseSelect() error {
 	}
 	p.o.Selects = append(p.o.Selects, sel)
 
-	for p.PeekCmdIs(AddAttrType) {
+	for p.PeekCmdIs(TypeAddAttr) {
 		p.NextCmd()
 		ad := ParseAddAttr(p.CurCmd)
 		a := &Attr{
@@ -653,7 +653,7 @@ func (p *Parser) parseSelect() error {
 	}
 
 	var setAttrs []*SetAttrCmd
-	for p.PeekCmdIs(SetAttrType) {
+	for p.PeekCmdIs(TypeSetAttr) {
 		p.NextCmd()
 		var at *SetAttrCmd
 		var err error

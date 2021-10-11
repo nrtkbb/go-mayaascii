@@ -1,74 +1,70 @@
 package mayaascii
 
-import (
-	"strings"
-)
-
-// go:generate stringer -type=AttrType attrtype.go
-type AttrType int
+// go:generate stringer -type=SetAttrType setattrtype.go
+type SetAttrType int
 
 const (
 	// parse error
-	TypeInvalid AttrType = iota
+	SetAttrTypeInvalid SetAttrType = iota
 
-	TypeBool
-	TypeInt
-	TypeDouble
+	SetAttrTypeBool
+	SetAttrTypeInt
+	SetAttrTypeDouble
 
 	// type: short short
 	// mean: value1 value2
 	// setAttr node.short2Attr -type short2 1 2;
-	TypeShort2
+	SetAttrTypeShort2
 
 	// type: short short short
 	// mean: value1 value2 value3
 	// setAttr node.short3Attr -type short3 1 2 3;
-	TypeShort3
+	SetAttrTypeShort3
 
 	// type: long long
 	// mean: value1 value2
 	// setAttr node.long2Attr -type long2 1000000 2000000;
-	TypeLong2
+	SetAttrTypeLong2
 
 	// type: long long long
 	// mean: value1 value2 value3
 	// setAttr node.long3Attr -type long3 1000000 2000000 3000000;
-	TypeLong3
+	SetAttrTypeLong3
 
 	// type: int [int]
 	// mean: numberOfArrayValues {arrayValue}
 	// setAttr node.int32ArrayAttr -type Int32Array 2 12 75;
-	TypeInt32Array
+	SetAttrTypeInt32Array
 
 	// type: float float
 	// mean: value1 value2
 	// setAttr node.float2Attr -type float2 1.1 2.2;
-	TypeFloat2
+	SetAttrTypeFloat2
 
 	// type: float float float
 	// mean: value1 value2 value3
 	// setAttr node.float3Attr -type float3 1.1 2.2 3.3;
-	TypeFloat3
+	SetAttrTypeFloat3
 
 	// type: double double
 	// mean: value1 value2
 	// setAttr node.double2Attr -type double2 1.1 2.2;
-	TypeDouble2
+	SetAttrTypeDouble2
 
 	// type: double double double
 	// mean: value1 value2 value3
 	// setAttr node.double3Attr -type double3 1.1 2.2 3.3;
-	TypeDouble3
+	SetAttrTypeDouble3
 
 	// type: int {double}
 	// mean: numberOfArrayValues {arrayValue}
 	// setAttr node.doubleArrayAttr -type doubleArray 2 3.14159 2.782;
-	TypeDoubleArray
+	SetAttrTypeDoubleArray
 
 	// type: double double double double double double double double double double double double double double double double
 	// mean: row1col1 row1col2 row1col3 row1col4 row2col1 row2col2 row2col3 row2col4 row3col1 row3col2 row3col3 row3col4 row4col1 row4col2 row4col3 row4col4
 	// setAttr ".ix" -type "matrix" 5 0 0 0 0 0 0 0 0 0 5 0 0 0 0 1;
-	TypeMatrix
+	SetAttrTypeMatrix
 
 	// type: string double double double
 	//       double double double
@@ -97,57 +93,57 @@ const (
 	//       inverseParentScaleX inverseParentScaleY inverseParentScaleZ
 	//       compensateForParentScale
 	// setAttr ".xm[0]" -type "matrix" "xform" 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 1 1 1 1 yes;
-	TypeMatrixXform
+	SetAttrTypeMatrixXform
 
 	// type: int {double double double double}
 	// mean: numberOfArrayValues {xValue yValue zValue wValue}
 	// setAttr node.pointArrayAttr -type pointArray 2 1 1 1 1 2 2 2 1;
-	TypePointArray
+	SetAttrTypePointArray
 
 	// type: int {double double double}
 	// mean: numberOfArrayValues {xValue yValue zValue}
 	// setAttr node.vectorArrayAttr -type vectorArray 2 1 1 1 2 2 2;
-	TypeVectorArray
+	SetAttrTypeVectorArray
 
 	// type: string
 	// mean: characterStringValue
 	// setAttr node.stringAttr -type "string" "blarg";
-	TypeString
+	SetAttrTypeString
 
 	// type: int {string}
 	// mean: numberOfArrayValues {arrayValue}
 	// setAttr node.stringArrayAttr -type stringArray 3 "a" "b" "c";
-	TypeStringArray
+	SetAttrTypeStringArray
 
 	// type: 倍精度浮動小数点数
 	// mean: sphereRadius
 	// setAttr node.sphereAttr -type sphere 5.0;
-	TypeSphere
+	SetAttrTypeSphere
 
 	// type: double double
 	// mean: coneAngle coneCap
 	// setAttr node.coneAttr -type cone 45.0 5.0;
-	TypeCone
+	SetAttrTypeCone
 
 	// type: double double double
 	// mean: redReflect greenReflect blueReflect
 	// setAttr node.reflectanceRGBAttr -type reflectanceRGB 0.5 0.5 0.1;
-	TypeReflectanceRGB
+	SetAttrTypeReflectanceRGB
 
 	// type: double double double
 	// mean: redSpectrum greenSpectrum blueSpectrum
 	// setAttr node.spectrumRGBAttr -type spectrumRGB 0.5 0.5 0.1;
-	TypeSpectrumRGB
+	SetAttrTypeSpectrumRGB
 
 	// type: int {string}
 	// mean: numberOfComponents {componentName}
 	// setAttr node.componentListAttr -type componentList 3 cv[1] cv[12] cv[3];
-	TypeComponentList
+	SetAttrTypeComponentList
 
 	// type: string string
 	// mean: newAlias currentName
 	// setAttr node.attrAliasAttr -type attributeAlias {"GoUp","translateY", "GoLeft","translateX"};
-	TypeAttributeAlias
+	SetAttrTypeAttributeAlias
 
 	// type: int int int bool int int {double}
 	//       int {double double double}
@@ -167,7 +163,7 @@ const (
 	//
 	// setAttr node.curveAttr -type nurbsCurve 3 1 0 no 3 6 0 0 0 1 1 1
 	// 4 -2 3 0 -2 1 0 -2 -1 0 -2 -3 0;
-	TypeNurbsCurve
+	SetAttrTypeNurbsCurve
 
 	// type: int int int int bool
 	//       int {double}
@@ -200,7 +196,7 @@ const (
 	// -1 3 0 -1 1 0 -1 -1 0 -1 -3 0
 	// 1 3 0 1 1 0 1 -1 0 1 -3 0
 	// 3 3 0 3 1 0 3 -1 0 3 -3 0;
-	TypeNurbsSurface
+	SetAttrTypeNurbsSurface
 
 	// type: bool int {int {int {int int int} int {int int}}}
 	// mean: flipNormal boundaryCount {boundaryType tedgeCountOnBoundary
@@ -232,7 +228,7 @@ const (
 	// isMonotone : true の場合、曲率は単調になる -> Bool
 	// pedgeTolerance : 2D エッジの許容値 -> Double
 	//
-	TypeNurbsTrimface
+	SetAttrTypeNurbsTrimface
 
 	// type: {"f" int {int}}
 	//       {"h" int {int}}
@@ -287,13 +283,13 @@ const (
 	//
 	//
 	// setAttr node.polyFaceAttr -type polyFaces "f" 3 1 2 3 "fc" 3 4 4 6;
-	TypePolyFaces
+	SetAttrTypePolyFaces
 
 	// From the code
 	// _dataPolyComponent_ takes data of the form
 	// Index_Data Edge|Face|Vertex|UV
 	// COUNT_OF_INDEX_VALUES {Index Value}
-	TypeDataPolyComponent
+	SetAttrTypeDataPolyComponent
 
 	// type: "string"
 	//       "string" int
@@ -343,7 +339,7 @@ const (
 	//           8 "|namespace:topNode" "attrNameA"
 	//           9 "|namespace:topNode" "attrNameA"
 	//           ;
-	TypeDataReferenceEdits
+	SetAttrTypeDataReferenceEdits
 
 	// type: {string [int {double double double}]}
 	//       {string [int {double double double}]}
@@ -362,7 +358,7 @@ const (
 	// "vn" 3 1 0 0 1 0 0 1 0 0
 	// "vt" 3 0 0 0 1 1 0
 	// "e" 3 0 1 "hard" 1 2 "hard" 2 0 "hard";
-	TypeMesh
+	SetAttrTypeMesh
 
 	// type: int int int int {double double double}
 	// mean: sDivisionCount tDivisionCount uDivisionCount
@@ -380,12 +376,14 @@ const (
 	// 2 0 -2 -2 1 -2 2 1 -2 -2 2 -2 2 2 -2
 	// -2 -2 2 2 -2 2 -2 -1 2 2 -1 2 -2 0 2
 	// 2 0 2 -2 1 2 2 1 2 -2 2 2 2 2 2;
-	TypeLattice
+	SetAttrTypeLattice
 )
 
-func (at AttrType) Name() string {
-	s := at.String()
+/*
+func (sa SetAttrType) Name() string {
+	s := sa.String()
 	s = s[4:] // remove Type prefix.
 	return strings.ToLower(s[:1]) + s[1:] // ToLower head one string.
 }
+ */
 
