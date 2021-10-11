@@ -383,7 +383,6 @@ const (
 
 func (sa SetAttrType) Name() string {
 	s := sa.String()
-	s = s[11:] // remove SetAttrType prefix.
+	s = s[11:]                            // remove SetAttrType prefix.
 	return strings.ToLower(s[:1]) + s[1:] // ToLower head one string.
 }
-
