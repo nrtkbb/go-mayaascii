@@ -572,7 +572,10 @@ func (p *Parser) parseCreateNode() error {
 
 	for p.PeekCmdIs(TypeAddAttr) {
 		p.NextCmd()
-		ad := ParseAddAttr(p.CurCmd)
+		ad, err := ParseAddAttr(p.CurCmd)
+		if err != nil {
+			return err
+		}
 		a := &Attr{
 			Node:    node,
 			attrCmd: ad,
@@ -645,7 +648,10 @@ func (p *Parser) parseSelect() error {
 
 	for p.PeekCmdIs(TypeAddAttr) {
 		p.NextCmd()
-		ad := ParseAddAttr(p.CurCmd)
+		ad, err := ParseAddAttr(p.CurCmd)
+		if err != nil {
+			return nil
+		}
 		a := &Attr{
 			attrCmd: ad,
 		}

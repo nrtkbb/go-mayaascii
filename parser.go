@@ -1388,8 +1388,201 @@ func ParseAttrType(token *[]string, start int) (SetAttrType, error) {
 	return SetAttrTypeInvalid, errors.New("Invalid type " + typeString)
 }
 
-func ParseAddAttr(c *Cmd) *AddAttrCmd {
+func ParseAddAttr(c *Cmd) (*AddAttrCmd, error) {
+	// addAttr -shortName ms -longName mass -defaultValue 1.0 -minValue 0.001 -maxValue 10000;
+	// addAttr -ci true -sn "liw" -ln "lockInfluenceWeights" -min 0 -max 1 -at "bool";
 	aa := &AddAttrCmd{Cmd: c}
-	// TODO: Do finish!
-	return aa
+	fmt.Println(aa.Token)
+	for i := 1; i < len(aa.Token); i++ {
+		switch aa.Token[i] {
+		case "-at", "attributeType":
+			at, err := NewAddAttrAttributeType(strings.Trim(aa.Token[i+1], "\""))
+			if err != nil {
+				return nil, err
+			}
+			aa.AttributeType = &at
+			i++
+		case "-ci", "-cachedInternally":
+			ci := true
+			aa.CachedInternally = &ci
+		case "-ct", "-category":
+			ct := strings.Trim(aa.Token[i+1], "\"")
+			aa.Category = &ct
+			i++
+		case "-dt", "-dataType":
+			dt, err := NewAddAttrDataType(strings.Trim(aa.Token[i+1], "\""))
+			if err != nil {
+				return nil, err
+			}
+			aa.DataType = append(aa.DataType, dt)
+			i++
+		case "-dv", "-defaultValue":
+			dv, err := strconv.ParseFloat(aa.Token[i+1], 64)
+			if err != nil {
+				return nil, err
+			}
+			aa.DefaultValue = &dv
+			i++
+		case "-dcb", "-disconnectBehaviour":
+			dcb := aa.Token[i+1]
+			var db DisconnectBehaviour
+			if dcb == "0" {
+				db = DisconnectBehaviourDelete
+			} else if dcb == "1" {
+				db = DisconnectBehaviourReset
+			} else if dcb == "2" {
+				db = DisconnectBehaviourNothing
+			}
+			aa.DisconnectBehaviour = &db
+			i++
+		case "-en", "-enumName":
+			en := strings.Trim(aa.Token[i+1], "\"")
+			aa.EnumName = &en
+			i++
+		case "-ex", "-exists":
+			aa.Exists = true
+		case "-fp", "-fromPlugin":
+			fp, err := isOnYesOrOffNo(aa.Token[i+1])
+			if err != nil {
+				return nil, err
+			}
+			aa.FromPlugin = &fp
+			i++
+		case "-hxv", "-hasMaxValue":
+			hxv, err := isOnYesOrOffNo(aa.Token[i+1])
+			if err != nil {
+				return nil, err
+			}
+			aa.HasMaxValue = &hxv
+			i++
+		case "-hnv", "-hasMinValue":
+			hnv, err := isOnYesOrOffNo(aa.Token[i+1])
+			if err != nil {
+				return nil, err
+			}
+			aa.HasMinValue = &hnv
+			i++
+		case "-hsx", "-hasSoftMaxValue":
+			hsx, err := isOnYesOrOffNo(aa.Token[i+1])
+			if err != nil {
+				return nil, err
+			}
+			aa.HasSoftMaxValue = &hsx
+			i++
+		case "-hsn", "-hasSoftMinValue":
+			hsn, err := isOnYesOrOffNo(aa.Token[i+1])
+			if err != nil {
+				return nil, err
+			}
+			aa.HasSoftMinValue = &hsn
+			i++
+		case "-h", "-hidden":
+			h, err := isOnYesOrOffNo(aa.Token[i+1])
+			if err != nil {
+				return nil, err
+			}
+			aa.Hidden = &h
+			i++
+		case "-im", "-indexMatters":
+			im, err := isOnYesOrOffNo(aa.Token[i+1])
+			if err != nil {
+				return nil, err
+			}
+			aa.IndexMatters = &im
+			i++
+		case "-k", "-keyable":
+			k, err := isOnYesOrOffNo(aa.Token[i+1])
+			if err != nil {
+				return nil, err
+			}
+			aa.Keyable = &k
+			i++
+		case "-ln", "-longName":
+			ln := strings.Trim(aa.Token[i+1], "\"")
+			aa.LongName = &ln
+			i++
+		case "-max", "-maxValue":
+			max, err := strconv.ParseFloat(aa.Token[i+1], 64)
+			if err != nil {
+				return nil, err
+			}
+			aa.MaxValue = &max
+			i++
+		case "-min", "-minValue":
+			min, err := strconv.ParseFloat(aa.Token[i+1], 64)
+			if err != nil {
+				return nil, err
+			}
+			aa.MinValue = &min
+			i++
+		case "-m", "-multi":
+			aa.Multi = true
+		case "-nn", "-niceName":
+			nn := strings.Trim(aa.Token[i+1], "\"")
+			aa.NiceName = &nn
+			i++
+		case "-nc", "-numberOfChildren":
+			nc, err := strconv.ParseInt(aa.Token[i+1], 10, 64)
+			if err != nil {
+				return nil, err
+			}
+			uintNc := uint(nc)
+			aa.NumberOfChildren = &uintNc
+			i++
+		case "-p", "-parent":
+			p := strings.Trim(aa.Token[i+1], "\"")
+			aa.Parent = &p
+			i++
+		case "-pxy", "-proxy":
+			pxy := strings.Trim(aa.Token[i+1], "\"")
+			aa.Proxy = &pxy
+			i++
+		case "-r", "-readable":
+			r, err := isOnYesOrOffNo(aa.Token[i+1])
+			if err != nil {
+				return nil, err
+			}
+			aa.Readable = &r
+			i++
+		case "-sn", "-shortName":
+			sn := strings.Trim(aa.Token[i+1], "\"")
+			aa.ShortName = &sn
+			i++
+		case "-smx", "-softMaxValue":
+			smx, err := strconv.ParseFloat(aa.Token[i+1], 64)
+			if err != nil {
+				return nil, err
+			}
+			aa.SoftMaxValue = &smx
+			i++
+		case "-smn", "-softMinValue":
+			smn, err := strconv.ParseFloat(aa.Token[i+1], 64)
+			if err != nil {
+				return nil, err
+			}
+			aa.SoftMinValue = &smn
+			i++
+		case "-s", "-storable":
+			s, err := isOnYesOrOffNo(aa.Token[i+1])
+			if err != nil {
+				return nil, err
+			}
+			aa.Storable = &s
+			i++
+		case "-uac", "-usedAsColor":
+			aa.UsedAsColor = true
+		case "-uaf", "-usedAsFilename":
+			aa.UsedAsFilename = true
+		case "-uap", "-usedAsProxy":
+			aa.UsedAsProxy = true
+		case "-w", "-writable":
+			w, err := isOnYesOrOffNo(aa.Token[i+1])
+			if err != nil {
+				return nil, err
+			}
+			aa.Writable = &w
+			i++
+		}
+	}
+	return aa, nil
 }

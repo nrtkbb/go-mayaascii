@@ -428,9 +428,9 @@ type SetAttrCmd struct {
 	Clamp        bool        `json:"clamp" short:"-c"`
 	Keyable      *bool       `json:"keyable,omitempty" short:"-k"`
 	Lock         *bool       `json:"lock,omitempty" short:"-l"`
-	Size     *uint       `json:"size,omitempty" short:"-s"`
-	AttrType SetAttrType `json:"attr_type" short:"-typ"`
-	Attr     []AttrValue `json:"attr"`
+	Size         *uint       `json:"size,omitempty" short:"-s"`
+	AttrType     SetAttrType `json:"attr_type" short:"-typ"`
+	Attr         []AttrValue `json:"attr"`
 }
 
 func (sa *SetAttrCmd) GetName() string {
@@ -679,39 +679,40 @@ const (
 
 type AddAttrCmd struct {
 	*Cmd
-	AttributeType       *string              `json:"attribute_type,omitempty" short:"-at"`
-	CachedInternally    *bool                `json:"cached_internally,omitempty" short:"-ci"`
-	Category            *string              `json:"category,omitempty" short:"-ct"`
-	DataType            *string              `json:"data_type,omitempty" short:"-dt"`
-	DefaultValue        *float64             `json:"default_value,omitempty" short:"-dv"`
-	DisconnectBehaviour *DisconnectBehaviour `json:"disconnect_behaviour,omitempty" short:"-dcb"`
-	EnumName            *string              `json:"enum_name,omitempty" short:"-en"`
-	Exists              *bool                `json:"exists,omitempty" short:"-ex"`
-	FromPlugin          *bool                `json:"from_plugin,omitempty" short:"-fp"`
-	HasMaxValue         *bool                `json:"has_max_value,omitempty" short:"-hxv"`
-	HasMinValue         *bool                `json:"has_min_value,omitempty" short:"-hnv"`
-	HasSoftMaxValue     *bool                `json:"has_soft_max_value,omitempty" short:"-hsx"`
-	HasSoftMinValue     *bool                `json:"has_soft_min_value,omitempty" short:"-hsn"`
-	Hidden              *bool                `json:"hidden,omitempty" short:"-h"`
-	IndexMatters        *bool                `json:"index_matters,omitempty" short:"-im"`
-	Keyable             *bool                `json:"keyable,omitempty" short:"-k"`
-	LongName            string               `json:"long_name" short:"-ln"`
-	MaxValue            *float64             `json:"max_value,omitempty" short:"-max"`
-	MinValue            *float64             `json:"min_value,omitempty" short:"-min"`
-	Multi               *bool                `json:"multi,omitempty" short:"-m"`
-	NiceName            *string              `json:"nice_name,omitempty" short:"-nn"`
-	NumberOfChildren    *uint                `json:"number_of_children,omitempty" short:"-nc"`
-	Parent              *string              `json:"parent,omitempty" short:"-p"`
-	Proxy               *string              `json:"proxy,omitempty" short:"-pxy"`
-	Readable            *bool                `json:"readable,omitempty" short:"-r"`
-	ShortName           *string              `json:"short_name,omitempty" short:"-sn"`
-	SoftMaxValue        *float64             `json:"soft_max_value,omitempty" short:"-smx"`
-	SoftMinValue        *float64             `json:"soft_min_value,omitempty" short:"-smn"`
-	Storable            *bool                `json:"storable,omitempty" short:"-s"`
-	UsedAsColor         *bool                `json:"used_as_color,omitempty" short:"-uac"`
-	UsedAsFilename      *bool                `json:"used_as_filename,omitempty" short:"-uaf"`
-	UsedAsProxy         *bool                `json:"used_as_proxy,omitempty" short:"-uap"`
-	Writable            *bool                `json:"writable,omitempty" short:"-w"`
+	AttributeType       *AddAttrAttributeType `json:"attribute_type,omitempty" short:"-at"`
+	CachedInternally    *bool                 `json:"cached_internally,omitempty" short:"-ci"`
+	Category            *string               `json:"category,omitempty" short:"-ct"`
+	DataType            []AddAttrDataType     `json:"data_type,omitempty" short:"-dt"`
+	DefaultValue        *float64              `json:"default_value,omitempty" short:"-dv"`
+	DisconnectBehaviour *DisconnectBehaviour  `json:"disconnect_behaviour,omitempty" short:"-dcb"`
+	EnumName            *string               `json:"enum_name,omitempty" short:"-en"`
+	Exists              bool                 `json:"exists,omitempty" short:"-ex"`
+	FromPlugin          *bool                 `json:"from_plugin,omitempty" short:"-fp"`
+	HasMaxValue         *bool                 `json:"has_max_value,omitempty" short:"-hxv"`
+	HasMinValue         *bool                 `json:"has_min_value,omitempty" short:"-hnv"`
+	HasSoftMaxValue     *bool                 `json:"has_soft_max_value,omitempty" short:"-hsx"`
+	HasSoftMinValue     *bool                 `json:"has_soft_min_value,omitempty" short:"-hsn"`
+	Hidden              *bool                 `json:"hidden,omitempty" short:"-h"`
+	IndexMatters        *bool                 `json:"index_matters,omitempty" short:"-im"`
+	Keyable             *bool                 `json:"keyable,omitempty" short:"-k"`
+	LongName            *string               `json:"long_name" short:"-ln"`
+	MaxValue            *float64              `json:"max_value,omitempty" short:"-max"`
+	MinValue            *float64              `json:"min_value,omitempty" short:"-min"`
+	Multi               bool                 `json:"multi,omitempty" short:"-m"`
+	NiceName            *string               `json:"nice_name,omitempty" short:"-nn"`
+	NumberOfChildren    *uint                 `json:"number_of_children,omitempty" short:"-nc"`
+	Parent              *string               `json:"parent,omitempty" short:"-p"`
+	Proxy               *string               `json:"proxy,omitempty" short:"-pxy"`
+	Readable            *bool                 `json:"readable,omitempty" short:"-r"`
+	ShortName           *string               `json:"short_name,omitempty" short:"-sn"`
+	SoftMaxValue        *float64              `json:"soft_max_value,omitempty" short:"-smx"`
+	SoftMinValue        *float64              `json:"soft_min_value,omitempty" short:"-smn"`
+	Storable            *bool                 `json:"storable,omitempty" short:"-s"`
+	UsedAsColor         bool                 `json:"used_as_color,omitempty" short:"-uac"`
+	UsedAsFilename      bool                 `json:"used_as_filename,omitempty" short:"-uaf"`
+	UsedAsProxy         bool                 `json:"used_as_proxy,omitempty" short:"-uap"`
+	Writable            *bool                 `json:"writable,omitempty" short:"-w"`
+	NodeName            *string               `json:"node_name,omitempty"`
 }
 
 func (a *AddAttrCmd) GetName() string {
